@@ -115,7 +115,7 @@ public class DiagramBlockController extends Application {
     }
     public void onCanvasMouseDragged(MouseEvent event) {
         if (event.isSecondaryButtonDown()) {
-            model.posX += (event.getX() - model.startX) / model.canvasScale;
+            model.posX += (event.getX() -model.startX) / model.canvasScale;
             model.posY += (event.getY() - model.startY) / model.canvasScale;
             model.startX = event.getX();
             model.startY = event.getY();
