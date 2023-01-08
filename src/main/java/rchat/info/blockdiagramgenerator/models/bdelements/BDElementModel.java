@@ -1,30 +1,25 @@
-package rchat.info.blockdiagramgenerator.model;
+package rchat.info.blockdiagramgenerator.models.bdelements;
 
 import javafx.geometry.Dimension2D;
 import javafx.util.Pair;
-import rchat.info.blockdiagramgenerator.DiagramBlockController;
 
 import java.util.List;
 
-public abstract class BDElement {
+public abstract class BDElementModel {
     static enum Alignment {
         LEFT,
         CENTER,
         RIGHT
     }
 
-    List<String> data;
-    DiagramBlockController context;
+    public List<String> data;
     protected Dimension2D size;
     protected double leftBound;
     protected double rightBound;
 
-    public BDElement(DiagramBlockController context, List<String> data) {
-        this.context = context;
+    public BDElementModel(List<String> data) {
         this.data = data;
     }
-
-    public abstract void drawElement(Pair<Double, Double> drawPoint);
 
     public Dimension2D getSize() {
         return size;
@@ -40,12 +35,7 @@ public abstract class BDElement {
         return rightBound;
     }
 
-    // This method should be called every time data changes. Recalculates field size,
-    // leftBorder (distance from topconnector to left border) and rightBorder
-    // (distance from topconnector to right border) from data
-    public abstract void recalculateSizes();
-
-    protected void recalculateSizes(Dimension2D size, double leftBound, double rightBound) {
+    public void setMeasurements(Dimension2D size, double leftBound, double rightBound) {
         this.size = size;
         this.leftBound = leftBound;
         this.rightBound = rightBound;

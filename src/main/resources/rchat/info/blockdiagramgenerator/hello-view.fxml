@@ -3,7 +3,7 @@
 <?import javafx.scene.canvas.Canvas?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="rchat.info.blockdiagramgenerator.DiagramBlockController">
+<VBox fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="rchat.info.blockdiagramgenerator.controllers.DiagramBlockController">
    <children>
       <Canvas fx:id="canvas" height="400.0" onMouseDragged="#onCanvasMouseDragged" onMousePressed="#onCanvasMouseDragStarted" onScroll="#onCanvasScrolled" width="600.0" />
    </children>
