@@ -1,6 +1,7 @@
 package rchat.info.blockdiagramgenerator.models;
 
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import rchat.info.blockdiagramgenerator.controllers.bdelements.BDContainerController;
 
 public class DiagramBlockModel {
@@ -13,8 +14,8 @@ public class DiagramBlockModel {
     public static final double FONT_BASIC_SIZE = 50;
     public static final double STROKE_WIDTH_DEFAULT = 5;
     public static final double TILE_STROKE_WIDTH_DEFAULT = 1;
-    public static final double TILES_IN_TILE = 5;
-    public static final String FONT_BASIC_NAME = "Monospace";
+    public static final double TILES_IN_TILE = 10;
+    public static final String FONT_BASIC_NAME = DiagramBlockModel.class.getResource("/rchat/info/blockdiagramgenerator/fonts/consolas.ttf").toExternalForm();
     public static final double LINE_SPACING = 3;
     public static final double ELEMENTS_SPACING = 70;
     public static final double CONNECTORS_WIDTH = 3;
@@ -26,8 +27,10 @@ public class DiagramBlockModel {
     public static final Color DEBUG_BORDER_COLOR = Color.PURPLE;
     public static final boolean IS_DEBUG_MODE_ENABLED = false;
     public static final boolean DEBUG_DRAW_BORDERS = true;
+    public static final boolean IS_DEBUG_SHOW_FPS = true;
     public static double canvasWidth = 600;
     public static double canvasHeight = 400;
+    public static Font basicFont;
     public double startX = 0;
     public double startY = 0;
     public double posX = 0;

@@ -5,6 +5,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
 import rchat.info.blockdiagramgenerator.DebounceDecorator;
 import rchat.info.blockdiagramgenerator.controllers.bdelements.*;
 import rchat.info.blockdiagramgenerator.views.DiagramBlockView;
@@ -47,6 +48,8 @@ public class DiagramBlockController {
         model.root = new BDContainer(this, new BDTerminator(this, "Начало"), new BDCycleNotFixed(this, "Hello World!", model.root), new BDTerminator(this, "Конец"));
         */
 
+
+
         model.root = new BDContainerController(this,
                 new BDTerminatorController(this, "Начало"),
                 new BDDataController(this, "Ввод input"),
@@ -58,7 +61,7 @@ public class DiagramBlockController {
                             new BDDecisionController(this, new BDContainerController(this, new BDDataController(this, "Вывод\n\"Последовательность\nсодержит только один\nэлемент\"")), BDDecisionModel.Branch.LEFT,
                                            new BDContainerController(this,
                                                    new BDProcessController(this, "nextAfterMin := input"),
-                                                   new BDCycleNotFixedController(this,
+                                                   new BDCycleFixedController(this,
                                                            new BDContainerController(this,
                                                                    new BDProcessController(this, "previousElement :=\ninput"),
                                                                    new BDDataController(this, "Ввод input"),
