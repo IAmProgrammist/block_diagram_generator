@@ -44,7 +44,6 @@ public class BDAddElementController extends BDElementController {
     // You can't remove BDAddElement! Why would you do that?
     @Override
     public void remove() {
-
     }
 
     @Override
