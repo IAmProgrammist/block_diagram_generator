@@ -15,7 +15,8 @@ public class DiagramBlockView {
     // Repaint canvas from controller.model
     public void repaint(GraphicsContext gc) {
         gc.clearRect(0, 0, DiagramBlockModel.canvasWidth, DiagramBlockModel.canvasHeight);
-        gc.setStroke(Paint.valueOf("#D3D3D3"));
+        gc.setFill(DiagramBlockModel.BACKGROUND_COLOR);
+        gc.setStroke(DiagramBlockModel.GRID_COLOR);
         gc.setLineWidth(DiagramBlockModel.TILE_STROKE_WIDTH_DEFAULT);
         double calculatedTileSize = Math.pow(DiagramBlockModel.TILES_IN_TILE, -Math.floor(Math.log(model.canvasScale) / Math.log(DiagramBlockModel.TILES_IN_TILE))) * DiagramBlockModel.TILE_SIZE;
         for (double x = model.posX - Math.ceil(model.posX / calculatedTileSize) * calculatedTileSize;
@@ -28,6 +29,6 @@ public class DiagramBlockView {
              y += calculatedTileSize) {
             gc.strokeLine(0, y * model.canvasScale, DiagramBlockModel.canvasWidth, y * model.canvasScale);
         }
-        model.root.update(new Pair<>(model.posX, model.posY));
+        model.root.update(gc, new Pair<>(model.posX, model.posY), model.canvasScale);
     }
 }

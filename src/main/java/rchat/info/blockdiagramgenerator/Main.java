@@ -2,27 +2,41 @@ package rchat.info.blockdiagramgenerator;
 
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import rchat.info.blockdiagramgenerator.controllers.DiagramBlockController;
 import rchat.info.blockdiagramgenerator.models.DiagramBlockModel;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 public class Main extends Application {
     final long[] frameTimes = new long[100];
     int frameTimeIndex = 0;
     boolean arrayFilled = false;
 
+    public static EventHandler<KeyEvent> rewriteKeyPressedEvent;
+    public static ResourceBundle rb = null;
+
     @Override
     public void start(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("layouts/hello-view.fxml"));
+        rb = ResourceBundle.getBundle("rchat/info/blockdiagramgenerator/bundles/languages");
+        fxmlLoader.setResources(rb);
         Scene scene = new Scene(fxmlLoader.load(), DiagramBlockModel.canvasWidth, DiagramBlockModel.canvasHeight);
+        scene.setOnKeyPressed(event -> {
+            if (rewriteKeyPressedEvent != null) {
+                rewriteKeyPressedEvent.handle(event);
+            }
+        });
         stage.setTitle("Hello!");
         stage.setScene(scene);
         stage.show();
-
         if (DiagramBlockModel.IS_DEBUG_MODE_ENABLED) {
             if (DiagramBlockModel.IS_DEBUG_SHOW_FPS) {
                 AnimationTimer frameRateMeter = new AnimationTimer() {

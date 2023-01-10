@@ -2,21 +2,24 @@ package rchat.info.blockdiagramgenerator.views.bdelements;
 
 import javafx.geometry.Dimension2D;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
 import javafx.util.Pair;
 import rchat.info.blockdiagramgenerator.Utils;
 import rchat.info.blockdiagramgenerator.models.DiagramBlockModel;
 import rchat.info.blockdiagramgenerator.models.bdelements.BDCycleNotFixedModel;
 
+import static rchat.info.blockdiagramgenerator.models.DiagramBlockModel.basicFont;
+
 public class BDCycleNotFixedView extends BDElementView {
 
     protected BDCycleNotFixedModel model;
+
     public BDCycleNotFixedView(BDCycleNotFixedModel model) {
         this.model = model;
     }
+
     @Override
-    public void repaint(GraphicsContext gc, Pair<Double, Double> drawPoint, double scale) {
+    public void repaint(GraphicsContext gc, Pair<Double, Double> drawPoint,
+                        boolean selectionOverflow, boolean selected, double scale) {
         Dimension2D rhombusSize = model.getRhombusSize();
         Dimension2D textSize = model.getRhombusTextSize();
         double rhombusWidth = rhombusSize.getWidth() * scale;
@@ -32,20 +35,25 @@ public class BDCycleNotFixedView extends BDElementView {
             }
         }
         drawPoint = new Pair<>(drawPoint.getKey() + (model.getDistanceToLeftBound() - rhombusWidth / scale / 2), drawPoint.getValue());
-
-        Font basicFont = new Font(DiagramBlockModel.FONT_BASIC_NAME, DiagramBlockModel.FONT_BASIC_SIZE * scale);
-        gc.setStroke(Color.BLACK);
+        gc.setFill(DiagramBlockModel.BD_BACKGROUND_COLOR);
+        gc.fillPolygon(new double[]{(drawPoint.getKey()) * scale,
+                        (drawPoint.getKey()) * scale + rhombusWidth / 2,
+                        (drawPoint.getKey()) * scale + rhombusWidth,
+                        (drawPoint.getKey()) * scale + rhombusWidth / 2},
+                new double[]{(drawPoint.getValue()) * scale + rhombusHeight / 2,
+                        (drawPoint.getValue()) * scale + rhombusHeight,
+                        (drawPoint.getValue()) * scale + rhombusHeight / 2,
+                        (drawPoint.getValue()) * scale}, 4);
+        gc.setStroke(DiagramBlockModel.STROKE_COLOR);
         gc.setLineWidth(DiagramBlockModel.STROKE_WIDTH_DEFAULT * scale);
         gc.strokePolygon(new double[]{(drawPoint.getKey()) * scale,
                         (drawPoint.getKey()) * scale + rhombusWidth / 2,
                         (drawPoint.getKey()) * scale + rhombusWidth,
-                        (drawPoint.getKey()) * scale + rhombusWidth / 2,
-                        (drawPoint.getKey()) * scale},
+                        (drawPoint.getKey()) * scale + rhombusWidth / 2},
                 new double[]{(drawPoint.getValue()) * scale + rhombusHeight / 2,
                         (drawPoint.getValue()) * scale + rhombusHeight,
                         (drawPoint.getValue()) * scale + rhombusHeight / 2,
-                        (drawPoint.getValue()) * scale,
-                        (drawPoint.getValue()) * scale + rhombusHeight / 2}, 5);
+                        (drawPoint.getValue()) * scale}, 4);
 
         gc.setFont(basicFont);
         //TODO: This is so bad!
@@ -53,6 +61,7 @@ public class BDCycleNotFixedView extends BDElementView {
         for (String line : this.model.data) {
             Dimension2D d = Utils.computeTextWidth(basicFont, line);
             currentLevel += d.getHeight();
+            gc.setFill(DiagramBlockModel.FONT_COLOR);
             gc.fillText(line, (rhombusWidth - d.getWidth()) / 2 + ((drawPoint.getKey()) * scale), (drawPoint.getValue()) * scale + currentLevel);
             currentLevel += DiagramBlockModel.LINE_SPACING * scale;
         }
@@ -64,13 +73,16 @@ public class BDCycleNotFixedView extends BDElementView {
         Pair<Double, Double> fakeDrawPoint = model.body.getModel().getTopConnector(new Pair<>(bottomRhombusConnector.getKey(), bottomRhombusConnector.getValue() + DiagramBlockModel.ELEMENTS_SPACING));
         Pair<Double, Double> trueCenterDrawPoint = new Pair<>(bottomRhombusConnector.getKey() - (fakeDrawPoint.getKey() - bottomRhombusConnector.getKey()),
                 bottomRhombusConnector.getValue() + DiagramBlockModel.ELEMENTS_SPACING);
-        model.body.update(trueCenterDrawPoint);
-        gc.setLineWidth(DiagramBlockModel.STROKE_WIDTH_DEFAULT * scale);
+        model.body.update(gc, trueCenterDrawPoint, scale);
+        gc.setStroke(DiagramBlockModel.STROKE_COLOR);
+        selectionOverflow &= !model.body.isMouseInElement(trueCenterDrawPoint);
+        gc.setLineWidth(DiagramBlockModel.CONNECTORS_WIDTH * scale);
         gc.strokeLine((bottomRhombusConnector.getKey()) * scale,
                 (bottomRhombusConnector.getValue()) * scale,
                 (bottomRhombusConnector.getKey()) * scale,
                 (bottomRhombusConnector.getValue() + DiagramBlockModel.ELEMENTS_SPACING) * scale);
         Dimension2D centerBranchTextSize = Utils.computeTextWidth(basicFont, DiagramBlockModel.POSITIVE_BRANCH_TEXT);
+        gc.setFill(DiagramBlockModel.FONT_COLOR);
         gc.fillText(DiagramBlockModel.POSITIVE_BRANCH_TEXT,
                 (bottomRhombusConnector.getKey() - centerBranchTextSize.getWidth() / scale - DiagramBlockModel.LINE_SPACING) * scale,
                 (bottomRhombusConnector.getValue() + centerBranchTextSize.getHeight() / scale) * scale);
@@ -79,8 +91,8 @@ public class BDCycleNotFixedView extends BDElementView {
                 + DiagramBlockModel.DECISION_BLOCKS_PADDING, DiagramBlockModel.MIN_DECISION_SHOULDER_LEN);
         Pair<Double, Double> bottomBodyConnector = model.body.getModel().getBottomConnector(trueCenterDrawPoint);
 
-        gc.setStroke(Color.BLACK);
-        gc.setLineWidth(DiagramBlockModel.STROKE_WIDTH_DEFAULT * scale);
+        gc.setStroke(DiagramBlockModel.STROKE_COLOR);
+        gc.setLineWidth(DiagramBlockModel.CONNECTORS_WIDTH * scale);
         gc.strokePolyline(new double[]{(bottomBodyConnector.getKey()) * scale,
                         (bottomBodyConnector.getKey()) * scale,
                         (bottomBodyConnector.getKey() - leftLineOffset) * scale,
@@ -96,9 +108,11 @@ public class BDCycleNotFixedView extends BDElementView {
         double bottomPoint = rhombusHeight / scale / 2 + 2 * DiagramBlockModel.ELEMENTS_SPACING + model.body.getModel().getSize().getHeight() + DiagramBlockModel.DECISION_BLOCKS_PADDING;
 
         textSize = Utils.computeTextWidth(basicFont, DiagramBlockModel.NEGATIVE_BRANCH_TEXT);
+        gc.setFill(DiagramBlockModel.FONT_COLOR);
         gc.fillText(DiagramBlockModel.NEGATIVE_BRANCH_TEXT, (rightRhombusConnector.getKey() + rightLineOffset - textSize.getWidth() / scale) * scale,
                 (rightRhombusConnector.getValue() - DiagramBlockModel.TEXT_PADDING) * scale);
 
+        gc.setLineWidth(DiagramBlockModel.CONNECTORS_WIDTH * scale);
         gc.strokePolyline(new double[]{
                         rightRhombusConnector.getKey() * scale,
                         (rightRhombusConnector.getKey() + rightLineOffset) * scale,
@@ -109,6 +123,15 @@ public class BDCycleNotFixedView extends BDElementView {
                         rightRhombusConnector.getValue() * scale,
                         (rightRhombusConnector.getValue() + bottomPoint) * scale,
                         (rightRhombusConnector.getValue() + bottomPoint) * scale}, 4);
+
+
+        if (selected) {
+            drawPoint = new Pair<>(drawPoint.getKey() - (model.getDistanceToLeftBound() - rhombusWidth / scale / 2), drawPoint.getValue());
+            drawSelectBorder(gc, drawPoint, model.getSize(), scale);
+        } else if (selectionOverflow) {
+            drawPoint = new Pair<>(drawPoint.getKey() - (model.getDistanceToLeftBound() - rhombusWidth / scale / 2), drawPoint.getValue());
+            drawOverflowBorder(gc, drawPoint, model.getSize(), scale);
+        }
 
     }
 }

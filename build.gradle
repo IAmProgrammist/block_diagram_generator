@@ -25,7 +25,7 @@ tasks.withType(JavaCompile) {
 
 application {
     mainModule = 'rchat.info.blockdiagramgenerator'
-    mainClass = 'rchat.info.blockdiagramgenerator.HelloApplication'
+    mainClass = 'rchat.info.blockdiagramgenerator.Main'
 }
 
 javafx {

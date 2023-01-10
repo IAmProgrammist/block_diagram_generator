@@ -15,9 +15,14 @@ public class BDDecisionModel extends BDElementModel {
     public Dimension2D rhombusTextSize;
 
     public static enum Branch {
-        LEFT,
-        CENTER,
-        RIGHT
+        LEFT("dec_left"),
+        CENTER("dec_center"),
+        RIGHT("dec_right");
+
+        public final String propName;
+        Branch(String propName) {
+            this.propName = propName;
+        }
     }
 
     public BDDecisionModel(BDContainerController positive, BDDecisionModel.Branch positiveBranch, 

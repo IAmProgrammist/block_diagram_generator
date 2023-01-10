@@ -1,8 +1,14 @@
 package rchat.info.blockdiagramgenerator.controllers.bdelements;
 
 import javafx.geometry.Dimension2D;
+import javafx.scene.Node;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Separator;
+import javafx.scene.control.TextArea;
 import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import javafx.util.Pair;
+import rchat.info.blockdiagramgenerator.Main;
 import rchat.info.blockdiagramgenerator.Utils;
 import rchat.info.blockdiagramgenerator.controllers.DiagramBlockController;
 import rchat.info.blockdiagramgenerator.models.DiagramBlockModel;
@@ -10,20 +16,51 @@ import rchat.info.blockdiagramgenerator.models.bdelements.BDDataModel;
 import rchat.info.blockdiagramgenerator.models.bdelements.BDElementModel;
 import rchat.info.blockdiagramgenerator.views.bdelements.BDDataView;
 
-public class BDDataController extends BDElementController {
-    public DiagramBlockController context;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+
+import static rchat.info.blockdiagramgenerator.models.DiagramBlockModel.onDataUpdate;
+
+public class BDDataController extends BDElementController implements TextEditable {
     public BDDataModel model;
     public BDDataView view;
-    public BDDataController(DiagramBlockController context, String content) {
-        this.context = context;
+    private String content;
+
+    public BDDataController(String content) {
         this.model = new BDDataModel(content);
         this.view = new BDDataView(this.model);
+        this.content = content;
+        this.setControls();
+        recalculateSizes();
+    }
+
+    public BDDataController(String content, boolean selected) {
+        this.model = new BDDataModel(content);
+        this.view = new BDDataView(this.model);
+        this.content = content;
+        this.selected = selected;
+        this.setControls();
         recalculateSizes();
     }
 
     @Override
-    public void update(Pair<Double, Double> position) {
-        view.repaint(context.canvas.getGraphicsContext2D(), position, context.model.canvasScale);
+    public void setControls() {
+        Text header = new Text(Main.rb.getString("text"));
+        controllings.add(header);
+        TextArea area = new TextArea(getText());
+        controllings.add(area);
+        area.textProperty().addListener((observable, oldValue, newValue) -> {
+            setText(newValue);
+            if (DiagramBlockModel.onDataUpdate != null) onDataUpdate.run();
+        });
+        controllings.add(new Separator());
+    }
+
+    @Override
+    public void update(GraphicsContext gc, Pair<Double, Double> position, double scale) {
+        view.repaint(gc, position, isMouseInElement(position), selected, scale);
     }
 
     @Override
@@ -49,5 +86,22 @@ public class BDDataController extends BDElementController {
     @Override
     public BDElementModel getModel() {
         return model;
+    }
+
+    @Override
+    public BDElementController clone() {
+        return new BDDataController(this.content, this.selected);
+    }
+
+    @Override
+    public String getText() {
+        return content;
+    }
+
+    @Override
+    public void setText(String text) {
+        this.model.data = Arrays.asList(text.split("\n"));
+        this.content = text;
+        recalculateSizes();
     }
 }

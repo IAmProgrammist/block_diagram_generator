@@ -5,13 +5,10 @@ import javafx.util.Pair;
 import rchat.info.blockdiagramgenerator.controllers.bdelements.BDElementController;
 import rchat.info.blockdiagramgenerator.models.DiagramBlockModel;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class BDContainerModel extends BDElementModel {
-    public List<BDElementController> elements = new ArrayList<>();
+    public List<BDElementController> elements = new LinkedList<>();
     public BDContainerModel() {
         super(Collections.emptyList());
     }

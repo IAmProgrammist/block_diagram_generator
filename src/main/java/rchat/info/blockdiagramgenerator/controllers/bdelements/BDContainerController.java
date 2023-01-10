@@ -1,37 +1,109 @@
 package rchat.info.blockdiagramgenerator.controllers.bdelements;
 
 import javafx.geometry.Dimension2D;
+import javafx.scene.Node;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.util.Pair;
-import rchat.info.blockdiagramgenerator.controllers.DiagramBlockController;
+import rchat.info.blockdiagramgenerator.Utils;
 import rchat.info.blockdiagramgenerator.models.DiagramBlockModel;
 import rchat.info.blockdiagramgenerator.models.bdelements.BDContainerModel;
 import rchat.info.blockdiagramgenerator.models.bdelements.BDElementModel;
 import rchat.info.blockdiagramgenerator.views.bdelements.BDContainerView;
 
-import java.util.Collection;
-import java.util.Iterator;
+import java.util.*;
 
-public class BDContainerController extends BDElementController implements Collection<BDElementController> {
-    public DiagramBlockController context;
+public class BDContainerController extends BDElementController implements Collection<BDElementController>, Container {
     public BDContainerModel model;
     public BDContainerView view;
 
-    public BDContainerController(DiagramBlockController context) {
-        this.context = context;
-        this.model = new BDContainerModel();
+    public BDContainerController() {
+        if (DiagramBlockModel.VIEWPORT_MODE) {
+            this.model = new BDContainerModel(new BDAddElementController());
+        } else {
+            this.model = new BDContainerModel();
+        }
+        for (BDElementController element : this.model.elements)
+            element.setParentContainer(this);
         this.view = new BDContainerView(this.model);
+        this.setControls();
         recalculateSizes();
     }
 
-    public BDContainerController(DiagramBlockController context, BDElementController...elements) {
-        this.context = context;
-        this.model = new BDContainerModel(elements);
+    public BDContainerController(BDElementController... elements) {
+        if (elements.length == 0 && DiagramBlockModel.VIEWPORT_MODE) {
+            this.model = new BDContainerModel(new BDAddElementController());
+        } else {
+            this.model = new BDContainerModel(elements);
+        }
+        for (BDElementController element : this.model.elements)
+            element.setParentContainer(this);
         this.view = new BDContainerView(this.model);
+        this.setControls();
         recalculateSizes();
     }
+
+    public BDContainerController(boolean selected, BDElementController... elements) {
+        if (elements.length == 0 && DiagramBlockModel.VIEWPORT_MODE) {
+            this.model = new BDContainerModel(new BDAddElementController());
+        } else {
+            this.model = new BDContainerModel(elements);
+        }
+        for (BDElementController element : this.model.elements)
+            element.setParentContainer(this);
+        this.selected = selected;
+        this.view = new BDContainerView(this.model);
+        this.setControls();
+        recalculateSizes();
+    }
+
     @Override
-    public void update(Pair<Double, Double> position) {
-        view.repaint(context.canvas.getGraphicsContext2D(), position, context.model.canvasScale);
+    public void update(GraphicsContext gc, Pair<Double, Double> position, double scale) {
+        view.repaint(gc, position, isMouseInElement(position), selected, scale);
+    }
+
+    // We're doing this because there is may be only one element in container, so hitbox for this only element and
+    // container would be the same. So we add paddings to container
+    @Override
+    public boolean isMouseInElement(Pair<Double, Double> position) {
+        Dimension2D fixedSize = model.getSize();
+        fixedSize = new Dimension2D(fixedSize.getWidth() + 2 * DiagramBlockModel.CONTAINER_OVERFLOW_PADDING,
+                fixedSize.getHeight() + 2 * DiagramBlockModel.CONTAINER_OVERFLOW_PADDING);
+        Pair<Double, Double> fixedPosition = new Pair<>(position.getKey() - DiagramBlockModel.CONTAINER_OVERFLOW_PADDING,
+                position.getValue() - DiagramBlockModel.CONTAINER_OVERFLOW_PADDING);
+        return Utils.isPointInBounds(
+                new Pair<>(DiagramBlockModel.canvasMousePosX, DiagramBlockModel.canvasMousePosY), fixedPosition,
+                fixedSize);
+    }
+
+    @Override
+    public BDElementController select(Pair<Double, Double> drawPoint) {
+        BDElementController selected = null;
+        Pair<Double, Double> topConnector = model.getTopConnector(drawPoint);
+        double currentLevel = drawPoint.getValue();
+
+        for (BDElementController element : model.elements) {
+            Pair<Double, Double> drawElementPoint = new Pair<>(
+                    topConnector.getKey() - element.getModel().getDistanceToLeftBound(),
+                    currentLevel);
+            selected = element.select(drawElementPoint);
+            if (selected != null) break;
+            currentLevel += element.getModel().getSize().getHeight() + DiagramBlockModel.ELEMENTS_SPACING;
+        }
+
+        if (selected != null) {
+            this.selected = false;
+            return selected;
+        }
+
+        return super.select(drawPoint);
+    }
+
+    @Override
+    public BDElementController getSelected() {
+        for(BDElementController cont : this.model.elements) {
+            if (cont.getSelected() != null) return cont;
+        }
+        return super.getSelected();
     }
 
     @Override
@@ -44,6 +116,7 @@ public class BDContainerController extends BDElementController implements Collec
         double maxRightBound = 0;
         double height = 0;
         for (BDElementController element : model.elements) {
+            element.recalculateSizes();
             Dimension2D elementSize = element.getModel().getSize();
             double currLeftBound;
             double currRightBound;
@@ -141,5 +214,29 @@ public class BDContainerController extends BDElementController implements Collec
     public void clear() {
         model.elements.clear();
         recalculateSizes();
+    }
+
+    @Override
+    public BDContainerController clone() {
+        BDElementController[] elements = new BDElementController[size()];
+        int i = 0;
+        for (BDElementController controller : this) {
+            elements[i++] = controller.clone();
+        }
+        return new BDContainerController(this.selected, elements);
+    }
+
+    @Override
+    public void setControls () {
+        this.controllings = Collections.emptyList();
+    }
+
+    @Override
+    public void removeFromContainer(BDElementController bdElementController) {
+        model.elements.remove(bdElementController);
+        if (model.elements.size() == 0 && DiagramBlockModel.VIEWPORT_MODE) {
+            model.elements.add(new BDAddElementController());
+            model.elements.get(0).setParentContainer(this);
+        }
     }
 }

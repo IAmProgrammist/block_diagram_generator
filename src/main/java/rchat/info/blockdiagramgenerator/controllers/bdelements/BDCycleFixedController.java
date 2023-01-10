@@ -1,35 +1,80 @@
 package rchat.info.blockdiagramgenerator.controllers.bdelements;
 
 import javafx.geometry.Dimension2D;
+import javafx.scene.Node;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Separator;
+import javafx.scene.control.TextArea;
 import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import javafx.util.Pair;
+import rchat.info.blockdiagramgenerator.Main;
 import rchat.info.blockdiagramgenerator.Utils;
-import rchat.info.blockdiagramgenerator.controllers.DiagramBlockController;
 import rchat.info.blockdiagramgenerator.models.DiagramBlockModel;
 import rchat.info.blockdiagramgenerator.models.bdelements.BDCycleFixedModel;
-import rchat.info.blockdiagramgenerator.models.bdelements.BDCycleNotFixedModel;
 import rchat.info.blockdiagramgenerator.models.bdelements.BDElementModel;
 import rchat.info.blockdiagramgenerator.views.bdelements.BDCycleFixedView;
-import rchat.info.blockdiagramgenerator.views.bdelements.BDCycleNotFixedView;
 
-public class BDCycleFixedController extends BDElementController {
-    public DiagramBlockController context;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import static rchat.info.blockdiagramgenerator.models.DiagramBlockModel.onDataUpdate;
+
+public class BDCycleFixedController extends BDElementController implements TextEditable, Container {
     public BDCycleFixedModel model;
     public BDCycleFixedView view;
-    public BDCycleFixedController(DiagramBlockController context, BDContainerController body, String content) {
-        this.context = context;
+    private String content;
+
+    public BDCycleFixedController(BDContainerController body, String content) {
         this.model = new BDCycleFixedModel(content, body);
+        this.model.body.setParentContainer(this);
         this.view = new BDCycleFixedView(this.model);
+        this.content = content;
+        this.setControls();
+        recalculateSizes();
+    }
+
+    public BDCycleFixedController(BDContainerController body, String content, boolean selected) {
+        this.model = new BDCycleFixedModel(content, body);
+        this.model.body.setParentContainer(this);
+        this.view = new BDCycleFixedView(this.model);
+        this.content = content;
+        this.selected = selected;
+        this.setControls();
         recalculateSizes();
     }
 
     @Override
-    public void update(Pair<Double, Double> position) {
-        view.repaint(context.canvas.getGraphicsContext2D(), position, context.model.canvasScale);
+    public void update(GraphicsContext gc, Pair<Double, Double> position, double scale) {
+        view.repaint(gc, position, isMouseInElement(position), selected, scale);
+    }
+
+    @Override
+    public BDElementController select(Pair<Double, Double> drawPoint) {
+        BDElementController selected;
+        Dimension2D rhombusSize = model.getRhombusSize();
+        double rhombusWidth = rhombusSize.getWidth();
+
+        drawPoint = new Pair<>(drawPoint.getKey() + (model.getDistanceToLeftBound() - rhombusWidth / 2), drawPoint.getValue());
+
+        Pair<Double, Double> bottomRhombusConnector = model.getBottomRhombusConnector(drawPoint);
+        Pair<Double, Double> fakeDrawPoint = model.body.getModel().getTopConnector(new Pair<>(bottomRhombusConnector.getKey(), bottomRhombusConnector.getValue() + DiagramBlockModel.ELEMENTS_SPACING));
+        Pair<Double, Double> trueCenterDrawPoint = new Pair<>(bottomRhombusConnector.getKey() - (fakeDrawPoint.getKey() - bottomRhombusConnector.getKey()),
+                bottomRhombusConnector.getValue() + DiagramBlockModel.ELEMENTS_SPACING);
+        selected = model.body.select(trueCenterDrawPoint);
+
+        if (selected != null) {
+            this.selected = false;
+            return selected;
+        }
+
+        return super.select(new Pair<>(drawPoint.getKey() - (model.getDistanceToLeftBound() - rhombusWidth / 2), drawPoint.getValue()));
     }
 
     @Override
     public void recalculateSizes() {
+        this.model.body.recalculateSizes();
         double maxLineLen = 0;
         Font basicFont = new Font(DiagramBlockModel.FONT_BASIC_NAME, DiagramBlockModel.FONT_BASIC_SIZE);
         double textHeight = this.model.data.size() == 0 ? Utils.computeTextWidth(basicFont, "").getHeight() : 0;
@@ -45,23 +90,21 @@ public class BDCycleFixedController extends BDElementController {
         textHeight += 2 * DiagramBlockModel.TEXT_PADDING;
         double a = Math.max(textHeight, textWidth);
 
-        Pair<Double, Double> drawPoint = new Pair<>(0.0, 0.0);
         Dimension2D rhombusSize = new Dimension2D(a * 2, a);
         Dimension2D rhombusTextSize = new Dimension2D(textWidth, textHeight);
         this.model.rhombusSize = rhombusSize;
         this.model.rhombusTextSize = rhombusTextSize;
-        Pair<Double, Double> topConnector = model.getTopConnector(drawPoint);
         double rhombusWidth = rhombusSize.getWidth();
         double rhombusHeight = rhombusSize.getHeight();
 
         double leftLineOffset = Math.max(Math.max(rhombusWidth / 2, model.body.getModel().getDistanceToLeftBound())
                 + DiagramBlockModel.DECISION_BLOCKS_PADDING, DiagramBlockModel.MIN_DECISION_SHOULDER_LEN);
 
-        double leftBound = Math.abs(topConnector.getKey() - leftLineOffset);
+        double leftBound = leftLineOffset;
         double rightLineOffset = Math.max(Math.max(rhombusWidth / 2, model.body.getModel().getDistanceToRightBound())
                 + DiagramBlockModel.DECISION_BLOCKS_PADDING, DiagramBlockModel.MIN_DECISION_SHOULDER_LEN);
         double bottomPoint = rhombusHeight + 2 * DiagramBlockModel.ELEMENTS_SPACING + model.body.getModel().getSize().getHeight() + DiagramBlockModel.DECISION_BLOCKS_PADDING;
-        double rightBound = Math.abs(topConnector.getKey() - rightLineOffset);
+        double rightBound = rightLineOffset;
         Dimension2D size = new Dimension2D(Math.abs(leftBound + rightBound), bottomPoint);
         model.setMeasurements(size, leftBound, rightBound);
     }
@@ -70,4 +113,51 @@ public class BDCycleFixedController extends BDElementController {
     public BDElementModel getModel() {
         return model;
     }
+
+    @Override
+    public BDElementController clone() {
+        return new BDCycleFixedController(model.body.clone(), this.content, this.selected);
+    }
+
+    @Override
+    public void setControls() {
+        Text header = new Text(Main.rb.getString("text"));
+
+        controllings.add(header);
+        TextArea area = new TextArea(getText());
+        controllings.add(area);
+        area.textProperty().addListener((observable, oldValue, newValue) -> {
+            setText(newValue);
+            if (DiagramBlockModel.onDataUpdate != null) onDataUpdate.run();
+        });
+        controllings.add(new Separator());
+    }
+
+    @Override
+    public BDElementController getSelected() {
+        if (model.body.getSelected() != null) return model.body;
+        return super.getSelected();
+    }
+
+    @Override
+    public String getText() {
+        return content;
+    }
+
+    @Override
+    public void setText(String text) {
+        this.model.data = Arrays.asList(text.split("\n"));
+        this.content = text;
+        recalculateSizes();
+    }
+
+    @Override
+    public void removeFromContainer(BDElementController bdElementController) {
+        if (model.body == bdElementController) {
+            model.body = null;
+            model.body = new BDContainerController();
+        }
+    }
+
+
 }

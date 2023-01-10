@@ -6,6 +6,7 @@ import javafx.util.Pair;
 import java.util.List;
 
 public abstract class BDElementModel {
+
     static enum Alignment {
         LEFT,
         CENTER,

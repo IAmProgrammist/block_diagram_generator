@@ -1,10 +1,70 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.canvas.Canvas?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import rchat.info.blockdiagramgenerator.elements.*?>
 
-<VBox fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="rchat.info.blockdiagramgenerator.controllers.DiagramBlockController">
-   <children>
-      <Canvas fx:id="canvas" height="400.0" onMouseDragged="#onCanvasMouseDragged" onMousePressed="#onCanvasMouseDragStarted" onScroll="#onCanvasScrolled" width="600.0" />
-   </children>
+<VBox prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="rchat.info.blockdiagramgenerator.controllers.DiagramBlockController">
+    <MenuBar fx:id="menuBar" useSystemMenuBar="true">
+        <menus>
+            <Menu text="Файл">
+                <items>
+                    <MenuItem text="Новый" />
+                    <MenuItem text="Открыть" />
+                    <Menu text="Последние проекты">
+                        <items>
+                        </items>
+                    </Menu>
+                    <MenuItem text="Сохранить" />
+                    <MenuItem text="Сохранить как" />
+                    <MenuItem text="Экспорт" />
+                    <SeparatorMenuItem />
+                    <MenuItem text="Выход" />
+                </items>
+            </Menu>
+            <Menu text="Изменить">
+                <items>
+                    <MenuItem text="Copy" />
+                    <MenuItem text="Cut" />
+                    <MenuItem text="Paste" />
+                </items>
+            </Menu>
+            <Menu text="Help">
+                <items>
+                    <MenuItem disable="true" text="Search" />
+                    <MenuItem text="Online Manual" visible="false" />
+                    <SeparatorMenuItem />
+                    <MenuItem text="About" />
+                </items>
+            </Menu>
+        </menus>
+    </MenuBar>
+    <SplitPane fx:id="root" dividerPositions="0.2, 0.8" prefWidth="-1" VBox.vgrow="ALWAYS">
+        <items>
+            <AnchorPane maxWidth="300.0">
+            <children>
+               <SplitPane dividerPositions="0.5" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                 <items>
+                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                        <children>
+                           <Text strokeType="OUTSIDE" strokeWidth="0.0" text="In dev" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                        </children>
+                     </AnchorPane>
+                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                        <children>
+                           <Text strokeType="OUTSIDE" strokeWidth="0.0" text="In dev" wrappingWidth="32.56982421875" AnchorPane.bottomAnchor="-134.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                        </children>
+                     </AnchorPane>
+                 </items>
+               </SplitPane>
+            </children>
+            </AnchorPane>
+         <AnchorPane prefHeight="200.0" prefWidth="200.0">
+            <children>
+                        <ResizableCanvas fx:id="canvas" height="350.0" onMouseDragged="#onCanvasMouseDragged" onMousePressed="#onMousePressed" onScroll="#onCanvasScrolled" width="450.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+            </children></AnchorPane>
+         <VBox fx:id="elementProps" alignment="TOP_RIGHT" />
+        </items>
+    </SplitPane>
 </VBox>

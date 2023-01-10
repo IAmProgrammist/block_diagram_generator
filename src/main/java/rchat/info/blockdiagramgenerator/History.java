@@ -1,25 +1,34 @@
 package rchat.info.blockdiagramgenerator;
 
-import java.util.List;
 import java.util.Stack;
 
-public class History<T> extends Stack<T>{
+public class History<T> extends Stack<History.Cloneable<T>>{
+    public interface Cloneable<E> {
+        public E clone();
+    }
+    public History(History.Cloneable<T> initValue) {
+        this.add(initValue);
+    }
     int currentIndex = 0;
     public synchronized T prev() {
         currentIndex = Math.max(0, currentIndex - 1);
-        return this.get(currentIndex);
+        return this.get(currentIndex).clone();
     }
 
     public synchronized T next() {
         currentIndex = Math.min(this.size() - 1, currentIndex + 1);
-        return this.get(currentIndex);
+        return this.get(currentIndex).clone();
     }
 
-    @Override
-    public synchronized T push(T element) {
-        this.removeRange(currentIndex + 1, this.size() - 1);
-        this.add(element);
-        currentIndex++;
-        return element;
+    public synchronized T pushElement(History.Cloneable<T> element) {
+        if (++currentIndex >= this.size()) {
+            this.add(element);
+        } else {
+            this.set(currentIndex, element);
+            for (int i = currentIndex + 1; i < this.size(); i++) {
+                this.remove(currentIndex + 1);
+            }
+        }
+        return element.clone();
     }
 }

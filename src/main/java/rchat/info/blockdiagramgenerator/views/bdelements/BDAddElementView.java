@@ -5,13 +5,13 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.util.Pair;
 import rchat.info.blockdiagramgenerator.Utils;
 import rchat.info.blockdiagramgenerator.models.DiagramBlockModel;
-import rchat.info.blockdiagramgenerator.models.bdelements.BDProcessModel;
+import rchat.info.blockdiagramgenerator.models.bdelements.BDAddElementModel;
 
 import static rchat.info.blockdiagramgenerator.models.DiagramBlockModel.basicFont;
 
-public class BDProcessView extends BDElementView{
-    protected BDProcessModel model;
-    public BDProcessView(BDProcessModel model) {
+public class BDAddElementView extends BDElementView{
+    protected BDAddElementModel model;
+    public BDAddElementView(BDAddElementModel model) {
         this.model = model;
     }
     @Override
@@ -27,9 +27,13 @@ public class BDProcessView extends BDElementView{
         }
         gc.setFill(DiagramBlockModel.BD_BACKGROUND_COLOR);
         gc.fillRect(drawPoint.getKey() * scale, drawPoint.getValue() * scale, totalWidth, textHeight);
+
+        gc.setLineDashes(DiagramBlockModel.DASH_LINE_WIDTH_LINE * scale, DiagramBlockModel.DASH_LINE_WIDTH_SPACE * scale);
         gc.setStroke(DiagramBlockModel.STROKE_COLOR);
         gc.setLineWidth(DiagramBlockModel.STROKE_WIDTH_DEFAULT * scale);
         gc.strokeRect(drawPoint.getKey() * scale, drawPoint.getValue() * scale, totalWidth, textHeight);
+        gc.setLineDashes(0);
+
         gc.setFont(basicFont);
         double currentLevel = DiagramBlockModel.TEXT_PADDING * scale -
                 DiagramBlockModel.LINE_SPACING * scale;

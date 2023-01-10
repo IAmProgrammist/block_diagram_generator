@@ -1,92 +1,119 @@
 package rchat.info.blockdiagramgenerator.controllers;
 
 import javafx.fxml.FXML;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.input.ScrollEvent;
+import javafx.geometry.Insets;
+import javafx.scene.Node;
+import javafx.scene.control.ListView;
+import javafx.scene.control.TextArea;
+import javafx.scene.input.*;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
+import javafx.util.Pair;
 import rchat.info.blockdiagramgenerator.DebounceDecorator;
-import rchat.info.blockdiagramgenerator.controllers.bdelements.*;
-import rchat.info.blockdiagramgenerator.views.DiagramBlockView;
 import rchat.info.blockdiagramgenerator.History;
+import rchat.info.blockdiagramgenerator.Main;
+import rchat.info.blockdiagramgenerator.controllers.bdelements.*;
+import rchat.info.blockdiagramgenerator.elements.ResizableCanvas;
 import rchat.info.blockdiagramgenerator.models.DiagramBlockModel;
-import rchat.info.blockdiagramgenerator.models.bdelements.*;
+import rchat.info.blockdiagramgenerator.models.bdelements.BDDecisionModel;
+import rchat.info.blockdiagramgenerator.views.DiagramBlockView;
+
+import java.util.List;
 
 public class DiagramBlockController {
     public DiagramBlockModel model;
     public DiagramBlockView view;
     @FXML
-    public Canvas canvas;
+    public ResizableCanvas canvas;
     @FXML
-    public VBox root;
-    public History<DiagramBlockModel> applicationHistory = new History<>();
-    public Runnable saveState = new Runnable() {
+    public VBox elementProps;
+    public History<DiagramBlockModel> applicationHistory;
+    final KeyCombination undoCombintaion = new KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN);
+    final KeyCombination redoCombination = new KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN);
+    final KeyCombination delete = new KeyCodeCombination(KeyCode.DELETE);
+
+    /*public Runnable saveState = new Runnable() {
         @Override
         public void run() {
-            DiagramBlockModel clonedAppState = model;
-            applicationHistory.push(clonedAppState);
+            DiagramBlockModel clonedAppState = model.clone();
+            applicationHistory.pushElement(clonedAppState);
         }
     };
+    DebounceDecorator d = new DebounceDecorator(saveState, DiagramBlockModel.SAVE_STATE_DELAY);*/
+
+    public void select() {
+        //d.discardChanges();
+        BDElementController newSelected = model.root.select(new Pair<>(model.posX, model.posY));
+        if (newSelected != model.selected) {
+
+            if (model.selected != null)
+                model.selected.selected = false;
+            model.selected = newSelected;
+
+            updateBDContentsEditor();
+            DiagramBlockModel clonedAppState = model.clone();
+            applicationHistory.pushElement(clonedAppState);
+            view.repaint(canvas.getGraphicsContext2D());
+        }
+    }
+
+    public void updateBDContentsEditor() {
+        elementProps.getChildren().clear();
+        if (this.model.selected != null) {
+            List<Node> nodes = this.model.selected.getControls();
+            nodes.forEach(el -> HBox.setMargin(el, new Insets(50, 50, 50, 50)));
+            elementProps.getChildren().addAll(nodes);
+        }
+    }
 
     @FXML
     public void initialize() {
         model = DiagramBlockModel.initDefault();
+        DiagramBlockModel.onDataUpdate = () -> {
+            DiagramBlockModel clonedAppState = model.clone();
+            applicationHistory.pushElement(clonedAppState);
+            model.root.recalculateSizes();
+            view.repaint(canvas.getGraphicsContext2D());
+        };
         view = new DiagramBlockView(model);
-        /*model.root = new BDContainer(this, new BDProcess(this, "a := 12"), new BDPreProcess(this, "a := max(1, 3)"));
-        BDContainer container2 = new BDContainer(this, new BDData(this, "a := 12"), new BDTerminator(this, "a := max(1,asdasd 3)"));
-        BDContainer container3 = new BDContainer(this, new BDData(this, "a := 12"), new BDTerminator(this, "a := max(1, 3)"));
-        BDContainer container4 = new BDContainer(this, new BDData(this, "a := 12"), new BDTerminator(this, "a := max(1, dasdasdasd3)"));
-        container2.add(new BDDecision(container3, BDDecision.Branch.RIGHT, container4, BDDecision.Branch.LEFT, this, "a := max(1, 3)"));
-        container2.add(new BDProcess(this, "Hello how a u"));
-        model.root.add(new BDDecision(container3, BDDecision.Branch.RIGHT, container4, BDDecision.Branch.LEFT, this, "a := max(1, 3)"));
-        BDDecision dec = new BDDecision(model.root, BDDecision.Branch.CENTER, container2, BDDecision.Branch.RIGHT, this, "Are you gay?");
-        BDContainer killme = new BDContainer(this, dec, dec, dec);
-        BDDecision c = new BDDecision(killme, BDDecision.Branch.LEFT, container2, BDDecision.Branch.RIGHT, this, "KILL ME");
-        BDContainer cc = new BDContainer(this, c);
-        cc.add(new BDTerminator(this, "Конец"));
-        model.root = new BDContainer(this, new BDTerminator(this, "Начало"), new BDCycleNotFixed(this, "Hello World!", model.root), new BDTerminator(this, "Конец"));
-        */
+        DiagramBlockModel.basicFont = Font.font(DiagramBlockModel.FONT_BASIC_NAME, model.canvasScale * DiagramBlockModel.FONT_BASIC_SIZE);
 
-
-
-        model.root = new BDContainerController(this,
-                new BDTerminatorController(this, "Начало"),
-                new BDDataController(this, "Ввод input"),
-                new BDDecisionController(this,
-                        new BDContainerController(this, new BDDataController(this, "Вывод\n\"Последовательность\nпуста\"")), BDDecisionModel.Branch.LEFT,
-                        new BDContainerController(this,
-                            new BDProcessController(this, "min := input"),
-                            new BDDataController(this, "Ввод input"),
-                            new BDDecisionController(this, new BDContainerController(this, new BDDataController(this, "Вывод\n\"Последовательность\nсодержит только один\nэлемент\"")), BDDecisionModel.Branch.LEFT,
-                                           new BDContainerController(this,
-                                                   new BDProcessController(this, "nextAfterMin := input"),
-                                                   new BDCycleFixedController(this,
-                                                           new BDContainerController(this,
-                                                                   new BDProcessController(this, "previousElement :=\ninput"),
-                                                                   new BDDataController(this, "Ввод input"),
-                                                                   new BDDecisionController(this,
-                                                                           new BDContainerController(this,
-                                                                                   new BDProcessController(this, "min :=\npreviousElement"),
-                                                                                   new BDProcessController(this, "nextAfterMin := input")
-                                                                           ), BDDecisionModel.Branch.LEFT,
-                                                                           new BDContainerController(this),
-                                                                           BDDecisionModel.Branch.RIGHT,
-                                                                           "previousElement ≤ min"
-                                                                   ),
-                                                                   new BDDecisionController(this, new BDContainerController(this, new BDDataController(this, "Вывод \"Последний\nэлемент\nпоследовательности\nминимальный\"")), BDDecisionModel.Branch.LEFT, new BDContainerController(this, new BDDataController(this, "Вывод nextAfterMin")), BDDecisionModel.Branch.RIGHT,  "nextAfterMin = 0")
-                                                           )
-                                                   , "input ≠ 0")
-                                           ), BDDecisionModel.Branch.RIGHT, "input = 0")
+        model.root = new BDContainerController(
+                new BDTerminatorController("Начало"),
+                new BDDataController("Ввод input"),
+                new BDDecisionController(
+                        new BDContainerController(new BDDataController("Вывод\n\"Последовательность\nпуста\"")), BDDecisionModel.Branch.LEFT,
+                        new BDContainerController(
+                                new BDProcessController("min := input"),
+                                new BDDataController("Ввод input"),
+                                new BDDecisionController(new BDContainerController(new BDDataController("Вывод\n\"Последовательность\nсодержит только один\nэлемент\"")), BDDecisionModel.Branch.LEFT,
+                                        new BDContainerController(
+                                                new BDProcessController("nextAfterMin := input"),
+                                                new BDCycleNotFixedController(
+                                                        new BDContainerController(
+                                                                new BDProcessController("previousElement :=\ninput"),
+                                                                new BDDataController("Ввод input"),
+                                                                new BDDecisionController(
+                                                                        new BDContainerController(
+                                                                                new BDProcessController("min :=\npreviousElement"),
+                                                                                new BDProcessController("nextAfterMin := input")
+                                                                        ), BDDecisionModel.Branch.LEFT,
+                                                                        new BDContainerController(),
+                                                                        BDDecisionModel.Branch.RIGHT,
+                                                                        "previousElement ≤ min"
+                                                                ),
+                                                                new BDDecisionController(new BDContainerController(new BDDataController("Вывод \"Последний\nэлемент\nпоследовательности\nминимальный\"")), BDDecisionModel.Branch.LEFT, new BDContainerController(new BDDataController("Вывод nextAfterMin")), BDDecisionModel.Branch.RIGHT, "nextAfterMin = 0")
+                                                        )
+                                                        , "input ≠ 0")
+                                        ), BDDecisionModel.Branch.RIGHT, "input = 0")
                         ), BDDecisionModel.Branch.RIGHT, "input = 0"),
-                new BDTerminatorController(this, "Конец"));
-
-        root.widthProperty().addListener((observable, oldValue, newValue) -> {
+                new BDTerminatorController("Конец"));
+        canvas.widthProperty().addListener((observable, oldValue, newValue) -> {
             DiagramBlockModel.canvasWidth = newValue.doubleValue();
-            canvas.setWidth(DiagramBlockModel.canvasWidth);
             view.repaint(canvas.getGraphicsContext2D());
         });
-        root.heightProperty().addListener((observable, oldValue, newValue) -> {
+        canvas.heightProperty().addListener((observable, oldValue, newValue) -> {
             DiagramBlockModel.canvasHeight = newValue.doubleValue();
             canvas.setHeight(DiagramBlockModel.canvasHeight);
             view.repaint(canvas.getGraphicsContext2D());
@@ -94,7 +121,49 @@ public class DiagramBlockController {
         canvas.setOnMouseMoved(event -> {
             DiagramBlockModel.mousePosX = event.getX();
             DiagramBlockModel.mousePosY = event.getY();
+            DiagramBlockModel.canvasMousePosX = DiagramBlockModel.mousePosX / this.model.canvasScale;
+            DiagramBlockModel.canvasMousePosY = DiagramBlockModel.mousePosY / this.model.canvasScale;
+            view.repaint(canvas.getGraphicsContext2D());
         });
+        Main.rewriteKeyPressedEvent = event -> {
+            if (undoCombintaion.match(event)) {
+                this.model = applicationHistory.prev();
+                this.model.selected = model.root.getSelected();
+                this.view.model = model;
+
+                DiagramBlockModel.basicFont = Font.font(DiagramBlockModel.FONT_BASIC_NAME,
+                        model.canvasScale * DiagramBlockModel.FONT_BASIC_SIZE);
+                updateBDContentsEditor();
+                this.view.repaint(canvas.getGraphicsContext2D());
+            } else if (redoCombination.match(event)) {
+                this.model = applicationHistory.next();
+                this.model.selected = model.root.getSelected();
+                this.view.model = model;
+
+                DiagramBlockModel.basicFont = Font.font(DiagramBlockModel.FONT_BASIC_NAME,
+                        model.canvasScale * DiagramBlockModel.FONT_BASIC_SIZE);
+                updateBDContentsEditor();
+                this.view.repaint(canvas.getGraphicsContext2D());
+            } else if (delete.match(event)) {
+                if (model.selected != null) model.selected.remove();
+                model.selected = null;
+                model.root.recalculateSizes();
+                DiagramBlockModel clonedAppState = model.clone();
+                applicationHistory.pushElement(clonedAppState);
+                updateBDContentsEditor();
+                view.repaint(canvas.getGraphicsContext2D());
+            }
+        };
+        /*bdcontent.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (model.selected != null && model.selected instanceof TextEditable) {
+                ((TextEditable) model.selected).setText(newValue);
+                DiagramBlockModel clonedAppState = model.clone();
+                applicationHistory.pushElement(clonedAppState);
+                model.root.recalculateSizes();
+                view.repaint(canvas.getGraphicsContext2D());
+            }
+        });*/
+        applicationHistory = new History<>(model.clone());
         view.repaint(canvas.getGraphicsContext2D());
     }
 
@@ -113,22 +182,30 @@ public class DiagramBlockController {
         model.posX += newCanvasWidth * (newRelMouseX - oldRelMouseX) / model.canvasScale;
         model.posY += newCanvasHeight * (newRelMouseY - oldRelMouseY) / model.canvasScale;
 
+        DiagramBlockModel.basicFont = Font.font(DiagramBlockModel.FONT_BASIC_NAME,
+                model.canvasScale * DiagramBlockModel.FONT_BASIC_SIZE);
+
         view.repaint(canvas.getGraphicsContext2D());
     }
 
-    public void onCanvasMouseDragStarted(MouseEvent event) {
+    public void onMousePressed(MouseEvent event) {
+        canvas.requestFocus();
         if (event.isSecondaryButtonDown()) {
             model.startX = event.getX();
             model.startY = event.getY();
+        } else if (event.isPrimaryButtonDown()) {
+            select();
         }
     }
+
     public void onCanvasMouseDragged(MouseEvent event) {
         if (event.isSecondaryButtonDown()) {
-            model.posX += (event.getX() -model.startX) / model.canvasScale;
+            model.posX += (event.getX() - model.startX) / model.canvasScale;
             model.posY += (event.getY() - model.startY) / model.canvasScale;
             model.startX = event.getX();
             model.startY = event.getY();
             view.repaint(canvas.getGraphicsContext2D());
         }
     }
+
 }

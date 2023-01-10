@@ -2,13 +2,13 @@ package rchat.info.blockdiagramgenerator.views.bdelements;
 
 import javafx.geometry.Dimension2D;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
 import javafx.util.Pair;
 import rchat.info.blockdiagramgenerator.Utils;
 import rchat.info.blockdiagramgenerator.controllers.bdelements.BDContainerController;
 import rchat.info.blockdiagramgenerator.models.DiagramBlockModel;
 import rchat.info.blockdiagramgenerator.models.bdelements.BDDecisionModel;
+
+import static rchat.info.blockdiagramgenerator.models.DiagramBlockModel.basicFont;
 
 public class BDDecisionView extends BDElementView {
     protected BDDecisionModel model;
@@ -16,7 +16,8 @@ public class BDDecisionView extends BDElementView {
         this.model = model;
     }
     @Override
-    public void repaint(GraphicsContext gc, Pair<Double, Double> drawPoint, double scale) {
+    public void repaint(GraphicsContext gc, Pair<Double, Double> drawPoint,
+                        boolean selectionOverflow, boolean selected, double scale) {
         Dimension2D rhombusSize = model.getRhombusSize();
         Dimension2D textSize = model.getRhombusTextSize();
         double rhombusWidth = rhombusSize.getWidth() * scale;
@@ -33,21 +34,28 @@ public class BDDecisionView extends BDElementView {
         }
         drawPoint = new Pair<>(drawPoint.getKey() + (model.getDistanceToLeftBound() - rhombusWidth / scale / 2), drawPoint.getValue());
 
-
-        Font basicFont = new Font(DiagramBlockModel.FONT_BASIC_NAME, DiagramBlockModel.FONT_BASIC_SIZE * scale);
-        gc.setStroke(Color.BLACK);
-        gc.setLineWidth(DiagramBlockModel.STROKE_WIDTH_DEFAULT * scale);
-        gc.strokePolygon(new double[]{drawPoint.getKey() * scale,
+        gc.setFill(DiagramBlockModel.BD_BACKGROUND_COLOR);
+        gc.fillPolygon(new double[]{drawPoint.getKey() * scale,
                         drawPoint.getKey() * scale + rhombusWidth / 2,
                         drawPoint.getKey() * scale + rhombusWidth,
-                        drawPoint.getKey() * scale + rhombusWidth / 2,
-                        drawPoint.getKey() * scale},
+                        drawPoint.getKey() * scale + rhombusWidth / 2},
                 new double[]{
                         drawPoint.getValue() * scale + rhombusHeight / 2,
                         drawPoint.getValue() * scale + rhombusHeight,
                         drawPoint.getValue() * scale + rhombusHeight / 2,
-                        drawPoint.getValue() * scale,
-                        drawPoint.getValue() * scale + rhombusHeight / 2}, 5);
+                        drawPoint.getValue() * scale}, 4);
+
+        gc.setStroke(DiagramBlockModel.STROKE_COLOR);
+        gc.setLineWidth(DiagramBlockModel.STROKE_WIDTH_DEFAULT * scale);
+        gc.strokePolygon(new double[]{drawPoint.getKey() * scale,
+                        drawPoint.getKey() * scale + rhombusWidth / 2,
+                        drawPoint.getKey() * scale + rhombusWidth,
+                        drawPoint.getKey() * scale + rhombusWidth / 2},
+                new double[]{
+                        drawPoint.getValue() * scale + rhombusHeight / 2,
+                        drawPoint.getValue() * scale + rhombusHeight,
+                        drawPoint.getValue() * scale + rhombusHeight / 2,
+                        drawPoint.getValue() * scale}, 4);
 
         gc.setFont(basicFont);
         //TODO: This is so bad!
@@ -55,6 +63,7 @@ public class BDDecisionView extends BDElementView {
         for (String line : this.model.data) {
             Dimension2D d = Utils.computeTextWidth(basicFont, line);
             currentLevel += d.getHeight();
+            gc.setFill(DiagramBlockModel.FONT_COLOR);
             gc.fillText(line, (rhombusWidth - d.getWidth()) / 2 + (drawPoint.getKey() * scale), drawPoint.getValue() * scale + currentLevel);
             currentLevel += DiagramBlockModel.LINE_SPACING * scale;
         }
@@ -79,8 +88,10 @@ public class BDDecisionView extends BDElementView {
             Pair<Double, Double> fakeDrawPoint = centerBranch.getModel().getTopConnector(new Pair<>(bottomRhombusConnector.getKey(), bottomRhombusConnector.getValue() + DiagramBlockModel.ELEMENTS_SPACING));
             Pair<Double, Double> trueCenterDrawPoint = new Pair<>(bottomRhombusConnector.getKey() - (fakeDrawPoint.getKey() - bottomRhombusConnector.getKey()),
                     bottomRhombusConnector.getValue() + DiagramBlockModel.ELEMENTS_SPACING);
-            centerBranch.update(trueCenterDrawPoint);
-            gc.setLineWidth(DiagramBlockModel.STROKE_WIDTH_DEFAULT * scale);
+            centerBranch.update(gc, trueCenterDrawPoint, scale);
+            gc.setStroke(DiagramBlockModel.STROKE_COLOR);
+            gc.setLineWidth(DiagramBlockModel.CONNECTORS_WIDTH * scale);
+            selectionOverflow &= !centerBranch.isMouseInElement(trueCenterDrawPoint);
             gc.strokeLine(
                     bottomRhombusConnector.getKey() * scale,
                     bottomRhombusConnector.getValue() * scale,
@@ -88,11 +99,13 @@ public class BDDecisionView extends BDElementView {
                     (bottomRhombusConnector.getValue() + DiagramBlockModel.ELEMENTS_SPACING) * scale);
             if (isCenterPositive) {
                 Dimension2D centerBranchTextSize = Utils.computeTextWidth(basicFont, DiagramBlockModel.POSITIVE_BRANCH_TEXT);
+                gc.setFill(DiagramBlockModel.FONT_COLOR);
                 gc.fillText(DiagramBlockModel.POSITIVE_BRANCH_TEXT,
                         (bottomRhombusConnector.getKey() - centerBranchTextSize.getWidth() / scale - DiagramBlockModel.LINE_SPACING) * scale,
                         (bottomRhombusConnector.getValue() + centerBranchTextSize.getHeight() / scale) * scale);
             } else {
                 Dimension2D centerBranchTextSize = Utils.computeTextWidth(basicFont, DiagramBlockModel.NEGATIVE_BRANCH_TEXT);
+                gc.setFill(DiagramBlockModel.FONT_COLOR);
                 gc.fillText(DiagramBlockModel.NEGATIVE_BRANCH_TEXT,
                         (bottomRhombusConnector.getKey() - centerBranchTextSize.getWidth() / scale - DiagramBlockModel.LINE_SPACING) * scale,
                         (bottomRhombusConnector.getValue() + centerBranchTextSize.getHeight() / scale) * scale);
@@ -115,7 +128,7 @@ public class BDDecisionView extends BDElementView {
                             drawRestPoint.getValue());
                     restConnector = restContainer.getModel().getTopConnector(drawRestPoint);
                 }
-                gc.setLineWidth(DiagramBlockModel.STROKE_WIDTH_DEFAULT * scale);
+                gc.setLineWidth(DiagramBlockModel.CONNECTORS_WIDTH * scale);
                 gc.strokePolyline(
                         new double[]{
                                 rhombusLeftConnector.getKey() * scale,
@@ -127,16 +140,21 @@ public class BDDecisionView extends BDElementView {
                                 restConnector.getValue() * scale},
                         3);
                 if (isCenterPositive) {
+                    gc.setFill(DiagramBlockModel.FONT_COLOR);
                     gc.fillText(DiagramBlockModel.NEGATIVE_BRANCH_TEXT,
                             restConnector.getKey() * scale,
                             (rhombusLeftConnector.getValue() - DiagramBlockModel.TEXT_PADDING) * scale);
                 } else {
+                    gc.setFill(DiagramBlockModel.FONT_COLOR);
                     gc.fillText(DiagramBlockModel.POSITIVE_BRANCH_TEXT,
                             restConnector.getKey() * scale,
                             (rhombusLeftConnector.getValue() - DiagramBlockModel.TEXT_PADDING) * scale);
 
                 }
-                restContainer.update(drawRestPoint);
+                restContainer.update(gc, drawRestPoint, scale);
+                gc.setStroke(DiagramBlockModel.STROKE_COLOR);
+                gc.setLineWidth(DiagramBlockModel.STROKE_WIDTH_DEFAULT * scale);
+                selectionOverflow &= !restContainer.isMouseInElement(drawRestPoint);
 
                 bottomRestConnector = restContainer.getModel().getBottomConnector(drawRestPoint);
             } else {
@@ -153,7 +171,7 @@ public class BDDecisionView extends BDElementView {
                             drawRestPoint.getValue());
                     restConnector = restContainer.getModel().getTopConnector(drawRestPoint);
                 }
-                gc.setLineWidth(DiagramBlockModel.STROKE_WIDTH_DEFAULT * scale);
+                gc.setLineWidth(DiagramBlockModel.CONNECTORS_WIDTH * scale);
                 gc.strokePolyline(
                         new double[]{
                                 rhombusRightConnector.getKey() * scale,
@@ -166,17 +184,22 @@ public class BDDecisionView extends BDElementView {
                         3);
                 if (isCenterPositive) {
                     Dimension2D restTextSize = Utils.computeTextWidth(basicFont, DiagramBlockModel.NEGATIVE_BRANCH_TEXT);
+                    gc.setFill(DiagramBlockModel.FONT_COLOR);
                     gc.fillText(DiagramBlockModel.NEGATIVE_BRANCH_TEXT,
                             (restConnector.getKey() - restTextSize.getWidth() / scale) * scale,
                             (rhombusRightConnector.getValue() - DiagramBlockModel.TEXT_PADDING) * scale);
                 } else {
                     Dimension2D restTextSize = Utils.computeTextWidth(basicFont, DiagramBlockModel.POSITIVE_BRANCH_TEXT);
+                    gc.setFill(DiagramBlockModel.FONT_COLOR);
                     gc.fillText(DiagramBlockModel.POSITIVE_BRANCH_TEXT,
                             (restConnector.getKey() - restTextSize.getWidth() / scale) * scale,
                             (rhombusRightConnector.getValue() - DiagramBlockModel.TEXT_PADDING) * scale);
 
                 }
-                restContainer.update(drawRestPoint);
+                restContainer.update(gc, drawRestPoint, scale);
+                gc.setStroke(DiagramBlockModel.STROKE_COLOR);
+                gc.setLineWidth(DiagramBlockModel.STROKE_WIDTH_DEFAULT * scale);
+                selectionOverflow &= !restContainer.isMouseInElement(drawRestPoint);
 
                 bottomRestConnector = restContainer.getModel().getBottomConnector(drawRestPoint);
             }
@@ -185,7 +208,7 @@ public class BDDecisionView extends BDElementView {
                     Math.max(centerBranch.getModel().getSize().getHeight(), restContainer.getModel().getSize().getHeight());
 
 
-            gc.setLineWidth(DiagramBlockModel.STROKE_WIDTH_DEFAULT * scale);
+            gc.setLineWidth(DiagramBlockModel.CONNECTORS_WIDTH * scale);
             gc.strokePolyline(
                     new double[]{
                             bottomRestConnector.getKey() * scale,
@@ -197,7 +220,7 @@ public class BDDecisionView extends BDElementView {
                             (model.getTopRhombusConnector(drawPoint).getValue() + totalHeight) * scale},
                     3);
 
-            gc.setLineWidth(DiagramBlockModel.STROKE_WIDTH_DEFAULT * scale);
+            gc.setLineWidth(DiagramBlockModel.CONNECTORS_WIDTH * scale);
             gc.strokePolyline(
                     new double[]{
                             bottomCenterConnector.getKey() * scale,
@@ -229,7 +252,7 @@ public class BDDecisionView extends BDElementView {
                     negConnector = model.negative.getModel().getTopConnector(drawNegativePoint);
                 }
 
-                gc.setLineWidth(DiagramBlockModel.STROKE_WIDTH_DEFAULT * scale);
+                gc.setLineWidth(DiagramBlockModel.CONNECTORS_WIDTH * scale);
                 gc.strokePolyline(
                         new double[]{rhombusLeftConnector.getKey() * scale,
                                 negConnector.getKey() * scale,
@@ -238,14 +261,18 @@ public class BDDecisionView extends BDElementView {
                                 rhombusLeftConnector.getValue() * scale,
                                 negConnector.getValue() * scale},
                         3);
+                gc.setFill(DiagramBlockModel.FONT_COLOR);
                 gc.fillText(DiagramBlockModel.NEGATIVE_BRANCH_TEXT,
                         negConnector.getKey() * scale,
                         (rhombusLeftConnector.getValue() - DiagramBlockModel.TEXT_PADDING) * scale);
-                model.negative.update(drawNegativePoint);
+                model.negative.update(gc, drawNegativePoint, scale);
+                gc.setStroke(DiagramBlockModel.STROKE_COLOR);
+                gc.setLineWidth(DiagramBlockModel.STROKE_WIDTH_DEFAULT * scale);
+                selectionOverflow &= !model.negative.isMouseInElement(drawNegativePoint);
 
                 Pair<Double, Double> bottomNegConnector = model.negative.getModel().getBottomConnector(drawNegativePoint);
 
-                gc.setLineWidth(DiagramBlockModel.STROKE_WIDTH_DEFAULT * scale);
+                gc.setLineWidth(DiagramBlockModel.CONNECTORS_WIDTH * scale);
                 gc.strokePolyline(
                         new double[]{bottomNegConnector.getKey() * scale,
                                 bottomNegConnector.getKey() * scale,
@@ -264,7 +291,7 @@ public class BDDecisionView extends BDElementView {
                     posConnector = model.positive.getModel().getTopConnector(drawPositivePoint);
                 }
 
-                gc.setLineWidth(DiagramBlockModel.STROKE_WIDTH_DEFAULT * scale);
+                gc.setLineWidth(DiagramBlockModel.CONNECTORS_WIDTH * scale);
                 gc.strokePolyline(
                         new double[]{rhombusRightConnector.getKey() * scale,
                                 posConnector.getKey() * scale,
@@ -273,13 +300,17 @@ public class BDDecisionView extends BDElementView {
                                 rhombusRightConnector.getValue() * scale,
                                 posConnector.getValue() * scale},
                         3);
+                gc.setFill(DiagramBlockModel.FONT_COLOR);
                 gc.fillText(DiagramBlockModel.POSITIVE_BRANCH_TEXT,
                         (posConnector.getKey() - Utils.computeTextWidth(basicFont, DiagramBlockModel.POSITIVE_BRANCH_TEXT).getWidth() / scale) * scale,
                         (rhombusRightConnector.getValue() - DiagramBlockModel.TEXT_PADDING) * scale);
-                model.positive.update(drawPositivePoint);
+                model.positive.update(gc, drawPositivePoint, scale);
+                gc.setStroke(DiagramBlockModel.STROKE_COLOR);
+                gc.setLineWidth(DiagramBlockModel.STROKE_WIDTH_DEFAULT * scale);
+                selectionOverflow &= !model.positive.isMouseInElement(drawPositivePoint);
 
                 Pair<Double, Double> bottomPosConnector = model.positive.getModel().getBottomConnector(drawPositivePoint);
-                gc.setLineWidth(DiagramBlockModel.STROKE_WIDTH_DEFAULT * scale);
+                gc.setLineWidth(DiagramBlockModel.CONNECTORS_WIDTH * scale);
                 gc.strokePolyline(
                         new double[]{bottomPosConnector.getKey() * scale,
                                 bottomPosConnector.getKey() * scale,
@@ -300,7 +331,7 @@ public class BDDecisionView extends BDElementView {
                             drawPositivePoint.getValue());
                     posConnector = model.positive.getModel().getTopConnector(drawPositivePoint);
                 }
-                gc.setLineWidth(DiagramBlockModel.STROKE_WIDTH_DEFAULT * scale);
+                gc.setLineWidth(DiagramBlockModel.CONNECTORS_WIDTH * scale);
                 gc.strokePolyline(
                         new double[]{rhombusLeftConnector.getKey() * scale,
                                 posConnector.getKey() * scale,
@@ -309,7 +340,11 @@ public class BDDecisionView extends BDElementView {
                                 rhombusLeftConnector.getValue() * scale,
                                 posConnector.getValue() * scale},
                         3);
-                model.positive.update(drawPositivePoint);
+                model.positive.update(gc, drawPositivePoint, scale);
+                gc.setStroke(DiagramBlockModel.STROKE_COLOR);
+                gc.setLineWidth(DiagramBlockModel.STROKE_WIDTH_DEFAULT * scale);
+                selectionOverflow &= !model.positive.isMouseInElement(drawPositivePoint);
+                gc.setFill(DiagramBlockModel.FONT_COLOR);
                 gc.fillText(DiagramBlockModel.POSITIVE_BRANCH_TEXT,
                         posConnector.getKey() * scale,
                         (rhombusLeftConnector.getValue() - DiagramBlockModel.TEXT_PADDING) * scale);
@@ -322,7 +357,7 @@ public class BDDecisionView extends BDElementView {
                             drawNegativePoint.getValue());
                     negConnector = model.negative.getModel().getTopConnector(drawNegativePoint);
                 }
-                gc.setLineWidth(DiagramBlockModel.STROKE_WIDTH_DEFAULT * scale);
+                gc.setLineWidth(DiagramBlockModel.CONNECTORS_WIDTH * scale);
                 gc.strokePolyline(
                         new double[]{rhombusRightConnector.getKey() * scale,
                                 negConnector.getKey() * scale,
@@ -331,14 +366,18 @@ public class BDDecisionView extends BDElementView {
                                 rhombusRightConnector.getValue() * scale,
                                 negConnector.getValue() * scale},
                         3);
+                gc.setFill(DiagramBlockModel.FONT_COLOR);
                 gc.fillText(DiagramBlockModel.NEGATIVE_BRANCH_TEXT,
                         (negConnector.getKey() - Utils.computeTextWidth(basicFont, DiagramBlockModel.NEGATIVE_BRANCH_TEXT).getWidth() / scale) * scale,
                         (rhombusRightConnector.getValue() - DiagramBlockModel.TEXT_PADDING) * scale);
-                model.negative.update(drawNegativePoint);
+                model.negative.update(gc, drawNegativePoint, scale);
+                gc.setStroke(DiagramBlockModel.STROKE_COLOR);
+                gc.setLineWidth(DiagramBlockModel.STROKE_WIDTH_DEFAULT * scale);
+                selectionOverflow &= !model.negative.isMouseInElement(drawNegativePoint);
 
                 Pair<Double, Double> bottomNegConnector = model.negative.getModel().getBottomConnector(drawNegativePoint);
                 Pair<Double, Double> bottomPosConnector = model.positive.getModel().getBottomConnector(drawPositivePoint);
-                gc.setLineWidth(DiagramBlockModel.STROKE_WIDTH_DEFAULT * scale);
+                gc.setLineWidth(DiagramBlockModel.CONNECTORS_WIDTH * scale);
                 gc.strokePolyline(
                         new double[]{bottomNegConnector.getKey() * scale,
                                 bottomNegConnector.getKey() * scale,
@@ -348,7 +387,7 @@ public class BDDecisionView extends BDElementView {
                                 (model.getTopRhombusConnector(drawPoint).getValue() + totalHeight) * scale},
                         3);
 
-                gc.setLineWidth(DiagramBlockModel.STROKE_WIDTH_DEFAULT * scale);
+                gc.setLineWidth(DiagramBlockModel.CONNECTORS_WIDTH * scale);
                 gc.strokePolyline(
                         new double[]{bottomPosConnector.getKey() * scale,
                                 bottomPosConnector.getKey() * scale,
@@ -359,5 +398,15 @@ public class BDDecisionView extends BDElementView {
                         3);
             }
         }
+
+
+        if (selected) {
+            drawPoint = new Pair<>(drawPoint.getKey() - (model.getDistanceToLeftBound() - rhombusWidth / scale / 2), drawPoint.getValue());
+            drawSelectBorder(gc, drawPoint, model.getSize(), scale);
+        } else if (selectionOverflow) {
+            drawPoint = new Pair<>(drawPoint.getKey() - (model.getDistanceToLeftBound() - rhombusWidth / scale / 2), drawPoint.getValue());
+            drawOverflowBorder(gc, drawPoint, model.getSize(), scale);
+        }
+
     }
 }

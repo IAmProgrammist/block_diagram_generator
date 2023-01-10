@@ -16,8 +16,7 @@ public class DebounceDecorator {
                     if (t.shouldRun) {
                         runnable.run();
                     }
-                }
-                catch (Exception e){
+                } catch (Exception e) {
                     System.err.println(e);
                 }
             }).start();
@@ -28,13 +27,15 @@ public class DebounceDecorator {
             this.shouldRun = false;
         }
     }
+
     public DebounceDecorator(Runnable runnable, long delay) {
         this.runnable = runnable;
         this.delay = delay;
     }
 
     public void execute() {
-        previousRun.clearTimeout();
+        if (previousRun != null)
+            previousRun.clearTimeout();
         previousRun = Timeout.setTimeout(runnable, delay);
     }
 

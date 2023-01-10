@@ -1,8 +1,21 @@
 package rchat.info.blockdiagramgenerator.controllers.bdelements;
 
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.geometry.Dimension2D;
+import javafx.geometry.Insets;
+import javafx.scene.Node;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Separator;
+import javafx.scene.control.TextArea;
+import javafx.scene.layout.HBox;
 import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import javafx.util.Pair;
+import javafx.util.StringConverter;
+import rchat.info.blockdiagramgenerator.Main;
 import rchat.info.blockdiagramgenerator.Utils;
 import rchat.info.blockdiagramgenerator.controllers.DiagramBlockController;
 import rchat.info.blockdiagramgenerator.models.DiagramBlockModel;
@@ -10,26 +23,253 @@ import rchat.info.blockdiagramgenerator.models.bdelements.BDDecisionModel;
 import rchat.info.blockdiagramgenerator.models.bdelements.BDElementModel;
 import rchat.info.blockdiagramgenerator.views.bdelements.BDDecisionView;
 
-public class BDDecisionController extends BDElementController {
-    public DiagramBlockController context;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static rchat.info.blockdiagramgenerator.models.DiagramBlockModel.basicFont;
+import static rchat.info.blockdiagramgenerator.models.DiagramBlockModel.onDataUpdate;
+
+public class BDDecisionController extends BDElementController implements TextEditable, Container {
     public BDDecisionModel model;
     public BDDecisionView view;
-    public BDDecisionController(DiagramBlockController context, BDContainerController positive, BDDecisionModel.Branch positiveBranch,
+    private String content;
+
+    public BDDecisionController(BDContainerController positive, BDDecisionModel.Branch positiveBranch,
                                 BDContainerController negative, BDDecisionModel.Branch negativeBranch,
                                 String content) {
-        this.context = context;
+        this.model = new BDDecisionModel(positive, positiveBranch, negative, negativeBranch, content);
+        this.model.positive.setParentContainer(this);
+        this.model.negative.setParentContainer(this);
+        this.view = new BDDecisionView(this.model);
+        this.content = content;
+        this.setControls();
+        recalculateSizes();
+    }
+
+    public BDDecisionController(BDContainerController positive, BDDecisionModel.Branch positiveBranch,
+                                BDContainerController negative, BDDecisionModel.Branch negativeBranch,
+                                String content, boolean selected) {
         this.model = new BDDecisionModel(positive, positiveBranch, negative, negativeBranch, content);
         this.view = new BDDecisionView(this.model);
+        this.model.positive.setParentContainer(this);
+        this.model.negative.setParentContainer(this);
+        this.content = content;
+        this.selected = selected;
+        this.setControls();
         recalculateSizes();
     }
 
     @Override
-    public void update(Pair<Double, Double> position) {
-        view.repaint(context.canvas.getGraphicsContext2D(), position, context.model.canvasScale);
+    public void setControls() {
+        Text header = new Text(Main.rb.getString("text"));
+        controllings.add(header);
+        TextArea area = new TextArea(getText());
+        area.textProperty().addListener((observable, oldValue, newValue) -> {
+            setText(newValue);
+            if (DiagramBlockModel.onDataUpdate != null) onDataUpdate.run();
+        });
+        controllings.add(area);
+        controllings.add(new Separator());
+        Text headerDecPos = new Text(Main.rb.getString("dec_positive_pos"));
+        controllings.add(headerDecPos);
+        StringConverter<BDDecisionModel.Branch> converter = new StringConverter<>() {
+            @Override
+            public String toString(BDDecisionModel.Branch object) {
+                if (object == null) return "";
+                return Main.rb.getString(object.propName);
+            }
+
+            @Override
+            public BDDecisionModel.Branch fromString(String string) {
+                if (string.equals(Main.rb.getString(BDDecisionModel.Branch.LEFT.propName)))
+                    return BDDecisionModel.Branch.LEFT;
+                if (string.equals(Main.rb.getString(BDDecisionModel.Branch.CENTER.propName)))
+                    return BDDecisionModel.Branch.CENTER;
+                if (string.equals(Main.rb.getString(BDDecisionModel.Branch.RIGHT.propName)))
+                    return BDDecisionModel.Branch.RIGHT;
+                return null;
+            }
+        };
+        ComboBox<BDDecisionModel.Branch> posComboBox = new ComboBox<>();
+        posComboBox.setItems(FXCollections.observableArrayList(Arrays.stream(BDDecisionModel.Branch.values())
+                .filter((el) -> el != model.negativeBranch).collect(Collectors.toList())));
+        posComboBox.setConverter(converter);
+        posComboBox.valueProperty().setValue(model.positiveBranch);
+        controllings.add(posComboBox);
+
+        controllings.add(new Separator());
+        Text headerDecNeg = new Text(Main.rb.getString("dec_negative_pos"));
+        controllings.add(headerDecNeg);
+
+        ComboBox<BDDecisionModel.Branch> negComboBox = new ComboBox<>();
+        negComboBox.setItems(FXCollections.observableArrayList(Arrays.stream(BDDecisionModel.Branch.values())
+                .filter((el) -> el != model.positiveBranch).collect(Collectors.toList())));
+        negComboBox.setConverter(converter);
+        negComboBox.valueProperty().setValue(model.negativeBranch);
+        negComboBox.setEditable(false);
+
+        posComboBox.valueProperty().addListener((observable, oldValue, newValue) -> {
+            model.positiveBranch = newValue;
+            negComboBox.setItems(FXCollections.observableArrayList(Arrays.stream(BDDecisionModel.Branch.values())
+                    .filter((el) -> el != model.positiveBranch).collect(Collectors.toList())));
+            if (DiagramBlockModel.onDataUpdate != null) onDataUpdate.run();
+        });
+
+        negComboBox.valueProperty().addListener((observable, oldValue, newValue) -> {
+            model.negativeBranch = newValue;
+            posComboBox.setItems(FXCollections.observableArrayList(Arrays.stream(BDDecisionModel.Branch.values())
+                    .filter((el) -> el != model.negativeBranch).collect(Collectors.toList())));
+            if (DiagramBlockModel.onDataUpdate != null) onDataUpdate.run();
+        });
+        controllings.add(negComboBox);
+        controllings.add(new Separator());
+    }
+
+    @Override
+    public void update(GraphicsContext gc, Pair<Double, Double> position, double scale) {
+        view.repaint(gc, position, isMouseInElement(position), selected, scale);
+    }
+
+    @Override
+    public BDElementController select(Pair<Double, Double> drawPoint) {
+        BDElementController selected = null;
+        Dimension2D rhombusSize = model.getRhombusSize();
+        double rhombusWidth = rhombusSize.getWidth();
+
+        drawPoint = new Pair<>(drawPoint.getKey() + (model.getDistanceToLeftBound() - rhombusWidth / 2), drawPoint.getValue());
+
+
+        if (model.positiveBranch == BDDecisionModel.Branch.CENTER || model.negativeBranch == BDDecisionModel.Branch.CENTER) {
+            BDContainerController centerBranch;
+            BDContainerController restContainer;
+            BDDecisionModel.Branch restBranch;
+            if (model.positiveBranch == BDDecisionModel.Branch.CENTER) {
+                centerBranch = model.positive;
+                restContainer = model.negative;
+                restBranch = model.negativeBranch;
+            } else {
+                centerBranch = model.negative;
+                restContainer = model.positive;
+                restBranch = model.positiveBranch;
+            }
+            Pair<Double, Double> bottomRhombusConnector = model.getBottomRhombusConnector(drawPoint);
+            Pair<Double, Double> fakeDrawPoint = centerBranch.getModel().getTopConnector(new Pair<>(bottomRhombusConnector.getKey(), bottomRhombusConnector.getValue() + DiagramBlockModel.ELEMENTS_SPACING));
+            Pair<Double, Double> trueCenterDrawPoint = new Pair<>(bottomRhombusConnector.getKey() - (fakeDrawPoint.getKey() - bottomRhombusConnector.getKey()),
+                    bottomRhombusConnector.getValue() + DiagramBlockModel.ELEMENTS_SPACING);
+            selected = centerBranch.select(trueCenterDrawPoint);
+            if (selected != null) {
+                this.selected = false;
+                return selected;
+            }
+
+            if (restBranch == BDDecisionModel.Branch.LEFT) {
+                double restShoulderLen = centerBranch.getModel().getDistanceToLeftBound() + DiagramBlockModel.DECISION_BLOCKS_PADDING
+                        + restContainer.getModel().getSize().getWidth() - rhombusWidth / 2;
+
+                Pair<Double, Double> rhombusLeftConnector = model.getLeftRhombusConnector(drawPoint);
+
+                Pair<Double, Double> drawRestPoint = new Pair<>(rhombusLeftConnector.getKey() - restShoulderLen,
+                        model.getBottomRhombusConnector(drawPoint).getValue() + DiagramBlockModel.ELEMENTS_SPACING);
+                Pair<Double, Double> restConnector = restContainer.getModel().getTopConnector(drawRestPoint);
+                if (rhombusLeftConnector.getKey() - restConnector.getKey() < DiagramBlockModel.MIN_DECISION_SHOULDER_LEN) {
+                    drawRestPoint = new Pair<>(drawRestPoint.getKey() - (DiagramBlockModel.MIN_DECISION_SHOULDER_LEN - rhombusLeftConnector.getKey() + restConnector.getKey()),
+                            drawRestPoint.getValue());
+                }
+                selected = restContainer.select(drawRestPoint);
+            } else {
+                double restShoulderLen = centerBranch.getModel().getDistanceToRightBound() + DiagramBlockModel.DECISION_BLOCKS_PADDING
+                        - rhombusWidth / 2;
+
+                Pair<Double, Double> rhombusRightConnector = model.getRightRhombusConnector(drawPoint);
+
+                Pair<Double, Double> drawRestPoint = new Pair<>(rhombusRightConnector.getKey() + restShoulderLen,
+                        model.getBottomRhombusConnector(drawPoint).getValue() + DiagramBlockModel.ELEMENTS_SPACING);
+                Pair<Double, Double> restConnector = restContainer.getModel().getTopConnector(drawRestPoint);
+                if (restConnector.getKey() - rhombusRightConnector.getKey() < DiagramBlockModel.MIN_DECISION_SHOULDER_LEN) {
+                    drawRestPoint = new Pair<>(drawRestPoint.getKey() + (DiagramBlockModel.MIN_DECISION_SHOULDER_LEN - restConnector.getKey() + rhombusRightConnector.getKey()),
+                            drawRestPoint.getValue());
+                }
+                selected = restContainer.select(drawRestPoint);
+            }
+        } else {
+            Dimension2D negativeSize = model.negative.getModel().getSize();
+            Dimension2D positiveSize = model.positive.getModel().getSize();
+            Pair<Double, Double> rhombusLeftConnector = model.getLeftRhombusConnector(drawPoint);
+            Pair<Double, Double> rhombusRightConnector = model.getRightRhombusConnector(drawPoint);
+
+            if (model.negativeBranch == BDDecisionModel.Branch.LEFT) {
+                double negativeShoulderLen = DiagramBlockModel.DECISION_BLOCKS_PADDING + negativeSize.getWidth() - rhombusWidth / 2;
+                double positiveShoulderLen = DiagramBlockModel.DECISION_BLOCKS_PADDING - rhombusWidth / 2;
+
+                Pair<Double, Double> drawNegativePoint = new Pair<>(rhombusLeftConnector.getKey() - negativeShoulderLen,
+                        model.getBottomRhombusConnector(drawPoint).getValue() + DiagramBlockModel.ELEMENTS_SPACING);
+                Pair<Double, Double> negConnector = model.negative.getModel().getTopConnector(drawNegativePoint);
+                if (rhombusLeftConnector.getKey() - negConnector.getKey() < DiagramBlockModel.MIN_DECISION_SHOULDER_LEN) {
+                    drawNegativePoint = new Pair<>(drawNegativePoint.getKey() - (DiagramBlockModel.MIN_DECISION_SHOULDER_LEN - rhombusLeftConnector.getKey() + negConnector.getKey()),
+                            drawNegativePoint.getValue());
+                }
+
+                selected = model.negative.select(drawNegativePoint);
+                if (selected != null) {
+                    this.selected = false;
+                    return selected;
+                }
+
+
+                Pair<Double, Double> drawPositivePoint = new Pair<>(rhombusRightConnector.getKey() + positiveShoulderLen,
+                        model.getBottomRhombusConnector(drawPoint).getValue() + DiagramBlockModel.ELEMENTS_SPACING);
+                Pair<Double, Double> posConnector = model.positive.getModel().getTopConnector(drawPositivePoint);
+                if (posConnector.getKey() - rhombusRightConnector.getKey() < DiagramBlockModel.MIN_DECISION_SHOULDER_LEN) {
+                    drawPositivePoint = new Pair<>(drawPositivePoint.getKey() + (DiagramBlockModel.MIN_DECISION_SHOULDER_LEN - (posConnector.getKey() - rhombusRightConnector.getKey())),
+                            drawPositivePoint.getValue());
+                }
+
+
+                selected = model.positive.select(drawPositivePoint);
+
+            } else {
+                double positiveShoulderLen = DiagramBlockModel.DECISION_BLOCKS_PADDING + positiveSize.getWidth() - rhombusWidth / 2;
+                double negativeShoulderLen = DiagramBlockModel.DECISION_BLOCKS_PADDING - rhombusWidth / 2;
+
+                Pair<Double, Double> drawPositivePoint = new Pair<>(rhombusLeftConnector.getKey() - positiveShoulderLen,
+                        model.getBottomRhombusConnector(drawPoint).getValue() + DiagramBlockModel.ELEMENTS_SPACING);
+                Pair<Double, Double> posConnector = model.positive.getModel().getTopConnector(drawPositivePoint);
+                if (rhombusLeftConnector.getKey() - posConnector.getKey() < DiagramBlockModel.MIN_DECISION_SHOULDER_LEN) {
+                    drawPositivePoint = new Pair<>(drawPositivePoint.getKey() - (DiagramBlockModel.MIN_DECISION_SHOULDER_LEN - rhombusLeftConnector.getKey() + posConnector.getKey()),
+                            drawPositivePoint.getValue());
+                }
+                selected = model.positive.select(drawPositivePoint);
+                if (selected != null) {
+                    this.selected = false;
+                    return selected;
+                }
+                Pair<Double, Double> drawNegativePoint = new Pair<>(rhombusRightConnector.getKey() + negativeShoulderLen,
+                        model.getBottomRhombusConnector(drawPoint).getValue() + DiagramBlockModel.ELEMENTS_SPACING);
+                Pair<Double, Double> negConnector = model.negative.getModel().getTopConnector(drawNegativePoint);
+                if (negConnector.getKey() - rhombusRightConnector.getKey() < DiagramBlockModel.MIN_DECISION_SHOULDER_LEN) {
+                    drawNegativePoint = new Pair<>(drawNegativePoint.getKey() + (DiagramBlockModel.MIN_DECISION_SHOULDER_LEN - (negConnector.getKey() - rhombusRightConnector.getKey())),
+                            drawNegativePoint.getValue());
+                }
+                selected = model.negative.select(drawNegativePoint);
+
+            }
+        }
+
+        if (selected != null) {
+            this.selected = false;
+            return selected;
+        }
+
+        return super.select(new Pair<>(drawPoint.getKey() - (model.getDistanceToLeftBound() - rhombusWidth / 2), drawPoint.getValue()));
     }
 
     @Override
     public void recalculateSizes() {
+        this.model.positive.recalculateSizes();
+        this.model.negative.recalculateSizes();
         double maxLineLen = 0;
         Font basicFont = new Font(DiagramBlockModel.FONT_BASIC_NAME, DiagramBlockModel.FONT_BASIC_SIZE);
         double textHeight = this.model.data.size() == 0 ? Utils.computeTextWidth(basicFont, "").getHeight() : 0;
@@ -179,5 +419,42 @@ public class BDDecisionController extends BDElementController {
     @Override
     public BDElementModel getModel() {
         return model;
+    }
+
+    @Override
+    public BDElementController getSelected() {
+        if (model.positive.getSelected() != null) return model.positive;
+        if (model.negative.getSelected() != null) return model.negative;
+        return super.getSelected();
+    }
+
+    @Override
+    public BDElementController clone() {
+        return new BDDecisionController(model.positive.clone(), model.positiveBranch,
+                model.negative.clone(), model.negativeBranch,
+                this.content, this.selected);
+    }
+
+    @Override
+    public String getText() {
+        return content;
+    }
+
+    @Override
+    public void setText(String text) {
+        this.model.data = Arrays.asList(text.split("\n"));
+        this.content = text;
+        recalculateSizes();
+    }
+
+    @Override
+    public void removeFromContainer(BDElementController bdElementController) {
+        if (model.positive == bdElementController) {
+            model.positive = null;
+            model.positive = new BDContainerController();
+        } else if (model.negative == bdElementController) {
+            model.negative = null;
+            model.negative = new BDContainerController();
+        }
     }
 }
