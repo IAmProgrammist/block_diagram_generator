@@ -12,9 +12,11 @@ import static rchat.info.blockdiagramgenerator.models.DiagramBlockModel.basicFon
 
 public class BDDecisionView extends BDElementView {
     protected BDDecisionModel model;
+
     public BDDecisionView(BDDecisionModel model) {
         this.model = model;
     }
+
     @Override
     public void repaint(GraphicsContext gc, Pair<Double, Double> drawPoint,
                         boolean selectionOverflow, boolean selected, double scale) {
@@ -60,7 +62,7 @@ public class BDDecisionView extends BDElementView {
         gc.setFont(basicFont);
         //TODO: This is so bad!
         double currentLevel = (rhombusHeight - textHeight) / 2 - 3 * DiagramBlockModel.LINE_SPACING * scale;
-        for (String line : this.model.data) {
+        for (String line : this.model.getDataLines()) {
             Dimension2D d = Utils.computeTextWidth(basicFont, line);
             currentLevel += d.getHeight();
             gc.setFill(DiagramBlockModel.FONT_COLOR);
@@ -399,11 +401,14 @@ public class BDDecisionView extends BDElementView {
             }
         }
 
-
-        if (selected) {
+        if (selectionOverflow && DiagramBlockModel.dragMode && Utils.isPointInBounds(new Pair<>(DiagramBlockModel.canvasMousePosX, DiagramBlockModel.canvasMousePosY),
+                drawPoint, model.getRhombusSize())) {
+            drawPoint = new Pair<>(drawPoint.getKey() - (model.getDistanceToLeftBound() - rhombusWidth / scale / 2), drawPoint.getValue());
+            drawDragNDropForeground(gc, drawPoint, model.getSize(), scale);
+        } else if (selected) {
             drawPoint = new Pair<>(drawPoint.getKey() - (model.getDistanceToLeftBound() - rhombusWidth / scale / 2), drawPoint.getValue());
             drawSelectBorder(gc, drawPoint, model.getSize(), scale);
-        } else if (selectionOverflow) {
+        } else if (selectionOverflow && !DiagramBlockModel.dragMode) {
             drawPoint = new Pair<>(drawPoint.getKey() - (model.getDistanceToLeftBound() - rhombusWidth / scale / 2), drawPoint.getValue());
             drawOverflowBorder(gc, drawPoint, model.getSize(), scale);
         }

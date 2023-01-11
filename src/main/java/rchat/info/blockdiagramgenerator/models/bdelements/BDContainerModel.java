@@ -9,12 +9,15 @@ import java.util.*;
 
 public class BDContainerModel extends BDElementModel {
     public List<BDElementController> elements = new LinkedList<>();
+    public List<Pair<Double, Double>> elementYBorders = new ArrayList<>();
+    public Integer lastVisitedDragModePos = null;
+
     public BDContainerModel() {
-        super(Collections.emptyList());
+        super("");
     }
 
     public BDContainerModel(BDElementController... elements) {
-        super(Collections.emptyList());
+        super("");
         this.elements.addAll(Arrays.asList(elements));
     }
 

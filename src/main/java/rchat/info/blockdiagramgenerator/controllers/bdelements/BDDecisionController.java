@@ -7,9 +7,7 @@ import javafx.geometry.Dimension2D;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Separator;
-import javafx.scene.control.TextArea;
+import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
@@ -19,14 +17,10 @@ import rchat.info.blockdiagramgenerator.Main;
 import rchat.info.blockdiagramgenerator.Utils;
 import rchat.info.blockdiagramgenerator.controllers.DiagramBlockController;
 import rchat.info.blockdiagramgenerator.models.DiagramBlockModel;
-import rchat.info.blockdiagramgenerator.models.bdelements.BDDecisionModel;
-import rchat.info.blockdiagramgenerator.models.bdelements.BDElementModel;
+import rchat.info.blockdiagramgenerator.models.bdelements.*;
 import rchat.info.blockdiagramgenerator.views.bdelements.BDDecisionView;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static rchat.info.blockdiagramgenerator.models.DiagramBlockModel.basicFont;
@@ -35,7 +29,6 @@ import static rchat.info.blockdiagramgenerator.models.DiagramBlockModel.onDataUp
 public class BDDecisionController extends BDElementController implements TextEditable, Container {
     public BDDecisionModel model;
     public BDDecisionView view;
-    private String content;
 
     public BDDecisionController(BDContainerController positive, BDDecisionModel.Branch positiveBranch,
                                 BDContainerController negative, BDDecisionModel.Branch negativeBranch,
@@ -44,7 +37,6 @@ public class BDDecisionController extends BDElementController implements TextEdi
         this.model.positive.setParentContainer(this);
         this.model.negative.setParentContainer(this);
         this.view = new BDDecisionView(this.model);
-        this.content = content;
         this.setControls();
         recalculateSizes();
     }
@@ -56,7 +48,6 @@ public class BDDecisionController extends BDElementController implements TextEdi
         this.view = new BDDecisionView(this.model);
         this.model.positive.setParentContainer(this);
         this.model.negative.setParentContainer(this);
-        this.content = content;
         this.selected = selected;
         this.setControls();
         recalculateSizes();
@@ -64,7 +55,8 @@ public class BDDecisionController extends BDElementController implements TextEdi
 
     @Override
     public void setControls() {
-        Text header = new Text(Main.rb.getString("text"));
+        this.controllings = new ArrayList<>();
+        Label header = new Label(Main.rb.getString("text"));
         controllings.add(header);
         TextArea area = new TextArea(getText());
         area.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -73,7 +65,7 @@ public class BDDecisionController extends BDElementController implements TextEdi
         });
         controllings.add(area);
         controllings.add(new Separator());
-        Text headerDecPos = new Text(Main.rb.getString("dec_positive_pos"));
+        Label headerDecPos = new Label(Main.rb.getString("dec_positive_pos"));
         controllings.add(headerDecPos);
         StringConverter<BDDecisionModel.Branch> converter = new StringConverter<>() {
             @Override
@@ -101,7 +93,7 @@ public class BDDecisionController extends BDElementController implements TextEdi
         controllings.add(posComboBox);
 
         controllings.add(new Separator());
-        Text headerDecNeg = new Text(Main.rb.getString("dec_negative_pos"));
+        Label headerDecNeg = new Label(Main.rb.getString("dec_negative_pos"));
         controllings.add(headerDecNeg);
 
         ComboBox<BDDecisionModel.Branch> negComboBox = new ComboBox<>();
@@ -272,8 +264,9 @@ public class BDDecisionController extends BDElementController implements TextEdi
         this.model.negative.recalculateSizes();
         double maxLineLen = 0;
         Font basicFont = new Font(DiagramBlockModel.FONT_BASIC_NAME, DiagramBlockModel.FONT_BASIC_SIZE);
-        double textHeight = this.model.data.size() == 0 ? Utils.computeTextWidth(basicFont, "").getHeight() : 0;
-        for (String line : this.model.data) {
+        List<String> dataLines = getModel().getDataLines();
+        double textHeight = dataLines.size() == 0 ? Utils.computeTextWidth(basicFont, "").getHeight() : 0;
+        for (String line : dataLines) {
             Dimension2D d = Utils.computeTextWidth(basicFont, line);
             if (d.getWidth() > maxLineLen) {
                 maxLineLen = d.getWidth();
@@ -432,18 +425,17 @@ public class BDDecisionController extends BDElementController implements TextEdi
     public BDElementController clone() {
         return new BDDecisionController(model.positive.clone(), model.positiveBranch,
                 model.negative.clone(), model.negativeBranch,
-                this.content, this.selected);
+                getModel().data, this.selected);
     }
 
     @Override
     public String getText() {
-        return content;
+        return getModel().data;
     }
 
     @Override
     public void setText(String text) {
-        this.model.data = Arrays.asList(text.split("\n"));
-        this.content = text;
+        this.model.data = text;
         recalculateSizes();
     }
 
@@ -455,6 +447,39 @@ public class BDDecisionController extends BDElementController implements TextEdi
         } else if (model.negative == bdElementController) {
             model.negative = null;
             model.negative = new BDContainerController();
+        }
+    }
+
+    @Override
+    public void replaceInContainer(BDElementController replacing, BDElementController replacer) {
+        if (replacing == this.model.positive && replacer instanceof BDContainerController) {
+            this.model.positive = (BDContainerController) replacer;
+            onDataUpdate.run();
+        } else if (replacing == this.model.negative && replacer instanceof BDContainerController) {
+            this.model.negative = (BDContainerController) replacer;
+            onDataUpdate.run();
+        }
+    }
+
+    @Override
+    public void replace(BDElementController replacer) {
+        if (parentContainer != null) {
+            if (replacer instanceof BDDecisionController) return;
+            replacer.setParentContainer(parentContainer);
+
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION, Main.rb.getString("alert_data_narrowing_content"),
+                    ButtonType.APPLY, ButtonType.CANCEL);
+            alert.setTitle(Main.rb.getString("alert_data_narrowing_title"));
+            Optional<ButtonType> result = alert.showAndWait();
+            if (result.isPresent() && result.get() == ButtonType.APPLY) {
+                replacer.getModel().data = model.data;
+                if (replacer instanceof BDCycleFixedController)
+                    ((BDCycleFixedModel)replacer.getModel()).body = this.model.positive;
+                if (replacer instanceof BDCycleNotFixedController)
+                    ((BDCycleNotFixedModel)replacer.getModel()).body = this.model.positive;
+                replacer.setControls();
+                parentContainer.replaceInContainer(this, replacer);
+            }
         }
     }
 }

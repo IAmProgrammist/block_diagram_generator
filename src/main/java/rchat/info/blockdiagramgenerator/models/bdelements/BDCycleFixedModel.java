@@ -12,7 +12,7 @@ public class BDCycleFixedModel extends BDElementModel {
     public Dimension2D rhombusTextSize;
 
     public BDCycleFixedModel(String data, BDContainerController body) {
-        super(Arrays.asList(data.split("\n")));
+        super(data);
         this.body = body;
     }
 

@@ -47,11 +47,20 @@ public class BDAddElementController extends BDElementController {
     }
 
     @Override
+    public void replace(BDElementController replacer) {
+        if (parentContainer != null) {
+            replacer.setParentContainer(parentContainer);
+            parentContainer.replaceInContainer(this, replacer);
+        }
+    }
+
+    @Override
     public void recalculateSizes() {
         double maxLineLen = 0;
         Font basicFont = new Font(DiagramBlockModel.FONT_BASIC_NAME, DiagramBlockModel.FONT_BASIC_SIZE);
-        double textHeight = this.model.data.size() == 0 ? Utils.computeTextWidth(basicFont, "").getHeight() : 0;
-        for (String line : this.model.data) {
+        List<String> dataLines = getModel().getDataLines();
+        double textHeight = dataLines.size() == 0 ? Utils.computeTextWidth(basicFont, "").getHeight() : 0;
+        for (String line : dataLines) {
             Dimension2D d = Utils.computeTextWidth(basicFont, line);
             if (d.getWidth() > maxLineLen) {
                 maxLineLen = d.getWidth();
@@ -79,5 +88,13 @@ public class BDAddElementController extends BDElementController {
     @Override
     public void setControls() {
         this.controllings = Collections.emptyList();
+    }
+
+    @Override
+    public BDElementController select(Pair<Double, Double> position) {
+        if (isMouseInElement(position)) {
+            return this;
+        }
+        return null;
     }
 }

@@ -2,7 +2,10 @@ package rchat.info.blockdiagramgenerator.models.bdelements;
 
 import javafx.geometry.Dimension2D;
 import javafx.util.Pair;
+import rchat.info.blockdiagramgenerator.controllers.bdelements.BDContainerController;
+import rchat.info.blockdiagramgenerator.controllers.bdelements.BDElementController;
 
+import java.util.Arrays;
 import java.util.List;
 
 public abstract class BDElementModel {
@@ -13,13 +16,17 @@ public abstract class BDElementModel {
         RIGHT
     }
 
-    public List<String> data;
+    public String data;
     protected Dimension2D size;
     protected double leftBound;
     protected double rightBound;
 
-    public BDElementModel(List<String> data) {
+    public BDElementModel(String data) {
         this.data = data;
+    }
+
+    public List<String> getDataLines() {
+        return Arrays.asList(data.split("\n"));
     }
 
     public Dimension2D getSize() {
@@ -41,7 +48,6 @@ public abstract class BDElementModel {
         this.leftBound = leftBound;
         this.rightBound = rightBound;
     }
-
     public abstract Pair<Double, Double> getLeftConnector(Pair<Double, Double> pos);
 
     public abstract Pair<Double, Double> getRightConnector(Pair<Double, Double> pos);

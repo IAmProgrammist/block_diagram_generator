@@ -58,7 +58,7 @@ public class BDCycleNotFixedView extends BDElementView {
         gc.setFont(basicFont);
         //TODO: This is so bad!
         double currentLevel = (rhombusHeight - textHeight) / 2 - 3 * DiagramBlockModel.LINE_SPACING * scale;
-        for (String line : this.model.data) {
+        for (String line : this.model.getDataLines()) {
             Dimension2D d = Utils.computeTextWidth(basicFont, line);
             currentLevel += d.getHeight();
             gc.setFill(DiagramBlockModel.FONT_COLOR);
@@ -125,10 +125,14 @@ public class BDCycleNotFixedView extends BDElementView {
                         (rightRhombusConnector.getValue() + bottomPoint) * scale}, 4);
 
 
-        if (selected) {
+        if (selectionOverflow && DiagramBlockModel.dragMode && Utils.isPointInBounds(new Pair<>(DiagramBlockModel.canvasMousePosX, DiagramBlockModel.canvasMousePosY),
+                drawPoint, model.getRhombusSize())) {
+            drawPoint = new Pair<>(drawPoint.getKey() - (model.getDistanceToLeftBound() - rhombusWidth / scale / 2), drawPoint.getValue());
+            drawDragNDropForeground(gc, drawPoint, model.getSize(), scale);
+        } else if (selected) {
             drawPoint = new Pair<>(drawPoint.getKey() - (model.getDistanceToLeftBound() - rhombusWidth / scale / 2), drawPoint.getValue());
             drawSelectBorder(gc, drawPoint, model.getSize(), scale);
-        } else if (selectionOverflow) {
+        } else if (selectionOverflow && !DiagramBlockModel.dragMode) {
             drawPoint = new Pair<>(drawPoint.getKey() - (model.getDistanceToLeftBound() - rhombusWidth / scale / 2), drawPoint.getValue());
             drawOverflowBorder(gc, drawPoint, model.getSize(), scale);
         }

@@ -6,6 +6,7 @@ import javafx.util.Pair;
 import rchat.info.blockdiagramgenerator.History;
 import rchat.info.blockdiagramgenerator.Utils;
 import rchat.info.blockdiagramgenerator.models.DiagramBlockModel;
+import rchat.info.blockdiagramgenerator.models.bdelements.BDDecisionModel;
 import rchat.info.blockdiagramgenerator.models.bdelements.BDElementModel;
 
 import java.util.ArrayList;
@@ -16,6 +17,19 @@ public abstract class BDElementController implements History.Cloneable<BDElement
     public boolean selected  = false;
     public Container parentContainer = null;
     protected List<Node> controllings = new ArrayList<>();
+
+    public static BDElementController fromString(String str) {
+        if (str.equals("bd_element_terminator")) return new BDTerminatorController("");
+        if (str.equals("bd_element_process")) return new BDProcessController("");
+        if (str.equals("bd_element_data")) return new BDDataController("");
+        if (str.equals("bd_element_decision")) return new BDDecisionController(new BDContainerController(), BDDecisionModel.Branch.LEFT,
+                new BDContainerController(), BDDecisionModel.Branch.RIGHT, "");
+        if (str.equals("bd_element_modifier")) return new BDCycleFixedController(new BDContainerController(), "");
+        if (str.equals("bd_element_preprocess")) return new BDPreProcessController("");
+        if (str.equals("bd_element_cyclenotfixed")) return new BDCycleNotFixedController(new BDContainerController(), "");
+        return null;
+    }
+
     public void setParentContainer(Container container) {
         this.parentContainer = container;
     }
@@ -47,6 +61,7 @@ public abstract class BDElementController implements History.Cloneable<BDElement
         if (this.selected) return this;
         return null;
     }
+    public abstract void replace(BDElementController replacer);
 
     public abstract void recalculateSizes();
 

@@ -64,6 +64,9 @@ public class DiagramBlockModel implements History.Cloneable<DiagramBlockModel> {
     public static final boolean DEBUG_DRAW_BORDERS = false;
     public static final boolean IS_DEBUG_SHOW_FPS = true;
     public static final double CONTAINER_OVERFLOW_PADDING = 30;
+    public static final Paint DRAGNDROP_FOREGROUND_COLOR = new Color(0.0, 1, 0.0, 0.3);
+    public static final double MAX_BD_CONTAINER_DRAGNDROP_WIDTH = 300;
+    public static final double BD_CONTAINER_DRAGNDROP_WIDTH_MARGIN = 25;
     // Позиция мышки в canvas (x)
     public static double mousePosX = 0;
     // Позиция мышки в canvas (y)
@@ -72,6 +75,7 @@ public class DiagramBlockModel implements History.Cloneable<DiagramBlockModel> {
     public static double canvasHeight = 400;
     public static Font basicFont;
     public static boolean VIEWPORT_MODE = true;
+    public static boolean dragMode = false;
     public double startX = 0;
     public double startY = 0;
     public double posX = 0;

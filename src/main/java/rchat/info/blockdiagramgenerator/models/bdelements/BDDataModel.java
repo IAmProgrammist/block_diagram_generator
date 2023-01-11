@@ -7,7 +7,7 @@ import java.util.Arrays;
 
 public class BDDataModel extends BDElementModel {
     public BDDataModel(String data) {
-        super(Arrays.asList(data.split("\n")));
+        super(data);
     }
     @Override
     public Pair<Double, Double> getLeftConnector(Pair<Double, Double> pos) {

@@ -3,6 +3,7 @@ package rchat.info.blockdiagramgenerator.controllers.bdelements;
 import javafx.geometry.Dimension2D;
 import javafx.scene.Node;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.Region;
@@ -29,12 +30,10 @@ import static rchat.info.blockdiagramgenerator.models.DiagramBlockModel.onDataUp
 public class BDProcessController extends BDElementController implements TextEditable {
     public BDProcessModel model;
     public BDProcessView view;
-    private String content;
 
     public BDProcessController(String content) {
         this.model = new BDProcessModel(content);
         this.view = new BDProcessView(this.model);
-        this.content = content;
         this.setControls();
         recalculateSizes();
     }
@@ -42,7 +41,6 @@ public class BDProcessController extends BDElementController implements TextEdit
     public BDProcessController(String content, boolean selected) {
         this.model = new BDProcessModel(content);
         this.view = new BDProcessView(this.model);
-        this.content = content;
         this.selected = selected;
         this.setControls();
         recalculateSizes();
@@ -50,7 +48,8 @@ public class BDProcessController extends BDElementController implements TextEdit
 
     @Override
     public void setControls() {
-        Text header = new Text(Main.rb.getString("text"));
+        this.controllings = new ArrayList<>();
+        Label header = new Label(Main.rb.getString("text"));
         controllings.add(header);
         TextArea area = new TextArea(getText());
         area.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -70,8 +69,9 @@ public class BDProcessController extends BDElementController implements TextEdit
     public void recalculateSizes() {
         double maxLineLen = 0;
         Font basicFont = new Font(DiagramBlockModel.FONT_BASIC_NAME, DiagramBlockModel.FONT_BASIC_SIZE);
-        double textHeight = this.model.data.size() == 0 ? Utils.computeTextWidth(basicFont, "").getHeight() : 0;
-        for (String line : this.model.data) {
+        List<String> dataLines = getModel().getDataLines();
+        double textHeight = dataLines.size() == 0 ? Utils.computeTextWidth(basicFont, "").getHeight() : 0;
+        for (String line : dataLines) {
             Dimension2D d = Utils.computeTextWidth(basicFont, line);
             if (d.getWidth() > maxLineLen) {
                 maxLineLen = d.getWidth();
@@ -93,18 +93,28 @@ public class BDProcessController extends BDElementController implements TextEdit
 
     @Override
     public BDElementController clone() {
-        return new BDProcessController(content, this.selected);
+        return new BDProcessController(getModel().data, this.selected);
     }
 
     @Override
     public String getText() {
-        return content;
+        return getModel().data;
     }
 
     @Override
     public void setText(String text) {
-        this.model.data = Arrays.asList(text.split("\n"));
-        this.content = text;
+        this.model.data = text;
         recalculateSizes();
+    }
+
+    @Override
+    public void replace(BDElementController replacer) {
+        if (parentContainer != null) {
+            if (replacer instanceof BDProcessController) return;
+            replacer.setParentContainer(parentContainer);
+            replacer.getModel().data = getModel().data;
+            replacer.setControls();
+            parentContainer.replaceInContainer(this, replacer);
+        }
     }
 }

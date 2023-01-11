@@ -1,9 +1,12 @@
 package rchat.info.blockdiagramgenerator.models.bdelements;
 
-import rchat.info.blockdiagramgenerator.models.DiagramBlockModel;
+import rchat.info.blockdiagramgenerator.Main;
 
 public class BDAddElementModel extends BDProcessModel {
     public BDAddElementModel() {
-        super(DiagramBlockModel.TEXT_ADD_ELEMENT);
+        this(false);
+    }
+    public BDAddElementModel(boolean empty) {
+        super(empty ? "" : Main.rb.getString("bd_element_add_content"));
     }
 }

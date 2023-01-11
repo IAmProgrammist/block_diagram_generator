@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 <?import rchat.info.blockdiagramgenerator.elements.*?>
@@ -40,31 +42,182 @@
             </Menu>
         </menus>
     </MenuBar>
-    <SplitPane fx:id="root" dividerPositions="0.2, 0.8" prefWidth="-1" VBox.vgrow="ALWAYS">
+    <SplitPane fx:id="root" dividerPositions="0.30434782608695654, 0.7240802675585284" prefWidth="-1" VBox.vgrow="ALWAYS">
         <items>
             <AnchorPane maxWidth="300.0">
-            <children>
-               <SplitPane dividerPositions="0.5" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                 <items>
-                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
-                        <children>
-                           <Text strokeType="OUTSIDE" strokeWidth="0.0" text="In dev" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                        </children>
-                     </AnchorPane>
-                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
-                        <children>
-                           <Text strokeType="OUTSIDE" strokeWidth="0.0" text="In dev" wrappingWidth="32.56982421875" AnchorPane.bottomAnchor="-134.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                        </children>
-                     </AnchorPane>
-                 </items>
-               </SplitPane>
-            </children>
+                <children>
+                    <SplitPane dividerPositions="0.5" orientation="VERTICAL" prefHeight="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <items>
+                            <VBox alignment="TOP_RIGHT" prefHeight="200.0" prefWidth="100.0">
+                                <Text strokeType="OUTSIDE" strokeWidth="0.0" text="%bd_elements">
+                                    <font>
+                                        <Font size="15.0" />
+                                    </font>
+                                    <VBox.margin>
+                                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                    </VBox.margin>
+                                </Text>
+                        <Separator prefWidth="200.0" />
+                                <ListView fx:id="elements" minWidth="-Infinity" VBox.vgrow="ALWAYS">
+                                    <HBox alignment="CENTER_LEFT" prefWidth="125.0"
+                                          xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1">
+                                        <properties datatype="bd_element_terminator"/>
+                                        <children>
+                                            <ImageView fitHeight="150.0" fitWidth="70.0" pickOnBounds="true" preserveRatio="true">
+                                                <image>
+                                                    <Image url="@../images/terminator.png" />
+                                                </image>
+                                                <viewport>
+                                                    <Rectangle2D />
+                                                </viewport>
+                                                <HBox.margin>
+                                                    <Insets right="10.0" />
+                                                </HBox.margin>
+                                            </ImageView>
+                                            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="%bd_element_terminator" />
+                                        </children>
+                                    </HBox>
+
+                                    <HBox alignment="CENTER_LEFT" prefWidth="125.0"
+                                          xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1">
+                                        <properties datatype="bd_element_process"/>
+                                        <children>
+                                            <ImageView fitHeight="150.0" fitWidth="70.0" pickOnBounds="true" preserveRatio="true">
+                                                <image>
+                                                    <Image url="@../images/process.png" />
+                                                </image>
+                                                <viewport>
+                                                    <Rectangle2D />
+                                                </viewport>
+                                                <HBox.margin>
+                                                    <Insets right="10.0" />
+                                                </HBox.margin>
+                                            </ImageView>
+                                            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="%bd_element_process" />
+                                        </children>
+                                    </HBox>
+
+                                    <HBox alignment="CENTER_LEFT" prefWidth="125.0"
+                                          xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1">
+                                        <properties datatype="bd_element_data"/>
+                                        <children>
+                                            <ImageView fitHeight="150.0" fitWidth="70.0" pickOnBounds="true" preserveRatio="true">
+                                                <image>
+                                                    <Image url="@../images/data.png" />
+                                                </image>
+                                                <viewport>
+                                                    <Rectangle2D />
+                                                </viewport>
+                                                <HBox.margin>
+                                                    <Insets right="10.0" />
+                                                </HBox.margin>
+                                            </ImageView>
+                                            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="%bd_element_data" />
+                                        </children>
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" prefWidth="125.0"
+                                          xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1">
+                                        <properties datatype="bd_element_decision"/>
+                                        <children>
+                                            <ImageView fitHeight="150.0" fitWidth="70.0" pickOnBounds="true" preserveRatio="true">
+                                                <image>
+                                                    <Image url="@../images/decision.png" />
+                                                </image>
+                                                <viewport>
+                                                    <Rectangle2D />
+                                                </viewport>
+                                                <HBox.margin>
+                                                    <Insets right="10.0" />
+                                                </HBox.margin>
+                                            </ImageView>
+                                            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="%bd_element_decision" />
+                                        </children>
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" prefWidth="125.0"
+                                          xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1">
+                                        <properties datatype="bd_element_modifier"/>
+                                        <children>
+                                            <ImageView fitHeight="150.0" fitWidth="70.0" pickOnBounds="true" preserveRatio="true">
+                                                <image>
+                                                    <Image url="@../images/modifier.png" />
+                                                </image>
+                                                <viewport>
+                                                    <Rectangle2D />
+                                                </viewport>
+                                                <HBox.margin>
+                                                    <Insets right="10.0" />
+                                                </HBox.margin>
+                                            </ImageView>
+                                            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="%bd_element_modifier" />
+                                        </children>
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" prefWidth="125.0"
+                                          xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1">
+                                        <properties datatype="bd_element_preprocess"/>
+                                        <children>
+                                            <ImageView fitHeight="150.0" fitWidth="70.0" pickOnBounds="true" preserveRatio="true">
+                                                <image>
+                                                    <Image url="@../images/preprocess.png" />
+                                                </image>
+                                                <viewport>
+                                                    <Rectangle2D />
+                                                </viewport>
+                                                <HBox.margin>
+                                                    <Insets right="10.0" />
+                                                </HBox.margin>
+                                            </ImageView>
+                                            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="%bd_element_preprocess" />
+                                        </children>
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" prefWidth="125.0"
+                                          xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1">
+                                        <properties datatype="bd_element_cyclenotfixed"/>
+                                        <children>
+                                            <ImageView fitHeight="150.0" fitWidth="70.0" pickOnBounds="true" preserveRatio="true">
+                                                <image>
+                                                    <Image url="@../images/cyclenotfixed.png" />
+                                                </image>
+                                                <viewport>
+                                                    <Rectangle2D />
+                                                </viewport>
+                                                <HBox.margin>
+                                                    <Insets right="10.0" />
+                                                </HBox.margin>
+                                            </ImageView>
+                                            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="%bd_element_cyclenotfixed" />
+                                        </children>
+                                    </HBox>
+                                </ListView>
+                            </VBox>
+                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0">
+                                <children>
+                                    <Text strokeType="OUTSIDE" strokeWidth="0.0" text="In dev" wrappingWidth="32.56982421875" AnchorPane.bottomAnchor="-134.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                </children>
+                            </AnchorPane>
+
+                        </items>
+                    </SplitPane>
+                </children>
             </AnchorPane>
-         <AnchorPane prefHeight="200.0" prefWidth="200.0">
-            <children>
-                        <ResizableCanvas fx:id="canvas" height="350.0" onMouseDragged="#onCanvasMouseDragged" onMousePressed="#onMousePressed" onScroll="#onCanvasScrolled" width="450.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-            </children></AnchorPane>
-         <VBox fx:id="elementProps" alignment="TOP_RIGHT" />
+            <AnchorPane prefHeight="200.0" prefWidth="200.0">
+                <children>
+                    <ResizableCanvas fx:id="canvas" height="350.0" onMouseDragged="#onCanvasMouseDragged" onMousePressed="#onMousePressed" onScroll="#onCanvasScrolled" width="450.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                </children>
+            </AnchorPane>
+
+            <VBox alignment="TOP_RIGHT" prefHeight="200.0" prefWidth="100.0">
+                <children>
+                    <Text strokeType="OUTSIDE" strokeWidth="0.0" text="%bd_props">
+                  <font>
+                     <Font size="15.0" />
+                  </font>
+                  <VBox.margin>
+                     <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                  </VBox.margin></Text>
+               <Separator prefWidth="200.0" />
+                    <VBox fx:id="elementProps" alignment="TOP_RIGHT" stylesheets="@../styles/elementPropsStyle.css" />
+                </children>
+            </VBox>
         </items>
     </SplitPane>
 </VBox>

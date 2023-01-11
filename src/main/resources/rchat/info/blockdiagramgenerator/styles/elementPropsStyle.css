@@ -1,0 +1,5 @@
+#elementProps > * {
+    -fx-padding: 5px, 5px, 5px, 5px;
+    -fx-border-insets: 5px, 5px, 5px, 5px;
+    -fx-background-insets: 5px, 5px, 5px, 5px;
+}

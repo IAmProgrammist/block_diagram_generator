@@ -7,7 +7,7 @@ import java.util.Arrays;
 
 public class BDTerminatorModel extends BDElementModel{
     public BDTerminatorModel(String data) {
-        super(Arrays.asList(data.split("\n")));
+        super(data);
     }
 
     @Override

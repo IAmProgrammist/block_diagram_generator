@@ -28,7 +28,7 @@ public class BDDecisionModel extends BDElementModel {
     public BDDecisionModel(BDContainerController positive, BDDecisionModel.Branch positiveBranch, 
                            BDContainerController negative, BDDecisionModel.Branch negativeBranch,
                       String data) {
-        super(Arrays.asList(data.split("\n")));
+        super(data);
 
         if (positiveBranch == negativeBranch)
             throw new IllegalArgumentException("Branches can't be the same");
@@ -92,5 +92,9 @@ public class BDDecisionModel extends BDElementModel {
         super.setMeasurements(size, leftBound, rightBound);
         this.rhombusSize = rhombusSize;
         this.rhombusTextSize = rhombusTextSize;
+    }
+
+    public void setPositive(BDContainerController positive) {
+        this.positive = positive;
     }
 }

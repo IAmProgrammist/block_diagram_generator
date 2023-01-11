@@ -11,6 +11,7 @@ import rchat.info.blockdiagramgenerator.models.bdelements.BDElementModel;
 import rchat.info.blockdiagramgenerator.views.bdelements.BDContainerView;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class BDContainerController extends BDElementController implements Collection<BDElementController>, Container {
     public BDContainerModel model;
@@ -94,17 +95,35 @@ public class BDContainerController extends BDElementController implements Collec
             this.selected = false;
             return selected;
         }
-
-        return super.select(drawPoint);
+        if (isMouseInElement(drawPoint)) {
+            return this;
+        }
+        return null;
     }
 
     @Override
     public BDElementController getSelected() {
-        for(BDElementController cont : this.model.elements) {
+        for (BDElementController cont : this.model.elements) {
             if (cont.getSelected() != null) return cont;
         }
         return super.getSelected();
     }
+
+    @Override
+    public void replace(BDElementController replacer) {
+        if (this.model.lastVisitedDragModePos != null) {
+            replacer.setParentContainer(this);
+            replacer.setControls();
+            this.model.elements.add(this.model.lastVisitedDragModePos, replacer);
+            this.model.elements = this.model.elements.stream()
+                    .filter(bdElementController -> !(bdElementController instanceof BDAddElementController))
+                    .collect(Collectors.toList());
+            this.model.lastVisitedDragModePos = null;
+            DiagramBlockModel.onDataUpdate.run();
+        }
+    }
+
+
 
     @Override
     public void recalculateSizes() {
@@ -115,6 +134,8 @@ public class BDContainerController extends BDElementController implements Collec
         double maxLeftBound = 0;
         double maxRightBound = 0;
         double height = 0;
+        List<Pair<Double, Double>> dragNDropYBounds = new ArrayList<>();
+        dragNDropYBounds.add(new Pair<>(height - DiagramBlockModel.CONTAINER_OVERFLOW_PADDING, -DiagramBlockModel.ELEMENTS_SPACING));
         for (BDElementController element : model.elements) {
             element.recalculateSizes();
             Dimension2D elementSize = element.getModel().getSize();
@@ -127,11 +148,16 @@ public class BDContainerController extends BDElementController implements Collec
                 maxRightBound = currRightBound;
             }
             height += elementSize.getHeight() + DiagramBlockModel.ELEMENTS_SPACING;
+            dragNDropYBounds.add(new Pair<>(height - DiagramBlockModel.ELEMENTS_SPACING - elementSize.getHeight() / 2,
+                    height - DiagramBlockModel.ELEMENTS_SPACING));
         }
 
         height -= DiagramBlockModel.ELEMENTS_SPACING;
+        dragNDropYBounds.add(new Pair<>(height + DiagramBlockModel.CONTAINER_OVERFLOW_PADDING,
+                height + DiagramBlockModel.ELEMENTS_SPACING));
 
         Dimension2D size = new Dimension2D(maxLeftBound + maxRightBound, height);
+        model.elementYBorders = dragNDropYBounds;
         model.setMeasurements(size, maxLeftBound, maxRightBound);
     }
 
@@ -227,7 +253,7 @@ public class BDContainerController extends BDElementController implements Collec
     }
 
     @Override
-    public void setControls () {
+    public void setControls() {
         this.controllings = Collections.emptyList();
     }
 
@@ -238,5 +264,11 @@ public class BDContainerController extends BDElementController implements Collec
             model.elements.add(new BDAddElementController());
             model.elements.get(0).setParentContainer(this);
         }
+    }
+
+    @Override
+    public void replaceInContainer(BDElementController replacing, BDElementController replacer) {
+        model.elements.set(model.elements.indexOf(replacing), replacer);
+        DiagramBlockModel.onDataUpdate.run();
     }
 }

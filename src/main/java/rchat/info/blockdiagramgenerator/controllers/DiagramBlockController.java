@@ -4,13 +4,11 @@ import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.ListView;
-import javafx.scene.control.TextArea;
 import javafx.scene.input.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.util.Pair;
-import rchat.info.blockdiagramgenerator.DebounceDecorator;
 import rchat.info.blockdiagramgenerator.History;
 import rchat.info.blockdiagramgenerator.Main;
 import rchat.info.blockdiagramgenerator.controllers.bdelements.*;
@@ -28,22 +26,14 @@ public class DiagramBlockController {
     public ResizableCanvas canvas;
     @FXML
     public VBox elementProps;
+    @FXML
+    public ListView<HBox> elements;
     public History<DiagramBlockModel> applicationHistory;
     final KeyCombination undoCombintaion = new KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN);
     final KeyCombination redoCombination = new KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN);
     final KeyCombination delete = new KeyCodeCombination(KeyCode.DELETE);
 
-    /*public Runnable saveState = new Runnable() {
-        @Override
-        public void run() {
-            DiagramBlockModel clonedAppState = model.clone();
-            applicationHistory.pushElement(clonedAppState);
-        }
-    };
-    DebounceDecorator d = new DebounceDecorator(saveState, DiagramBlockModel.SAVE_STATE_DELAY);*/
-
     public void select() {
-        //d.discardChanges();
         BDElementController newSelected = model.root.select(new Pair<>(model.posX, model.posY));
         if (newSelected != model.selected) {
 
@@ -79,7 +69,39 @@ public class DiagramBlockController {
         view = new DiagramBlockView(model);
         DiagramBlockModel.basicFont = Font.font(DiagramBlockModel.FONT_BASIC_NAME, model.canvasScale * DiagramBlockModel.FONT_BASIC_SIZE);
 
-        model.root = new BDContainerController(
+        elements.getItems().forEach(el -> {
+            el.setOnDragDetected((event -> {
+                Dragboard db = el.startDragAndDrop(TransferMode.COPY);
+                ClipboardContent cbc = new ClipboardContent();
+                cbc.putString(el.getProperties().get("datatype").toString());
+                db.setContent(cbc);
+                DiagramBlockModel.dragMode = true;
+
+                event.consume();
+            }));
+
+            el.setOnDragDone(event -> {
+                event.acceptTransferModes(TransferMode.COPY);
+                DiagramBlockModel.dragMode = false;
+                select();
+                if (this.model.selected != null) {
+                    BDElementController replacing = BDElementController.fromString(el.getProperties().get("datatype").toString());
+                    this.model.selected.replace(replacing);
+                    this.model.selected = null;
+                    updateBDContentsEditor();
+                }
+            });
+        });
+        canvas.setOnDragOver(event -> {
+                    DiagramBlockModel.mousePosX = event.getX();
+                    DiagramBlockModel.mousePosY = event.getY();
+                    DiagramBlockModel.canvasMousePosX = DiagramBlockModel.mousePosX / this.model.canvasScale;
+                    DiagramBlockModel.canvasMousePosY = DiagramBlockModel.mousePosY / this.model.canvasScale;
+                    view.repaint(canvas.getGraphicsContext2D());
+                }
+        );
+
+        /*model.root = new BDContainerController(
                 new BDTerminatorController("Начало"),
                 new BDDataController("Ввод input"),
                 new BDDecisionController(
@@ -108,7 +130,8 @@ public class DiagramBlockController {
                                                         , "input ≠ 0")
                                         ), BDDecisionModel.Branch.RIGHT, "input = 0")
                         ), BDDecisionModel.Branch.RIGHT, "input = 0"),
-                new BDTerminatorController("Конец"));
+                new BDTerminatorController("Конец"));*/
+        model.root = new BDContainerController();
         canvas.widthProperty().addListener((observable, oldValue, newValue) -> {
             DiagramBlockModel.canvasWidth = newValue.doubleValue();
             view.repaint(canvas.getGraphicsContext2D());
@@ -154,15 +177,6 @@ public class DiagramBlockController {
                 view.repaint(canvas.getGraphicsContext2D());
             }
         };
-        /*bdcontent.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (model.selected != null && model.selected instanceof TextEditable) {
-                ((TextEditable) model.selected).setText(newValue);
-                DiagramBlockModel clonedAppState = model.clone();
-                applicationHistory.pushElement(clonedAppState);
-                model.root.recalculateSizes();
-                view.repaint(canvas.getGraphicsContext2D());
-            }
-        });*/
         applicationHistory = new History<>(model.clone());
         view.repaint(canvas.getGraphicsContext2D());
     }

@@ -20,11 +20,7 @@ public class BDDataView extends BDElementView {
         Dimension2D size = model.getSize();
         double textHeight = size.getHeight() * scale;
         double totalWidth = size.getWidth() * scale;
-        if (selected) {
-            drawSelectBorder(gc, drawPoint, model.getSize(), scale);
-        } else if (selectionOverflow) {
-            drawOverflowBorder(gc, drawPoint, model.getSize(), scale);
-        }
+
         gc.setFill(DiagramBlockModel.BD_BACKGROUND_COLOR);
         gc.fillPolygon(new double[]{(drawPoint.getKey()) * scale,
                         (drawPoint.getKey()) * scale + textHeight / 4,
@@ -47,12 +43,20 @@ public class BDDataView extends BDElementView {
         gc.setFont(basicFont);
         double currentLevel = DiagramBlockModel.TEXT_PADDING * scale -
                 DiagramBlockModel.LINE_SPACING * scale;
-        for (String line : this.model.data) {
+        for (String line : this.model.getDataLines()) {
             Dimension2D d = Utils.computeTextWidth(basicFont, line);
             currentLevel += d.getHeight();
             gc.setFill(DiagramBlockModel.FONT_COLOR);
             gc.fillText(line, (totalWidth - d.getWidth()) / 2 + ((drawPoint.getKey()) * scale), (drawPoint.getValue()) * scale + currentLevel);
             currentLevel += DiagramBlockModel.LINE_SPACING * scale;
+        }
+
+        if (selected) {
+            drawSelectBorder(gc, drawPoint, model.getSize(), scale);
+        } else if (selectionOverflow) {
+            if (DiagramBlockModel.dragMode) {
+                drawDragNDropForeground(gc, drawPoint, model.getSize(), scale);
+            } else drawOverflowBorder(gc, drawPoint, model.getSize(), scale);
         }
     }
 }

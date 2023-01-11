@@ -25,4 +25,12 @@ public abstract class BDElementView {
                 (size.getWidth() + 2 * DiagramBlockModel.SELECTION_BORDER_WIDTH) * scale,
                 (size.getHeight() + 2 * DiagramBlockModel.SELECTION_BORDER_WIDTH) * scale);
     }
+
+    public void drawDragNDropForeground(GraphicsContext gc, Pair<Double, Double> drawPoint, Dimension2D size, double scale) {
+        gc.setFill(DiagramBlockModel.DRAGNDROP_FOREGROUND_COLOR);
+        gc.fillRect((drawPoint.getKey() - DiagramBlockModel.SELECTION_BORDER_WIDTH) * scale,
+                (drawPoint.getValue() - DiagramBlockModel.SELECTION_BORDER_WIDTH) * scale,
+                (size.getWidth() + 2 * DiagramBlockModel.SELECTION_BORDER_WIDTH) * scale,
+                (size.getHeight() + 2 * DiagramBlockModel.SELECTION_BORDER_WIDTH) * scale);
+    }
 }

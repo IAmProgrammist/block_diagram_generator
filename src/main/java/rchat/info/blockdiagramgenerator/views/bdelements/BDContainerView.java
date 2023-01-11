@@ -3,15 +3,18 @@ package rchat.info.blockdiagramgenerator.views.bdelements;
 import javafx.geometry.Dimension2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.util.Pair;
+import rchat.info.blockdiagramgenerator.Utils;
 import rchat.info.blockdiagramgenerator.controllers.bdelements.BDElementController;
 import rchat.info.blockdiagramgenerator.models.DiagramBlockModel;
 import rchat.info.blockdiagramgenerator.models.bdelements.BDContainerModel;
 
 public class BDContainerView extends BDElementView {
     protected BDContainerModel model;
+
     public BDContainerView(BDContainerModel model) {
         this.model = model;
     }
+
     @Override
     public void repaint(GraphicsContext gc, Pair<Double, Double> drawPoint,
                         boolean selectionOverflow, boolean selected, double scale) {
@@ -45,10 +48,33 @@ public class BDContainerView extends BDElementView {
             bottomConnector = element.getModel().getBottomConnector(drawElementPoint);
             currentLevel += element.getModel().getSize().getHeight() + DiagramBlockModel.ELEMENTS_SPACING;
         }
-
+        if (selectionOverflow && DiagramBlockModel.dragMode) {
+            for (int i = 0; i < model.elementYBorders.size() - 1; i++) {
+                Dimension2D dndCurrentSize = new Dimension2D(model.getSize().getWidth(),
+                        model.elementYBorders.get(i + 1).getKey() -
+                                model.elementYBorders.get(i).getKey());
+                Pair<Double, Double> dndCurrentPos = new Pair<>(drawPoint.getKey(), drawPoint.getValue() + model.elementYBorders.get(i).getKey());
+                if (Utils.isPointInBounds(new Pair<>(DiagramBlockModel.canvasMousePosX, DiagramBlockModel.canvasMousePosY),
+                        dndCurrentPos, dndCurrentSize)) {
+                    // I know that this is terrible but i need it!
+                    model.lastVisitedDragModePos = i;
+                    drawDragNDropForeground(gc,
+                            new Pair<>(drawPoint.getKey() + model.getDistanceToLeftBound() -
+                                    Math.min(DiagramBlockModel.MAX_BD_CONTAINER_DRAGNDROP_WIDTH / 2,
+                                            Math.min(model.getDistanceToLeftBound(), model.getDistanceToRightBound())
+                                                    - DiagramBlockModel.BD_CONTAINER_DRAGNDROP_WIDTH_MARGIN),
+                                    drawPoint.getValue() + model.elementYBorders.get(i).getValue()),
+                            new Dimension2D(2 * Math.min(DiagramBlockModel.MAX_BD_CONTAINER_DRAGNDROP_WIDTH / 2,
+                                    Math.min(model.getDistanceToLeftBound(), model.getDistanceToRightBound())
+                                            - DiagramBlockModel.BD_CONTAINER_DRAGNDROP_WIDTH_MARGIN),
+                                    DiagramBlockModel.ELEMENTS_SPACING), scale);
+                    break;
+                }
+            }
+        }
         if (selected) {
             drawSelectBorder(gc, drawPoint, model.getSize(), scale);
-        } else if (selectionOverflow) {
+        } else if (selectionOverflow && !DiagramBlockModel.dragMode) {
             drawOverflowBorder(gc, drawPoint, model.getSize(), scale);
         }
 
@@ -63,6 +89,7 @@ public class BDContainerView extends BDElementView {
                 (size.getWidth() + 2 * DiagramBlockModel.SELECTION_BORDER_WIDTH + 2 * DiagramBlockModel.CONTAINER_OVERFLOW_PADDING) * scale,
                 (size.getHeight() + 2 * DiagramBlockModel.SELECTION_BORDER_WIDTH + 2 * DiagramBlockModel.CONTAINER_OVERFLOW_PADDING) * scale);
     }
+
     public void drawSelectBorder(GraphicsContext gc, Pair<Double, Double> drawPoint, Dimension2D size, double scale) {
         gc.setStroke(DiagramBlockModel.SELECTED_COLOR);
         gc.setLineWidth(DiagramBlockModel.SELECTION_BORDER_WIDTH);

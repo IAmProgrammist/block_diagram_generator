@@ -34,6 +34,7 @@ public class Main extends Application {
                 rewriteKeyPressedEvent.handle(event);
             }
         });
+        scene.setOnMouseDragged(event -> System.out.println("HOLY CRAP WHATS GOING ON"));
         stage.setTitle("Hello!");
         stage.setScene(scene);
         stage.show();
