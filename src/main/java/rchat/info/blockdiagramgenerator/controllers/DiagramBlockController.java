@@ -14,9 +14,15 @@ import rchat.info.blockdiagramgenerator.Main;
 import rchat.info.blockdiagramgenerator.controllers.bdelements.*;
 import rchat.info.blockdiagramgenerator.elements.ResizableCanvas;
 import rchat.info.blockdiagramgenerator.models.DiagramBlockModel;
+import rchat.info.blockdiagramgenerator.models.SaveDialogModel;
 import rchat.info.blockdiagramgenerator.models.bdelements.BDDecisionModel;
+import rchat.info.blockdiagramgenerator.painter.AbstractPainter;
+import rchat.info.blockdiagramgenerator.painter.CanvasPainter;
+import rchat.info.blockdiagramgenerator.painter.ImagePainter;
+import rchat.info.blockdiagramgenerator.painter.SVGPainter;
 import rchat.info.blockdiagramgenerator.views.DiagramBlockView;
 
+import java.io.File;
 import java.util.List;
 
 public class DiagramBlockController {
@@ -31,7 +37,9 @@ public class DiagramBlockController {
     public History<DiagramBlockModel> applicationHistory;
     final KeyCombination undoCombintaion = new KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN);
     final KeyCombination redoCombination = new KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN);
+    final KeyCombination saveCombination = new KeyCodeCombination(KeyCode.S, KeyCombination.SHORTCUT_DOWN);
     final KeyCombination delete = new KeyCodeCombination(KeyCode.DELETE);
+    AbstractPainter gc;
 
     public void select() {
         BDElementController newSelected = model.root.select(new Pair<>(model.posX, model.posY));
@@ -44,7 +52,7 @@ public class DiagramBlockController {
             updateBDContentsEditor();
             DiagramBlockModel clonedAppState = model.clone();
             applicationHistory.pushElement(clonedAppState);
-            view.repaint(canvas.getGraphicsContext2D());
+            view.repaint(gc);
         }
     }
 
@@ -59,12 +67,13 @@ public class DiagramBlockController {
 
     @FXML
     public void initialize() {
+        gc = new CanvasPainter(canvas.getGraphicsContext2D());
         model = DiagramBlockModel.initDefault();
         DiagramBlockModel.onDataUpdate = () -> {
             DiagramBlockModel clonedAppState = model.clone();
             applicationHistory.pushElement(clonedAppState);
             model.root.recalculateSizes();
-            view.repaint(canvas.getGraphicsContext2D());
+            view.repaint(gc);
         };
         view = new DiagramBlockView(model);
         DiagramBlockModel.basicFont = Font.font(DiagramBlockModel.FONT_BASIC_NAME, model.canvasScale * DiagramBlockModel.FONT_BASIC_SIZE);
@@ -97,11 +106,11 @@ public class DiagramBlockController {
                     DiagramBlockModel.mousePosY = event.getY();
                     DiagramBlockModel.canvasMousePosX = DiagramBlockModel.mousePosX / this.model.canvasScale;
                     DiagramBlockModel.canvasMousePosY = DiagramBlockModel.mousePosY / this.model.canvasScale;
-                    view.repaint(canvas.getGraphicsContext2D());
+                    view.repaint(gc);
                 }
         );
 
-        /*model.root = new BDContainerController(
+        model.root = new BDContainerController(
                 new BDTerminatorController("Начало"),
                 new BDDataController("Ввод input"),
                 new BDDecisionController(
@@ -130,23 +139,23 @@ public class DiagramBlockController {
                                                         , "input ≠ 0")
                                         ), BDDecisionModel.Branch.RIGHT, "input = 0")
                         ), BDDecisionModel.Branch.RIGHT, "input = 0"),
-                new BDTerminatorController("Конец"));*/
-        model.root = new BDContainerController();
+                new BDTerminatorController("Конец"));
+        //model.root = new BDContainerController();
         canvas.widthProperty().addListener((observable, oldValue, newValue) -> {
             DiagramBlockModel.canvasWidth = newValue.doubleValue();
-            view.repaint(canvas.getGraphicsContext2D());
+            view.repaint(gc);
         });
         canvas.heightProperty().addListener((observable, oldValue, newValue) -> {
             DiagramBlockModel.canvasHeight = newValue.doubleValue();
             canvas.setHeight(DiagramBlockModel.canvasHeight);
-            view.repaint(canvas.getGraphicsContext2D());
+            view.repaint(gc);
         });
         canvas.setOnMouseMoved(event -> {
             DiagramBlockModel.mousePosX = event.getX();
             DiagramBlockModel.mousePosY = event.getY();
             DiagramBlockModel.canvasMousePosX = DiagramBlockModel.mousePosX / this.model.canvasScale;
             DiagramBlockModel.canvasMousePosY = DiagramBlockModel.mousePosY / this.model.canvasScale;
-            view.repaint(canvas.getGraphicsContext2D());
+            view.repaint(gc);
         });
         Main.rewriteKeyPressedEvent = event -> {
             if (undoCombintaion.match(event)) {
@@ -157,7 +166,7 @@ public class DiagramBlockController {
                 DiagramBlockModel.basicFont = Font.font(DiagramBlockModel.FONT_BASIC_NAME,
                         model.canvasScale * DiagramBlockModel.FONT_BASIC_SIZE);
                 updateBDContentsEditor();
-                this.view.repaint(canvas.getGraphicsContext2D());
+                this.view.repaint(gc);
             } else if (redoCombination.match(event)) {
                 this.model = applicationHistory.next();
                 this.model.selected = model.root.getSelected();
@@ -166,7 +175,7 @@ public class DiagramBlockController {
                 DiagramBlockModel.basicFont = Font.font(DiagramBlockModel.FONT_BASIC_NAME,
                         model.canvasScale * DiagramBlockModel.FONT_BASIC_SIZE);
                 updateBDContentsEditor();
-                this.view.repaint(canvas.getGraphicsContext2D());
+                this.view.repaint(gc);
             } else if (delete.match(event)) {
                 if (model.selected != null) model.selected.remove();
                 model.selected = null;
@@ -174,11 +183,55 @@ public class DiagramBlockController {
                 DiagramBlockModel clonedAppState = model.clone();
                 applicationHistory.pushElement(clonedAppState);
                 updateBDContentsEditor();
-                view.repaint(canvas.getGraphicsContext2D());
+                view.repaint(gc);
+            } else if (saveCombination.match(event)) {
+                model.root.recalculateSizes();
+                SVGPainter painter = new SVGPainter(model.root.model.getSize().getWidth(),
+                        model.root.model.getSize().getHeight());
+                double oldCS = model.canvasScale;
+                double oldPX = model.posX;
+                double oldPY = model.posY;
+                DiagramBlockModel.VIEWPORT_MODE = false;
+                DiagramBlockModel.basicFont = Font.font(DiagramBlockModel.FONT_BASIC_NAME,
+                        model.canvasScale * DiagramBlockModel.FONT_BASIC_SIZE);
+                model.canvasScale = 1;
+                model.posX = 0;
+                model.posY = 0;
+                BDContainerController currentState = model.root;
+                BDContainerController clone = model.root.clone();
+                model.root = clone;
+                SaveDialogController controller = new SaveDialogController(this, Main.stage);
+                controller.showAndWait().ifPresent(el -> {
+                            if (el != null) {
+                                if (el.fileExtension == SaveDialogModel.FILE_EXTENSION_SVG) {
+                                    SVGPainter p = new SVGPainter(el.widthPixels, el.heightPixels);
+                                    model.root.update(p, new Pair<>(0.0, 0.0), 1.0);
+                                    p.saveAsSVG(new File(el.file));
+                                } else {
+                                    ImagePainter p = new ImagePainter(el.originalWidth, el.originalHeight, el.scale);
+                                    model.root.update(p, new Pair<>(0.0, 0.0), 1.0);
+                                    if (el.fileExtension == SaveDialogModel.FILE_EXTENSION_JPG) {
+                                        p.saveAsJPG(new File(el.file));
+                                    } else {
+                                        p.saveAsPNG(new File(el.file));
+                                    }
+                                }
+                            }
+                        }
+                );
+                model.root = currentState;
+                model.canvasScale = oldCS;
+                model.posX = oldPX;
+                model.posY = oldPY;
+                DiagramBlockModel.basicFont = Font.font(DiagramBlockModel.FONT_BASIC_NAME,
+                        model.canvasScale * DiagramBlockModel.FONT_BASIC_SIZE);
+                DiagramBlockModel.VIEWPORT_MODE = true;
+                model.root.update(gc, new Pair<>(DiagramBlockModel.canvasMousePosX,
+                        DiagramBlockModel.canvasMousePosY), model.canvasScale);
             }
         };
         applicationHistory = new History<>(model.clone());
-        view.repaint(canvas.getGraphicsContext2D());
+        view.repaint(gc);
     }
 
     public void onCanvasScrolled(ScrollEvent event) {
@@ -199,7 +252,7 @@ public class DiagramBlockController {
         DiagramBlockModel.basicFont = Font.font(DiagramBlockModel.FONT_BASIC_NAME,
                 model.canvasScale * DiagramBlockModel.FONT_BASIC_SIZE);
 
-        view.repaint(canvas.getGraphicsContext2D());
+        view.repaint(gc);
     }
 
     public void onMousePressed(MouseEvent event) {
@@ -218,7 +271,7 @@ public class DiagramBlockController {
             model.posY += (event.getY() - model.startY) / model.canvasScale;
             model.startX = event.getX();
             model.startY = event.getY();
-            view.repaint(canvas.getGraphicsContext2D());
+            view.repaint(gc);
         }
     }
 

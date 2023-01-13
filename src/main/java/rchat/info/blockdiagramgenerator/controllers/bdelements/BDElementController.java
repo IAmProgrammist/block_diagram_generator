@@ -8,6 +8,7 @@ import rchat.info.blockdiagramgenerator.Utils;
 import rchat.info.blockdiagramgenerator.models.DiagramBlockModel;
 import rchat.info.blockdiagramgenerator.models.bdelements.BDDecisionModel;
 import rchat.info.blockdiagramgenerator.models.bdelements.BDElementModel;
+import rchat.info.blockdiagramgenerator.painter.AbstractPainter;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,7 +35,7 @@ public abstract class BDElementController implements History.Cloneable<BDElement
         this.parentContainer = container;
     }
 
-    public abstract void update(GraphicsContext gc, Pair<Double, Double> position,
+    public abstract void update(AbstractPainter gc, Pair<Double, Double> position,
                                 double scale);
 
     public boolean isMouseInElement(Pair<Double, Double> position) {

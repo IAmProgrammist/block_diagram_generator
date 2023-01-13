@@ -8,6 +8,7 @@ import rchat.info.blockdiagramgenerator.Utils;
 import rchat.info.blockdiagramgenerator.models.DiagramBlockModel;
 import rchat.info.blockdiagramgenerator.models.bdelements.BDContainerModel;
 import rchat.info.blockdiagramgenerator.models.bdelements.BDElementModel;
+import rchat.info.blockdiagramgenerator.painter.AbstractPainter;
 import rchat.info.blockdiagramgenerator.views.bdelements.BDContainerView;
 
 import java.util.*;
@@ -31,6 +32,9 @@ public class BDContainerController extends BDElementController implements Collec
     }
 
     public BDContainerController(BDElementController... elements) {
+        elements = Arrays.stream(elements)
+                .filter(el -> !(el instanceof BDAddElementController))
+                .collect(Collectors.toList()).toArray(new BDElementController[0]);
         if (elements.length == 0 && DiagramBlockModel.VIEWPORT_MODE) {
             this.model = new BDContainerModel(new BDAddElementController());
         } else {
@@ -44,6 +48,9 @@ public class BDContainerController extends BDElementController implements Collec
     }
 
     public BDContainerController(boolean selected, BDElementController... elements) {
+        elements = Arrays.stream(elements)
+                .filter(el -> !(el instanceof BDAddElementController))
+                .collect(Collectors.toList()).toArray(new BDElementController[0]);
         if (elements.length == 0 && DiagramBlockModel.VIEWPORT_MODE) {
             this.model = new BDContainerModel(new BDAddElementController());
         } else {
@@ -58,7 +65,7 @@ public class BDContainerController extends BDElementController implements Collec
     }
 
     @Override
-    public void update(GraphicsContext gc, Pair<Double, Double> position, double scale) {
+    public void update(AbstractPainter gc, Pair<Double, Double> position, double scale) {
         view.repaint(gc, position, isMouseInElement(position), selected, scale);
     }
 
@@ -122,7 +129,6 @@ public class BDContainerController extends BDElementController implements Collec
             DiagramBlockModel.onDataUpdate.run();
         }
     }
-
 
 
     @Override

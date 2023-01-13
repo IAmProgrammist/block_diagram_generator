@@ -7,6 +7,7 @@ import rchat.info.blockdiagramgenerator.Utils;
 import rchat.info.blockdiagramgenerator.controllers.bdelements.BDElementController;
 import rchat.info.blockdiagramgenerator.models.DiagramBlockModel;
 import rchat.info.blockdiagramgenerator.models.bdelements.BDContainerModel;
+import rchat.info.blockdiagramgenerator.painter.AbstractPainter;
 
 public class BDContainerView extends BDElementView {
     protected BDContainerModel model;
@@ -16,7 +17,7 @@ public class BDContainerView extends BDElementView {
     }
 
     @Override
-    public void repaint(GraphicsContext gc, Pair<Double, Double> drawPoint,
+    public void repaint(AbstractPainter gc, Pair<Double, Double> drawPoint,
                         boolean selectionOverflow, boolean selected, double scale) {
         double currentLevel = drawPoint.getValue();
         Pair<Double, Double> bottomConnector = null;
@@ -72,16 +73,17 @@ public class BDContainerView extends BDElementView {
                 }
             }
         }
-        if (selected) {
-            drawSelectBorder(gc, drawPoint, model.getSize(), scale);
-        } else if (selectionOverflow && !DiagramBlockModel.dragMode) {
-            drawOverflowBorder(gc, drawPoint, model.getSize(), scale);
+        if (DiagramBlockModel.VIEWPORT_MODE) {
+            if (selected) {
+                drawSelectBorder(gc, drawPoint, model.getSize(), scale);
+            } else if (selectionOverflow && !DiagramBlockModel.dragMode) {
+                drawOverflowBorder(gc, drawPoint, model.getSize(), scale);
+            }
         }
-
     }
 
     @Override
-    public void drawOverflowBorder(GraphicsContext gc, Pair<Double, Double> drawPoint, Dimension2D size, double scale) {
+    public void drawOverflowBorder(AbstractPainter gc, Pair<Double, Double> drawPoint, Dimension2D size, double scale) {
         gc.setStroke(DiagramBlockModel.OVERFLOW_SELECTION_COLOR);
         gc.setLineWidth(DiagramBlockModel.SELECTION_BORDER_WIDTH);
         gc.strokeRect((drawPoint.getKey() - DiagramBlockModel.SELECTION_BORDER_WIDTH - DiagramBlockModel.CONTAINER_OVERFLOW_PADDING) * scale,
@@ -90,7 +92,7 @@ public class BDContainerView extends BDElementView {
                 (size.getHeight() + 2 * DiagramBlockModel.SELECTION_BORDER_WIDTH + 2 * DiagramBlockModel.CONTAINER_OVERFLOW_PADDING) * scale);
     }
 
-    public void drawSelectBorder(GraphicsContext gc, Pair<Double, Double> drawPoint, Dimension2D size, double scale) {
+    public void drawSelectBorder(AbstractPainter gc, Pair<Double, Double> drawPoint, Dimension2D size, double scale) {
         gc.setStroke(DiagramBlockModel.SELECTED_COLOR);
         gc.setLineWidth(DiagramBlockModel.SELECTION_BORDER_WIDTH);
         gc.strokeRect((drawPoint.getKey() - DiagramBlockModel.SELECTION_BORDER_WIDTH - DiagramBlockModel.CONTAINER_OVERFLOW_PADDING) * scale,

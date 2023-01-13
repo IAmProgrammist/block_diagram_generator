@@ -10,6 +10,7 @@ import rchat.info.blockdiagramgenerator.models.DiagramBlockModel;
 import rchat.info.blockdiagramgenerator.models.bdelements.BDAddElementModel;
 import rchat.info.blockdiagramgenerator.models.bdelements.BDElementModel;
 import rchat.info.blockdiagramgenerator.models.bdelements.BDProcessModel;
+import rchat.info.blockdiagramgenerator.painter.AbstractPainter;
 import rchat.info.blockdiagramgenerator.views.bdelements.BDAddElementView;
 import rchat.info.blockdiagramgenerator.views.bdelements.BDProcessView;
 
@@ -37,7 +38,7 @@ public class BDAddElementController extends BDElementController {
     }
 
     @Override
-    public void update(GraphicsContext gc, Pair<Double, Double> position, double scale) {
+    public void update(AbstractPainter gc, Pair<Double, Double> position, double scale) {
         view.repaint(gc, position, isMouseInElement(position), selected, scale);
     }
 

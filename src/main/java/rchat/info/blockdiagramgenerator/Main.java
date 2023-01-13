@@ -6,10 +6,11 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyEvent;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import rchat.info.blockdiagramgenerator.controllers.DiagramBlockController;
 import rchat.info.blockdiagramgenerator.models.DiagramBlockModel;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Locale;
@@ -22,9 +23,11 @@ public class Main extends Application {
 
     public static EventHandler<KeyEvent> rewriteKeyPressedEvent;
     public static ResourceBundle rb = null;
+    public static Stage stage = null;
 
     @Override
     public void start(Stage stage) throws IOException {
+        this.stage = stage;
         FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("layouts/hello-view.fxml"));
         rb = ResourceBundle.getBundle("rchat/info/blockdiagramgenerator/bundles/languages");
         fxmlLoader.setResources(rb);
@@ -34,7 +37,6 @@ public class Main extends Application {
                 rewriteKeyPressedEvent.handle(event);
             }
         });
-        scene.setOnMouseDragged(event -> System.out.println("HOLY CRAP WHATS GOING ON"));
         stage.setTitle("Hello!");
         stage.setScene(scene);
         stage.show();
@@ -62,6 +64,7 @@ public class Main extends Application {
                 frameRateMeter.start();
             }
         }
+
     }
 
     public static void main(String[] args) {

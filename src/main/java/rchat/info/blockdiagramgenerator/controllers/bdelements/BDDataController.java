@@ -15,6 +15,7 @@ import rchat.info.blockdiagramgenerator.controllers.DiagramBlockController;
 import rchat.info.blockdiagramgenerator.models.DiagramBlockModel;
 import rchat.info.blockdiagramgenerator.models.bdelements.BDDataModel;
 import rchat.info.blockdiagramgenerator.models.bdelements.BDElementModel;
+import rchat.info.blockdiagramgenerator.painter.AbstractPainter;
 import rchat.info.blockdiagramgenerator.views.bdelements.BDDataView;
 
 import java.util.*;
@@ -55,7 +56,7 @@ public class BDDataController extends BDElementController implements TextEditabl
     }
 
     @Override
-    public void update(GraphicsContext gc, Pair<Double, Double> position, double scale) {
+    public void update(AbstractPainter gc, Pair<Double, Double> position, double scale) {
         view.repaint(gc, position, isMouseInElement(position), selected, scale);
     }
 

@@ -6,6 +6,7 @@ import javafx.util.Pair;
 import rchat.info.blockdiagramgenerator.Utils;
 import rchat.info.blockdiagramgenerator.models.DiagramBlockModel;
 import rchat.info.blockdiagramgenerator.models.bdelements.BDPreProcessModel;
+import rchat.info.blockdiagramgenerator.painter.AbstractPainter;
 
 import static rchat.info.blockdiagramgenerator.models.DiagramBlockModel.basicFont;
 
@@ -15,7 +16,7 @@ public class BDPreProcessView extends BDElementView {
         this.model = model;
     }
     @Override
-    public void repaint(GraphicsContext gc, Pair<Double, Double> drawPoint,
+    public void repaint(AbstractPainter gc, Pair<Double, Double> drawPoint,
                         boolean selectionOverflow, boolean selected, double scale) {
         Dimension2D size = model.getSize();
         double textHeight = size.getHeight() * scale;
@@ -38,12 +39,14 @@ public class BDPreProcessView extends BDElementView {
             gc.fillText(line, (totalWidth - d.getWidth()) / 2 + (drawPoint.getKey() * scale), drawPoint.getValue() * scale + currentLevel);
             currentLevel += DiagramBlockModel.LINE_SPACING * scale;
         }
-        if (selected) {
-            drawSelectBorder(gc, drawPoint, model.getSize(), scale);
-        } else if (selectionOverflow) {
-            if (DiagramBlockModel.dragMode) {
-                drawDragNDropForeground(gc, drawPoint, model.getSize(), scale);
-            } else drawOverflowBorder(gc, drawPoint, model.getSize(), scale);
+        if (DiagramBlockModel.VIEWPORT_MODE) {
+            if (selected) {
+                drawSelectBorder(gc, drawPoint, model.getSize(), scale);
+            } else if (selectionOverflow) {
+                if (DiagramBlockModel.dragMode) {
+                    drawDragNDropForeground(gc, drawPoint, model.getSize(), scale);
+                } else drawOverflowBorder(gc, drawPoint, model.getSize(), scale);
+            }
         }
     }
 }

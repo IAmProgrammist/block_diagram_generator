@@ -1,7 +1,9 @@
 module rchat.info.blockdiagramgenerator {
     requires javafx.controls;
     requires javafx.fxml;
-
+    requires javafx.swing;
+    requires org.jfree.svg;
+    requires java.desktop;
 
     opens rchat.info.blockdiagramgenerator to javafx.fxml;
     exports rchat.info.blockdiagramgenerator;
@@ -17,4 +19,5 @@ module rchat.info.blockdiagramgenerator {
     opens rchat.info.blockdiagramgenerator.views.bdelements to javafx.fxml;
     opens rchat.info.blockdiagramgenerator.elements to javafx.fxml;
     exports rchat.info.blockdiagramgenerator.elements;
+    opens rchat.info.blockdiagramgenerator.painter to java.desktop;
 }

@@ -1,94 +1,98 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import javafx.collections.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="321.0" prefWidth="480.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="rchat.info.blockdiagramgenerator.controllers.DiagramBlockSaverController">
-   <children>
-      <GridPane prefHeight="210.0" prefWidth="430.0" AnchorPane.bottomAnchor="25.0" AnchorPane.leftAnchor="25.0" AnchorPane.rightAnchor="25.0" AnchorPane.topAnchor="25.0">
-        <columnConstraints>
-          <ColumnConstraints hgrow="SOMETIMES" maxWidth="193.0" minWidth="193.0" prefWidth="193.0" />
-          <ColumnConstraints hgrow="SOMETIMES" maxWidth="235.0" minWidth="235.0" prefWidth="235.0" />
-        </columnConstraints>
-        <rowConstraints>
-          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-        </rowConstraints>
+<DialogPane prefHeight="357.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1">
+   <content>
+      <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="310.0" prefWidth="360.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1">
          <children>
-            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Название файла" />
-            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Ширина" GridPane.rowIndex="1" />
-            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Высота" GridPane.rowIndex="2" />
-            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Плотность" GridPane.rowIndex="3" />
-            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Цветовой режим" GridPane.rowIndex="4" />
-            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Цвет фона" GridPane.rowIndex="5" />
-            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Цвет контура" GridPane.rowIndex="6" />
-            <ColorPicker GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="6" />
-            <ColorPicker GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="5" />
-            <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+            <GridPane minWidth="-Infinity" prefHeight="210.0" VBox.vgrow="ALWAYS">
+               <columnConstraints>
+                  <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" minWidth="-Infinity" />
+                  <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" maxWidth="1.7976931348623157E308" />
+               </columnConstraints>
+               <rowConstraints>
+                  <RowConstraints maxHeight="49.0" minHeight="10.0" prefHeight="49.0" vgrow="SOMETIMES" />
+                  <RowConstraints maxHeight="49.0" minHeight="10.0" prefHeight="49.0" vgrow="SOMETIMES" />
+                  <RowConstraints maxHeight="49.0" minHeight="10.0" prefHeight="49.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+               </rowConstraints>
                <children>
-                  <TextField maxWidth="160.0" minWidth="160.0" />
-                  <ChoiceBox prefWidth="75.0">
-
-                  </ChoiceBox>
+                  <Text strokeType="OUTSIDE" strokeWidth="0.0" text="%export_image_dialog_width" GridPane.rowIndex="1">
+                     <GridPane.margin>
+                        <Insets bottom="10.0" right="10.0" top="10.0" />
+                     </GridPane.margin>
+                  </Text>
+                  <Text strokeType="OUTSIDE" strokeWidth="0.0" text="%export_image_dialog_height" GridPane.rowIndex="2">
+                     <GridPane.margin>
+                        <Insets bottom="10.0" right="10.0" top="10.0" />
+                     </GridPane.margin>
+                  </Text>
+                  <Text strokeType="OUTSIDE" strokeWidth="0.0" text="%export_image_dialog_density" GridPane.rowIndex="3">
+                     <GridPane.margin>
+                        <Insets bottom="10.0" right="10.0" top="10.0" />
+                     </GridPane.margin>
+                  </Text>
+                  <Text strokeType="OUTSIDE" strokeWidth="0.0" text="%export_image_dialog_style" GridPane.rowIndex="4">
+                     <GridPane.margin>
+                        <Insets bottom="10.0" right="10.0" top="10.0" />
+                     </GridPane.margin>
+                  </Text>
+                  <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                     <children>
+                        <TextField fx:id="widthText" HBox.hgrow="ALWAYS" />
+                        <ChoiceBox fx:id="widthTextMeasurments" prefWidth="75.0">
+                        </ChoiceBox>
+                     </children>
+                  </HBox>
+                  <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                     <children>
+                        <TextField fx:id="heightText" HBox.hgrow="ALWAYS" />
+                        <ChoiceBox fx:id="heightTextMeasurments" disable="true" opacity="0.0" prefWidth="75.0">
+                        </ChoiceBox>
+                     </children>
+                  </HBox>
+                  <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                     <children>
+                        <TextField fx:id="densityText" HBox.hgrow="ALWAYS" />
+                        <ChoiceBox fx:id="densityTextMeasurments" prefWidth="75.0">
+                           <items>
+                           </items>
+                        </ChoiceBox>
+                     </children>
+                  </HBox>
+                  <Button alignment="TOP_LEFT" mnemonicParsing="false" text="По умолчанию" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                  <Text strokeType="OUTSIDE" strokeWidth="0.0" text="%export_image_dialog_title">
+                     <GridPane.margin>
+                        <Insets bottom="10.0" right="10.0" top="10.0" />
+                     </GridPane.margin></Text>
+                  <HBox alignment="CENTER" prefWidth="200.0" GridPane.columnIndex="1">
+                     <children>
+                        <TextField fx:id="filePathText" maxWidth="1.7976931348623157E308" minHeight="-Infinity" HBox.hgrow="ALWAYS">
+                           <HBox.margin>
+                              <Insets />
+                           </HBox.margin>
+                        </TextField>
+                        <Button fx:id="filePathTextSelect" mnemonicParsing="false" text="%export_image_dialog_pick_path" />
+                     </children>
+                  </HBox>
                </children>
-            </HBox>
-            <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
-               <children>
-                  <TextField maxWidth="160.0" minWidth="160.0" />
-                  <ChoiceBox prefWidth="75.0" />
-               </children>
-            </HBox>
-            <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
-               <children>
-                  <TextField prefWidth="160.0" />
-                  <ChoiceBox prefWidth="75.0" />
-               </children>
-            </HBox>
-            <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="4">
-               <children>
-                  <TextField prefWidth="160.0" />
-                  <ChoiceBox prefWidth="75.0" />
-               </children>
-            </HBox>
-            <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1">
-               <children>
-                  <TextField maxWidth="160.0" minWidth="160.0" />
-                  <ChoiceBox prefWidth="75.0" value=".png">
-                      <items>
-                          <FXCollections fx:factory="observableArrayList">
-                              <String fx:value=".png" />
-                              <String fx:value=".bmp" />
-                              <String fx:value=".jpg" />
-                              <String fx:value=".gif" />
-                          </FXCollections>
-                      </items>
-                  </ChoiceBox>
-               </children>
-            </HBox>
-            <HBox alignment="BOTTOM_RIGHT" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="7">
-               <children>
-                  <Button alignment="CENTER_RIGHT" mnemonicParsing="false" text="Сохранить" />
-                  <Button alignment="CENTER_RIGHT" mnemonicParsing="false" text="Отмена">
-                     <HBox.margin>
-                        <Insets left="15.0" />
-                     </HBox.margin>
-                  </Button>
-               </children>
-            </HBox>
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+               <VBox.margin>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+               </VBox.margin>
+            </GridPane>
          </children>
-         <opaqueInsets>
-            <Insets />
-         </opaqueInsets>
-      </GridPane>
-   </children>
-</AnchorPane>
+      </VBox>
+   </content>
+   <buttonTypes>
+      <ButtonType buttonData="APPLY" text="%export_image_dialog_save" />
+      <ButtonType buttonData="CANCEL_CLOSE" text="%export_image_dialog_cancel" />
+   </buttonTypes>
+</DialogPane>

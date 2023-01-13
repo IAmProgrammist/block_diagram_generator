@@ -48,7 +48,7 @@
                 <children>
                     <SplitPane dividerPositions="0.5" orientation="VERTICAL" prefHeight="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                         <items>
-                            <VBox alignment="TOP_RIGHT" prefHeight="200.0" prefWidth="100.0">
+                            <VBox alignment="TOP_RIGHT">
                                 <Text strokeType="OUTSIDE" strokeWidth="0.0" text="%bd_elements">
                                     <font>
                                         <Font size="15.0" />
@@ -58,10 +58,9 @@
                                     </VBox.margin>
                                 </Text>
                         <Separator prefWidth="200.0" />
-                                <ListView fx:id="elements" minWidth="-Infinity" VBox.vgrow="ALWAYS">
-                                    <HBox alignment="CENTER_LEFT" prefWidth="125.0"
-                                          xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1">
-                                        <properties datatype="bd_element_terminator"/>
+                                <ListView fx:id="elements" VBox.vgrow="ALWAYS">
+                                    <HBox alignment="CENTER_LEFT" prefWidth="125.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1">
+                                        <properties datatype="bd_element_terminator" />
                                         <children>
                                             <ImageView fitHeight="150.0" fitWidth="70.0" pickOnBounds="true" preserveRatio="true">
                                                 <image>
@@ -78,9 +77,8 @@
                                         </children>
                                     </HBox>
 
-                                    <HBox alignment="CENTER_LEFT" prefWidth="125.0"
-                                          xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1">
-                                        <properties datatype="bd_element_process"/>
+                                    <HBox alignment="CENTER_LEFT" prefWidth="125.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1">
+                                        <properties datatype="bd_element_process" />
                                         <children>
                                             <ImageView fitHeight="150.0" fitWidth="70.0" pickOnBounds="true" preserveRatio="true">
                                                 <image>
@@ -97,9 +95,8 @@
                                         </children>
                                     </HBox>
 
-                                    <HBox alignment="CENTER_LEFT" prefWidth="125.0"
-                                          xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1">
-                                        <properties datatype="bd_element_data"/>
+                                    <HBox alignment="CENTER_LEFT" prefWidth="125.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1">
+                                        <properties datatype="bd_element_data" />
                                         <children>
                                             <ImageView fitHeight="150.0" fitWidth="70.0" pickOnBounds="true" preserveRatio="true">
                                                 <image>
@@ -115,9 +112,8 @@
                                             <Text strokeType="OUTSIDE" strokeWidth="0.0" text="%bd_element_data" />
                                         </children>
                                     </HBox>
-                                    <HBox alignment="CENTER_LEFT" prefWidth="125.0"
-                                          xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1">
-                                        <properties datatype="bd_element_decision"/>
+                                    <HBox alignment="CENTER_LEFT" prefWidth="125.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1">
+                                        <properties datatype="bd_element_decision" />
                                         <children>
                                             <ImageView fitHeight="150.0" fitWidth="70.0" pickOnBounds="true" preserveRatio="true">
                                                 <image>
@@ -133,9 +129,8 @@
                                             <Text strokeType="OUTSIDE" strokeWidth="0.0" text="%bd_element_decision" />
                                         </children>
                                     </HBox>
-                                    <HBox alignment="CENTER_LEFT" prefWidth="125.0"
-                                          xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1">
-                                        <properties datatype="bd_element_modifier"/>
+                                    <HBox alignment="CENTER_LEFT" prefWidth="125.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1">
+                                        <properties datatype="bd_element_modifier" />
                                         <children>
                                             <ImageView fitHeight="150.0" fitWidth="70.0" pickOnBounds="true" preserveRatio="true">
                                                 <image>
@@ -151,9 +146,8 @@
                                             <Text strokeType="OUTSIDE" strokeWidth="0.0" text="%bd_element_modifier" />
                                         </children>
                                     </HBox>
-                                    <HBox alignment="CENTER_LEFT" prefWidth="125.0"
-                                          xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1">
-                                        <properties datatype="bd_element_preprocess"/>
+                                    <HBox alignment="CENTER_LEFT" prefWidth="125.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1">
+                                        <properties datatype="bd_element_preprocess" />
                                         <children>
                                             <ImageView fitHeight="150.0" fitWidth="70.0" pickOnBounds="true" preserveRatio="true">
                                                 <image>
@@ -169,9 +163,8 @@
                                             <Text strokeType="OUTSIDE" strokeWidth="0.0" text="%bd_element_preprocess" />
                                         </children>
                                     </HBox>
-                                    <HBox alignment="CENTER_LEFT" prefWidth="125.0"
-                                          xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1">
-                                        <properties datatype="bd_element_cyclenotfixed"/>
+                                    <HBox alignment="CENTER_LEFT" prefWidth="125.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1">
+                                        <properties datatype="bd_element_cyclenotfixed" />
                                         <children>
                                             <ImageView fitHeight="150.0" fitWidth="70.0" pickOnBounds="true" preserveRatio="true">
                                                 <image>

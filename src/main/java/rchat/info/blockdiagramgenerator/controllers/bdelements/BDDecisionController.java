@@ -18,6 +18,7 @@ import rchat.info.blockdiagramgenerator.Utils;
 import rchat.info.blockdiagramgenerator.controllers.DiagramBlockController;
 import rchat.info.blockdiagramgenerator.models.DiagramBlockModel;
 import rchat.info.blockdiagramgenerator.models.bdelements.*;
+import rchat.info.blockdiagramgenerator.painter.AbstractPainter;
 import rchat.info.blockdiagramgenerator.views.bdelements.BDDecisionView;
 
 import java.util.*;
@@ -121,7 +122,7 @@ public class BDDecisionController extends BDElementController implements TextEdi
     }
 
     @Override
-    public void update(GraphicsContext gc, Pair<Double, Double> position, double scale) {
+    public void update(AbstractPainter gc, Pair<Double, Double> position, double scale) {
         view.repaint(gc, position, isMouseInElement(position), selected, scale);
     }
 
