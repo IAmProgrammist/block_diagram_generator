@@ -11,9 +11,13 @@ public class SaveDialogModel {
     public double heightPixels;
     public double widthInches;
     public double heightInches;
+    public double widthCantimeters;
+    public double heightCantimeters;
     public double scale;
     public Short fileExtension;
     public static final short PIXELS = 0;
+    public static final double MAX_DIMENSION = 300000;
+    public static final double MIN_DIMENSION = 1;
     public static final short INCHES = 1;
     public static final short CENTIMETERS = 2;
     public static final short FILE_EXTENSION_SVG = 0;
@@ -32,6 +36,8 @@ public class SaveDialogModel {
         this.scale = 1.0;
         this.widthInches = originalWidth / density;
         this.heightInches = originalHeight / density;
+        this.widthCantimeters = widthInches * CM_IN_ONE_INCH;
+        this.heightCantimeters = heightInches * CM_IN_ONE_INCH;
         this.initialRatio = originalWidth / originalHeight;
     }
 
@@ -49,42 +55,71 @@ public class SaveDialogModel {
     }
 
     public void setWidth(double width, short measurments) {
+        double tempWidthPix;
+        double tempWidthIn;
+        double tempWidthCm;
+
         switch (measurments) {
             case PIXELS:
-                this.widthPixels = width;
+                tempWidthPix = width;
                 break;
             case INCHES:
-                this.widthPixels = width * density;
+                tempWidthPix = width * density;
+                tempWidthIn = width;
+                tempWidthCm = width * CM_IN_ONE_INCH;
                 break;
             case CENTIMETERS:
-                this.widthPixels = (width / CM_IN_ONE_INCH) * density;
+                tempWidthPix = (width / CM_IN_ONE_INCH) * density;
                 break;
             default:
                 throw new IllegalArgumentException();
         }
 
-        this.heightPixels = this.widthPixels / initialRatio;
+        tempWidthPix = Math.min(MAX_DIMENSION, Math.max(MIN_DIMENSION, tempWidthPix));
+        double tempHeight = tempWidthPix / initialRatio;
+
+        if (tempHeight < MIN_DIMENSION || tempHeight > MAX_DIMENSION) {
+            setHeight(tempHeight, PIXELS);
+            return;
+        }
+
+        this.widthPixels = tempWidthPix;
+        this.heightPixels = tempHeight;
+
         this.heightInches = this.heightPixels / this.density;
         this.widthInches = this.widthPixels / this.density;
         this.scale = this.widthPixels / this.originalWidth;
     }
 
     public void setHeight(double height, short measurments) {
+        double tempHeight;
+
         switch (measurments) {
             case PIXELS:
-                this.heightPixels = height;
+                tempHeight = height;
                 break;
             case INCHES:
-                this.heightPixels = height * density;
+                tempHeight = height * density;
                 break;
             case CENTIMETERS:
-                this.heightPixels = (height / CM_IN_ONE_INCH) * density;
+                tempHeight = (height / CM_IN_ONE_INCH) * density;
                 break;
             default:
                 throw new IllegalArgumentException();
         }
 
-        this.widthPixels = this.heightPixels * initialRatio;
+
+        tempHeight = Math.min(MAX_DIMENSION, Math.max(MIN_DIMENSION, tempHeight));
+        double tempWidth = tempHeight * initialRatio;
+
+        if (tempWidth < MIN_DIMENSION || tempWidth > MAX_DIMENSION) {
+            setWidth(tempWidth, PIXELS);
+            return;
+        }
+
+        this.widthPixels = tempWidth;
+        this.heightPixels = tempHeight;
+
         this.heightInches = this.heightPixels / this.density;
         this.widthInches = this.widthPixels / this.density;
         this.scale = this.heightPixels / this.originalHeight;
