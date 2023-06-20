@@ -37,7 +37,7 @@ public class Main extends Application {
                 rewriteKeyPressedEvent.handle(event);
             }
         });
-        stage.setTitle("Hello!");
+        stage.setTitle("Diagram Block Generator DEMO [created by VladOS]");
         stage.setScene(scene);
         stage.show();
         if (DiagramBlockModel.IS_DEBUG_MODE_ENABLED) {
