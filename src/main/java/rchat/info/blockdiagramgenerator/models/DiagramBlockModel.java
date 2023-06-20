@@ -9,6 +9,7 @@ import rchat.info.blockdiagramgenerator.controllers.bdelements.BDElementControll
 
 public class DiagramBlockModel implements History.Cloneable<DiagramBlockModel> {
     public static final double DEFAULT_PPI = 72;
+    public static final boolean IS_DEBUG_TIKZ_INCLUDE_COMMENTS = true;
     // Текст для положительных веток в циклах и условии
     public static String POSITIVE_BRANCH_TEXT = "+";
     // Текст для отрицательных веток в циклах и условии
@@ -38,7 +39,7 @@ public class DiagramBlockModel implements History.Cloneable<DiagramBlockModel> {
     // Количество плиток для объединения их в одну плитку
     public static double TILES_IN_TILE = 10;
     // Название шрифта
-    public static String FONT_BASIC_NAME = "Times New Roman";
+    public static String FONT_BASIC_NAME = "American Typewriter";
     // Расстояние между линиями в многострочном тексте
     public static double LINE_SPACING = 3;
     // Расстояние между элементами блок схем

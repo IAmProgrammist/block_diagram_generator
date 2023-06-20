@@ -2,14 +2,17 @@ package rchat.info.blockdiagramgenerator;
 
 import java.util.Stack;
 
-public class History<T> extends Stack<History.Cloneable<T>>{
+public class History<T> extends Stack<History.Cloneable<T>> {
     public interface Cloneable<E> {
         public E clone();
     }
+
     public History(History.Cloneable<T> initValue) {
         this.add(initValue);
     }
+
     int currentIndex = 0;
+
     public synchronized T prev() {
         currentIndex = Math.max(0, currentIndex - 1);
         return this.get(currentIndex).clone();
@@ -30,5 +33,15 @@ public class History<T> extends Stack<History.Cloneable<T>>{
             }
         }
         return element.clone();
+    }
+
+    Integer savedIndex = 0;
+
+    public synchronized void save() {
+        savedIndex = currentIndex;
+    }
+
+    public synchronized boolean isSaved() {
+        return savedIndex.equals(currentIndex);
     }
 }

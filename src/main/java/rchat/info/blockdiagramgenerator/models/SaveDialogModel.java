@@ -23,6 +23,7 @@ public class SaveDialogModel {
     public static final short FILE_EXTENSION_SVG = 0;
     public static final short FILE_EXTENSION_PNG = 1;
     public static final short FILE_EXTENSION_JPG = 2;
+    public static final short FILE_EXTENSION_TEX = 3;
     //px/inch
     public double density;
     public String file = null;
@@ -151,6 +152,8 @@ public class SaveDialogModel {
             fileExtension = FILE_EXTENSION_JPG;
         } else if (absolutePath.endsWith(".png")) {
             fileExtension = FILE_EXTENSION_PNG;
+        }else if (absolutePath.endsWith(".tex")) {
+            fileExtension = FILE_EXTENSION_TEX;
         } else throw new IllegalArgumentException();
 
         this.file = absolutePath;

@@ -1,9 +1,12 @@
 package rchat.info.blockdiagramgenerator.controllers;
 
+import javafx.application.Platform;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
-import javafx.scene.control.ListView;
+import javafx.scene.control.*;
 import javafx.scene.input.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -16,14 +19,12 @@ import rchat.info.blockdiagramgenerator.elements.ResizableCanvas;
 import rchat.info.blockdiagramgenerator.models.DiagramBlockModel;
 import rchat.info.blockdiagramgenerator.models.SaveDialogModel;
 import rchat.info.blockdiagramgenerator.models.bdelements.BDDecisionModel;
-import rchat.info.blockdiagramgenerator.painter.AbstractPainter;
-import rchat.info.blockdiagramgenerator.painter.CanvasPainter;
-import rchat.info.blockdiagramgenerator.painter.ImagePainter;
-import rchat.info.blockdiagramgenerator.painter.SVGPainter;
+import rchat.info.blockdiagramgenerator.painter.*;
 import rchat.info.blockdiagramgenerator.views.DiagramBlockView;
 
 import java.io.File;
 import java.util.List;
+import java.util.Optional;
 
 public class DiagramBlockController {
     public DiagramBlockModel model;
@@ -36,10 +37,70 @@ public class DiagramBlockController {
     public ListView<HBox> elements;
     public History<DiagramBlockModel> applicationHistory;
     final KeyCombination undoCombintaion = new KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN);
+    final KeyCombination newFileCombination = new KeyCodeCombination(KeyCode.O, KeyCombination.CONTROL_DOWN);
     final KeyCombination redoCombination = new KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN);
     final KeyCombination saveCombination = new KeyCodeCombination(KeyCode.S, KeyCombination.SHORTCUT_DOWN);
     final KeyCombination delete = new KeyCodeCombination(KeyCode.DELETE);
+    @FXML
+    public MenuItem menuNew;
+    @FXML
+    public MenuItem menuOpen;
+    @FXML
+    public MenuItem menuSave;
+    @FXML
+    public MenuItem menuSaveAs;
+    @FXML
+    public MenuItem menuExport;
+    @FXML
+    public MenuItem menuQuit;
     AbstractPainter gc;
+
+    public boolean checkIfSaved() {
+        if (applicationHistory.isSaved()) {
+            return true;
+        } else {
+            ButtonType yes = new ButtonType(Main.rb.getString("should_save_yes"), ButtonBar.ButtonData.YES);
+            ButtonType no = new ButtonType(Main.rb.getString("should_save_no"), ButtonBar.ButtonData.NO);
+            ButtonType cancel = new ButtonType(Main.rb.getString("should_save_cancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
+            Alert alert = new Alert(Alert.AlertType.WARNING,
+                    Main.rb.getString("should_save_warning"),
+                    yes,
+                    no, cancel);
+
+            alert.setTitle(Main.rb.getString("should_save_warning_title"));
+            Optional<ButtonType> result = alert.showAndWait();
+
+            if (result.isPresent() && result.get().getButtonData() == ButtonType.YES.getButtonData()) {
+                return true;
+            } else if (result.isPresent() && result.get().getButtonData() == ButtonType.NO.getButtonData()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public void checkAndExit() {
+        if (checkIfSaved()) {
+            Platform.exit();
+            System.exit(0);
+        }
+    }
+
+    public void checkAndNew() {
+        if (checkIfSaved()) {
+            model.root = new BDContainerController();
+            model.posX = 0;
+            model.posY = 0;
+            model.canvasScale = 1;
+            model.selected = null;
+            DiagramBlockModel.VIEWPORT_MODE = true;
+            DiagramBlockModel.basicFont = Font.font(DiagramBlockModel.FONT_BASIC_NAME,
+                    model.canvasScale * DiagramBlockModel.FONT_BASIC_SIZE);
+            model.root.update(gc, new Pair<>(DiagramBlockModel.canvasMousePosX,
+                    DiagramBlockModel.canvasMousePosY), model.canvasScale);
+        }
+    }
 
     public void select() {
         BDElementController newSelected = model.root.select(new Pair<>(model.posX, model.posY));
@@ -157,6 +218,15 @@ public class DiagramBlockController {
             DiagramBlockModel.canvasMousePosY = DiagramBlockModel.mousePosY / this.model.canvasScale;
             view.repaint(gc);
         });
+
+        menuQuit.setOnAction(event -> {
+            checkAndExit();
+        });
+
+        menuNew.setOnAction(event -> {
+            checkAndNew();
+        });
+
         Main.rewriteKeyPressedEvent = event -> {
             if (undoCombintaion.match(event)) {
                 this.model = applicationHistory.prev();
@@ -186,27 +256,31 @@ public class DiagramBlockController {
                 view.repaint(gc);
             } else if (saveCombination.match(event)) {
                 model.root.recalculateSizes();
-                SVGPainter painter = new SVGPainter(model.root.model.getSize().getWidth(),
-                        model.root.model.getSize().getHeight());
                 double oldCS = model.canvasScale;
                 double oldPX = model.posX;
                 double oldPY = model.posY;
                 DiagramBlockModel.VIEWPORT_MODE = false;
-                DiagramBlockModel.basicFont = Font.font(DiagramBlockModel.FONT_BASIC_NAME,
-                        model.canvasScale * DiagramBlockModel.FONT_BASIC_SIZE);
                 model.canvasScale = 1;
                 model.posX = 0;
                 model.posY = 0;
                 BDContainerController currentState = model.root;
                 BDContainerController clone = model.root.clone();
+                DiagramBlockModel.basicFont = Font.font(DiagramBlockModel.FONT_BASIC_NAME,
+                        model.canvasScale * DiagramBlockModel.FONT_BASIC_SIZE);
                 model.root = clone;
                 SaveDialogController controller = new SaveDialogController(this, Main.stage);
                 controller.showAndWait().ifPresent(el -> {
+
+
                             if (el != null) {
                                 if (el.fileExtension == SaveDialogModel.FILE_EXTENSION_SVG) {
                                     SVGPainter p = new SVGPainter(el.widthPixels, el.heightPixels);
                                     model.root.update(p, new Pair<>(0.0, 0.0), 1.0);
                                     p.saveAsSVG(new File(el.file));
+                                } else if (el.fileExtension == SaveDialogModel.FILE_EXTENSION_TEX) {
+                                    TikzPainter texPainter = new TikzPainter();
+                                    model.root.update(texPainter, new Pair<>(0.0, 0.0), 1.0);
+                                    texPainter.save(new File(el.file), el.widthCantimeters);
                                 } else {
                                     ImagePainter p = new ImagePainter(el.originalWidth, el.originalHeight, el.scale);
                                     model.root.update(p, new Pair<>(0.0, 0.0), 1.0);
@@ -228,6 +302,8 @@ public class DiagramBlockController {
                 DiagramBlockModel.VIEWPORT_MODE = true;
                 model.root.update(gc, new Pair<>(DiagramBlockModel.canvasMousePosX,
                         DiagramBlockModel.canvasMousePosY), model.canvasScale);
+            } else if (newFileCombination.match(event)) {
+                checkAndNew();
             }
         };
         applicationHistory = new History<>(model.clone());

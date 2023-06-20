@@ -90,40 +90,6 @@ public class SaveDialogController extends Dialog<SaveDialogModel> {
                 }
             };
 
-
-            Pattern validEditingStateDouble = Pattern.compile("(^$)|(^\\d+\\.\\d{0,2}$)|(^\\d+$)|(^\\d+\\.$)|(^\\.\\d{0,2}$)");
-
-            UnaryOperator<TextFormatter.Change> doubleFilter = c -> {
-                String text = c.getControlNewText();
-                if (validEditingStateDouble.matcher(text).matches()) {
-                    return c;
-                } else {
-                    return null;
-                }
-            };
-
-            StringConverter<Double> doubleConverter = new StringConverter<>() {
-
-                @Override
-                public Double fromString(String s) {
-                    if (s.isEmpty()) {
-                        return 0.0;
-                    } else if (s.startsWith("\\.")) {
-                        return Double.valueOf("0" + s);
-                    } else if (s.endsWith("\\.")) {
-                        return Double.valueOf(s.substring(0, s.length() - 1));
-                    } else {
-                        return Double.valueOf(s);
-                    }
-                }
-
-
-                @Override
-                public String toString(Double d) {
-                    return String.format("%.2f", d);
-                }
-            };
-
             TextFormatter<Integer> widthTextFormatter = new TextFormatter<>(converter, 0, filter);
             TextFormatter<Integer> heightTextFormatter = new TextFormatter<>(converter, 0, filter);
             TextFormatter<Integer> densityTextFormatter = new TextFormatter<>(converter, 0, filter);
@@ -265,7 +231,8 @@ public class SaveDialogController extends Dialog<SaveDialogModel> {
                 fileChooser.getExtensionFilters().addAll(
                         new FileChooser.ExtensionFilter("SVG", "*.svg"),
                         new FileChooser.ExtensionFilter("JPG", "*.jpg"),
-                        new FileChooser.ExtensionFilter("PNG", "*.png")
+                        new FileChooser.ExtensionFilter("PNG", "*.png"),
+                        new FileChooser.ExtensionFilter("TEX", "*.tex")
                 );
                 File file = fileChooser.showSaveDialog(window);
                 if (file != null) {

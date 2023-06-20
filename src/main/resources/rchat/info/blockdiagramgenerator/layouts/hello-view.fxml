@@ -12,32 +12,13 @@
         <menus>
             <Menu text="Файл">
                 <items>
-                    <MenuItem text="Новый" />
-                    <MenuItem text="Открыть" />
-                    <Menu text="Последние проекты">
-                        <items>
-                        </items>
-                    </Menu>
-                    <MenuItem text="Сохранить" />
-                    <MenuItem text="Сохранить как" />
-                    <MenuItem text="Экспорт" />
+                    <MenuItem fx:id="menuNew" text="Новый" />
+                    <MenuItem fx:id="menuOpen" text="Открыть" />
+                    <MenuItem fx:id="menuSave" text="Сохранить" />
+                    <MenuItem fx:id="menuSaveAs" text="Сохранить как" />
+                    <MenuItem fx:id="menuExport" text="Экспорт" />
                     <SeparatorMenuItem />
-                    <MenuItem text="Выход" />
-                </items>
-            </Menu>
-            <Menu text="Изменить">
-                <items>
-                    <MenuItem text="Copy" />
-                    <MenuItem text="Cut" />
-                    <MenuItem text="Paste" />
-                </items>
-            </Menu>
-            <Menu text="Help">
-                <items>
-                    <MenuItem disable="true" text="Search" />
-                    <MenuItem text="Online Manual" visible="false" />
-                    <SeparatorMenuItem />
-                    <MenuItem text="About" />
+                    <MenuItem fx:id="menuQuit" text="Выход" />
                 </items>
             </Menu>
         </menus>
