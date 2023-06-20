@@ -4,21 +4,28 @@ import javafx.geometry.Dimension2D;
 import javafx.scene.Node;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.util.Pair;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import rchat.info.blockdiagramgenerator.Utils;
 import rchat.info.blockdiagramgenerator.models.DiagramBlockModel;
 import rchat.info.blockdiagramgenerator.models.bdelements.BDContainerModel;
+import rchat.info.blockdiagramgenerator.models.bdelements.BDCycleFixedModel;
 import rchat.info.blockdiagramgenerator.models.bdelements.BDElementModel;
 import rchat.info.blockdiagramgenerator.painter.AbstractPainter;
 import rchat.info.blockdiagramgenerator.views.bdelements.BDContainerView;
+import rchat.info.blockdiagramgenerator.views.bdelements.BDCycleFixedView;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class BDContainerController extends BDElementController implements Collection<BDElementController>, Container {
+    public static String EXPORT_IDENTIFIER = "bd_element_container";
     public BDContainerModel model;
     public BDContainerView view;
 
     public BDContainerController() {
+        super(EXPORT_IDENTIFIER);
+
         if (DiagramBlockModel.VIEWPORT_MODE) {
             this.model = new BDContainerModel(new BDAddElementController());
         } else {
@@ -32,6 +39,8 @@ public class BDContainerController extends BDElementController implements Collec
     }
 
     public BDContainerController(BDElementController... elements) {
+        super(EXPORT_IDENTIFIER);
+
         elements = Arrays.stream(elements)
                 .filter(el -> !(el instanceof BDAddElementController))
                 .collect(Collectors.toList()).toArray(new BDElementController[0]);
@@ -48,6 +57,8 @@ public class BDContainerController extends BDElementController implements Collec
     }
 
     public BDContainerController(boolean selected, BDElementController... elements) {
+        super(EXPORT_IDENTIFIER);
+
         elements = Arrays.stream(elements)
                 .filter(el -> !(el instanceof BDAddElementController))
                 .collect(Collectors.toList()).toArray(new BDElementController[0]);
@@ -62,6 +73,46 @@ public class BDContainerController extends BDElementController implements Collec
         this.view = new BDContainerView(this.model);
         this.setControls();
         recalculateSizes();
+    }
+
+    public BDContainerController(JSONObject object) {
+        super(object);
+        List<BDElementController> elements = new ArrayList<>();
+        JSONArray elementsArray = object.getJSONArray("data");
+
+        for (int i = 0; i < elementsArray.length(); i++)
+            elements.add(BDElementController.fromJSONObject(elementsArray.getJSONObject(i)));
+
+        BDElementController[] elementsAr = elements.stream()
+                .filter(el -> !(el == null || el instanceof BDAddElementController))
+                .collect(Collectors.toList()).toArray(new BDElementController[0]);
+        if (elementsAr.length == 0 && DiagramBlockModel.VIEWPORT_MODE) {
+            this.model = new BDContainerModel(new BDAddElementController());
+        } else {
+            this.model = new BDContainerModel(elementsAr);
+        }
+        for (BDElementController element : this.model.elements)
+            element.setParentContainer(this);
+        this.view = new BDContainerView(this.model);
+        this.setControls();
+        recalculateSizes();
+    }
+
+    @Override
+    public JSONObject exportToJSON() {
+        JSONObject base = super.exportToJSON();
+
+        JSONArray data = new JSONArray();
+
+        for (BDElementController element : this.model.elements) {
+            JSONObject obj = element.exportToJSON();
+            if (obj != null)
+                data.put(obj);
+        }
+
+        base.put("data", data);
+
+        return base;
     }
 
     @Override

@@ -13,6 +13,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.util.Pair;
 import javafx.util.StringConverter;
+import org.json.JSONObject;
 import rchat.info.blockdiagramgenerator.Main;
 import rchat.info.blockdiagramgenerator.Utils;
 import rchat.info.blockdiagramgenerator.controllers.DiagramBlockController;
@@ -20,6 +21,7 @@ import rchat.info.blockdiagramgenerator.models.DiagramBlockModel;
 import rchat.info.blockdiagramgenerator.models.bdelements.*;
 import rchat.info.blockdiagramgenerator.painter.AbstractPainter;
 import rchat.info.blockdiagramgenerator.views.bdelements.BDDecisionView;
+import rchat.info.blockdiagramgenerator.views.bdelements.BDPreProcessView;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -28,12 +30,15 @@ import static rchat.info.blockdiagramgenerator.models.DiagramBlockModel.basicFon
 import static rchat.info.blockdiagramgenerator.models.DiagramBlockModel.onDataUpdate;
 
 public class BDDecisionController extends BDElementController implements TextEditable, Container {
+    public static String EXPORT_IDENTIFIER = "bd_element_decision";
     public BDDecisionModel model;
     public BDDecisionView view;
 
     public BDDecisionController(BDContainerController positive, BDDecisionModel.Branch positiveBranch,
                                 BDContainerController negative, BDDecisionModel.Branch negativeBranch,
                                 String content) {
+        super(EXPORT_IDENTIFIER);
+
         this.model = new BDDecisionModel(positive, positiveBranch, negative, negativeBranch, content);
         this.model.positive.setParentContainer(this);
         this.model.negative.setParentContainer(this);
@@ -45,6 +50,8 @@ public class BDDecisionController extends BDElementController implements TextEdi
     public BDDecisionController(BDContainerController positive, BDDecisionModel.Branch positiveBranch,
                                 BDContainerController negative, BDDecisionModel.Branch negativeBranch,
                                 String content, boolean selected) {
+        super(EXPORT_IDENTIFIER);
+
         this.model = new BDDecisionModel(positive, positiveBranch, negative, negativeBranch, content);
         this.view = new BDDecisionView(this.model);
         this.model.positive.setParentContainer(this);
@@ -52,6 +59,54 @@ public class BDDecisionController extends BDElementController implements TextEdi
         this.selected = selected;
         this.setControls();
         recalculateSizes();
+    }
+
+    public BDDecisionController(JSONObject object) {
+        super(object);
+
+        JSONObject branches = object.getJSONObject("data");
+
+        JSONObject positiveBranch = branches.getJSONObject("positive");
+        BDDecisionModel.Branch posBranch = Arrays.stream(BDDecisionModel.Branch.values())
+                .filter(element -> element.propName.equals(positiveBranch.getString("position")))
+                .findFirst().orElse(null);
+        BDContainerController posController = new BDContainerController(positiveBranch.getJSONObject("data"));
+
+        JSONObject negativeBranch = branches.getJSONObject("negative");
+        BDDecisionModel.Branch negBranch = Arrays.stream(BDDecisionModel.Branch.values())
+                .filter(element -> element.propName.equals(negativeBranch.getString("position")))
+                .findFirst().orElse(null);
+        BDContainerController negController = new BDContainerController(negativeBranch.getJSONObject("data"));
+
+        this.model = new BDDecisionModel(posController, posBranch, negController, negBranch, branches.getString("data"));
+        this.view = new BDDecisionView(this.model);
+        this.model.positive.setParentContainer(this);
+        this.model.negative.setParentContainer(this);
+
+        this.setControls();
+        recalculateSizes();
+    }
+
+    @Override
+    public JSONObject exportToJSON() {
+        JSONObject base = super.exportToJSON();
+
+        JSONObject positiveBranch = new JSONObject();
+        positiveBranch.put("position", this.model.positiveBranch.propName);
+        positiveBranch.put("data", this.model.positive.exportToJSON());
+
+        JSONObject negativeBranch = new JSONObject();
+        negativeBranch.put("position", this.model.negativeBranch.propName);
+        negativeBranch.put("data", this.model.negative.exportToJSON());
+
+        JSONObject branches = new JSONObject();
+        branches.put("positive", positiveBranch);
+        branches.put("negative", negativeBranch);
+        branches.put("data", this.model.data);
+
+        base.put("data", branches);
+
+        return base;
     }
 
     @Override

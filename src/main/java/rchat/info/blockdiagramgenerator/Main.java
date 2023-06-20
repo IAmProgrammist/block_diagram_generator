@@ -8,6 +8,7 @@ import javafx.scene.Scene;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.json.JSONObject;
 import rchat.info.blockdiagramgenerator.models.DiagramBlockModel;
 
 import java.io.File;

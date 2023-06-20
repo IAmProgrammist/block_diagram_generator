@@ -9,24 +9,30 @@ import javafx.scene.control.TextArea;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.util.Pair;
+import org.json.JSONObject;
 import rchat.info.blockdiagramgenerator.Main;
 import rchat.info.blockdiagramgenerator.Utils;
 import rchat.info.blockdiagramgenerator.controllers.DiagramBlockController;
 import rchat.info.blockdiagramgenerator.models.DiagramBlockModel;
 import rchat.info.blockdiagramgenerator.models.bdelements.BDDataModel;
 import rchat.info.blockdiagramgenerator.models.bdelements.BDElementModel;
+import rchat.info.blockdiagramgenerator.models.bdelements.BDPreProcessModel;
 import rchat.info.blockdiagramgenerator.painter.AbstractPainter;
 import rchat.info.blockdiagramgenerator.views.bdelements.BDDataView;
+import rchat.info.blockdiagramgenerator.views.bdelements.BDPreProcessView;
 
 import java.util.*;
 
 import static rchat.info.blockdiagramgenerator.models.DiagramBlockModel.onDataUpdate;
 
 public class BDDataController extends BDElementController implements TextEditable {
+    public static String EXPORT_IDENTIFIER = "bd_element_data";
     public BDDataModel model;
     public BDDataView view;
 
     public BDDataController(String content) {
+        super(EXPORT_IDENTIFIER);
+
         this.model = new BDDataModel(content);
         this.view = new BDDataView(this.model);
         this.setControls();
@@ -34,11 +40,31 @@ public class BDDataController extends BDElementController implements TextEditabl
     }
 
     public BDDataController(String content, boolean selected) {
+        super(EXPORT_IDENTIFIER);
+
         this.model = new BDDataModel(content);
         this.view = new BDDataView(this.model);
         this.selected = selected;
         this.setControls();
         recalculateSizes();
+    }
+
+    public BDDataController(JSONObject object) {
+        super(object);
+
+        this.model = new BDDataModel(object.getString("data"));
+        this.view = new BDDataView(this.model);
+        this.setControls();
+        recalculateSizes();
+    }
+
+    @Override
+    public JSONObject exportToJSON() {
+        JSONObject base = super.exportToJSON();
+
+        base.put("data", this.model.data);
+
+        return base;
     }
 
     @Override

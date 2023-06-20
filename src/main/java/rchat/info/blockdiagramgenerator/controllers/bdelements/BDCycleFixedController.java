@@ -7,6 +7,7 @@ import javafx.scene.control.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.util.Pair;
+import org.json.JSONObject;
 import rchat.info.blockdiagramgenerator.Main;
 import rchat.info.blockdiagramgenerator.Utils;
 import rchat.info.blockdiagramgenerator.models.DiagramBlockModel;
@@ -16,16 +17,20 @@ import rchat.info.blockdiagramgenerator.models.bdelements.BDDecisionModel;
 import rchat.info.blockdiagramgenerator.models.bdelements.BDElementModel;
 import rchat.info.blockdiagramgenerator.painter.AbstractPainter;
 import rchat.info.blockdiagramgenerator.views.bdelements.BDCycleFixedView;
+import rchat.info.blockdiagramgenerator.views.bdelements.BDCycleNotFixedView;
 
 import java.util.*;
 
 import static rchat.info.blockdiagramgenerator.models.DiagramBlockModel.onDataUpdate;
 
 public class BDCycleFixedController extends BDElementController implements TextEditable, Container {
+    public static String EXPORT_IDENTIFIER = "bd_element_modifier";
     public BDCycleFixedModel model;
     public BDCycleFixedView view;
 
     public BDCycleFixedController(BDContainerController body, String content) {
+        super(EXPORT_IDENTIFIER);
+
         this.model = new BDCycleFixedModel(content, body);
         this.model.body.setParentContainer(this);
         this.view = new BDCycleFixedView(this.model);
@@ -34,12 +39,40 @@ public class BDCycleFixedController extends BDElementController implements TextE
     }
 
     public BDCycleFixedController(BDContainerController body, String content, boolean selected) {
+        super(EXPORT_IDENTIFIER);
+
         this.model = new BDCycleFixedModel(content, body);
         this.model.body.setParentContainer(this);
         this.view = new BDCycleFixedView(this.model);
         this.selected = selected;
         this.setControls();
         recalculateSizes();
+    }
+
+    public BDCycleFixedController(JSONObject object) {
+        super(object);
+        JSONObject data = object.getJSONObject("data");
+
+        BDContainerController body = new BDContainerController(object.getJSONObject("body"));
+
+        this.model = new BDCycleFixedModel(data.getString("data"), body);
+        this.model.body.setParentContainer(this);
+        this.view = new BDCycleFixedView(this.model);
+        this.setControls();
+        recalculateSizes();
+    }
+
+    @Override
+    public JSONObject exportToJSON() {
+        JSONObject base = super.exportToJSON();
+
+        JSONObject branches = new JSONObject();
+        branches.put("body", this.model.body.exportToJSON());
+        branches.put("data", this.model.data);
+
+        base.put("data", branches);
+
+        return base;
     }
 
     @Override

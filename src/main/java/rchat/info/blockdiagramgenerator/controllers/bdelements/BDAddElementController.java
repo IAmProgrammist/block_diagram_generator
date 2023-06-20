@@ -5,6 +5,7 @@ import javafx.scene.Node;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.text.Font;
 import javafx.util.Pair;
+import org.json.JSONObject;
 import rchat.info.blockdiagramgenerator.Utils;
 import rchat.info.blockdiagramgenerator.models.DiagramBlockModel;
 import rchat.info.blockdiagramgenerator.models.bdelements.BDAddElementModel;
@@ -23,6 +24,8 @@ public class BDAddElementController extends BDElementController {
     public BDAddElementView view;
 
     public BDAddElementController() {
+        super("");
+
         this.model = new BDAddElementModel();
         this.view = new BDAddElementView(this.model);
         this.setControls();
@@ -30,11 +33,18 @@ public class BDAddElementController extends BDElementController {
     }
 
     public BDAddElementController(boolean selected) {
+        super("");
+
         this.model = new BDAddElementModel();
         this.view = new BDAddElementView(this.model);
         this.setControls();
         this.selected = selected;
         recalculateSizes();
+    }
+
+    @Override
+    public JSONObject exportToJSON() {
+        return null;
     }
 
     @Override

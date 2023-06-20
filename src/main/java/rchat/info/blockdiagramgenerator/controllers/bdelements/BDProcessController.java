@@ -10,6 +10,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.util.Pair;
+import org.json.JSONObject;
 import rchat.info.blockdiagramgenerator.Main;
 import rchat.info.blockdiagramgenerator.Utils;
 import rchat.info.blockdiagramgenerator.controllers.DiagramBlockController;
@@ -29,17 +30,40 @@ import java.util.List;
 import static rchat.info.blockdiagramgenerator.models.DiagramBlockModel.onDataUpdate;
 
 public class BDProcessController extends BDElementController implements TextEditable {
+    public static String EXPORT_IDENTIFIER = "bd_element_process";
     public BDProcessModel model;
     public BDProcessView view;
 
     public BDProcessController(String content) {
+        super(EXPORT_IDENTIFIER);
+
         this.model = new BDProcessModel(content);
         this.view = new BDProcessView(this.model);
         this.setControls();
         recalculateSizes();
     }
 
+    public BDProcessController(JSONObject object) {
+        super(object);
+
+        this.model = new BDProcessModel(object.getString("data"));
+        this.view = new BDProcessView(this.model);
+        this.setControls();
+        recalculateSizes();
+    }
+
+    @Override
+    public JSONObject exportToJSON() {
+        JSONObject base = super.exportToJSON();
+
+        base.put("data", this.model.data);
+
+        return base;
+    }
+
     public BDProcessController(String content, boolean selected) {
+        super(EXPORT_IDENTIFIER);
+
         this.model = new BDProcessModel(content);
         this.view = new BDProcessView(this.model);
         this.selected = selected;
