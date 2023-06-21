@@ -57,8 +57,6 @@ public class SaveDialogModel {
 
     public void setWidth(double width, short measurments) {
         double tempWidthPix;
-        double tempWidthIn;
-        double tempWidthCm;
 
         switch (measurments) {
             case PIXELS:
@@ -66,8 +64,6 @@ public class SaveDialogModel {
                 break;
             case INCHES:
                 tempWidthPix = width * density;
-                tempWidthIn = width;
-                tempWidthCm = width * CM_IN_ONE_INCH;
                 break;
             case CENTIMETERS:
                 tempWidthPix = (width / CM_IN_ONE_INCH) * density;
@@ -89,6 +85,10 @@ public class SaveDialogModel {
 
         this.heightInches = this.heightPixels / this.density;
         this.widthInches = this.widthPixels / this.density;
+
+        this.heightCantimeters = this.heightInches * CM_IN_ONE_INCH;
+        this.widthCantimeters = this.widthInches * CM_IN_ONE_INCH;
+
         this.scale = this.widthPixels / this.originalWidth;
     }
 
@@ -123,6 +123,10 @@ public class SaveDialogModel {
 
         this.heightInches = this.heightPixels / this.density;
         this.widthInches = this.widthPixels / this.density;
+
+        this.heightCantimeters = this.heightInches * CM_IN_ONE_INCH;
+        this.widthCantimeters = this.widthInches * CM_IN_ONE_INCH;
+
         this.scale = this.heightPixels / this.originalHeight;
     }
 

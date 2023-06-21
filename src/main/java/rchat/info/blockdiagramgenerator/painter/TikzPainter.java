@@ -91,8 +91,8 @@ public class TikzPainter extends AbstractPainter {
         public String get(double scale) {
             Font resizedFont = new Font(this.font.getName(), ((this.font.getSize() / CM_IN_1_PT) * scale) / 10);
 
-            return String.format(Locale.ENGLISH, "\\node[opacity=%f, above right, font=\\%s, %s] at(%f, %f) {\\normalsize %s};\n",
-                    this.fill.getOpacity(), this.context.getFont(resizedFont), this.context.getColor(this.fill),
+            return String.format(Locale.ENGLISH, "\\verbatimfont{\\normalsize\\%s}\n\\node[opacity=%f, above right, %s] at(%f, %f) {\\verb|%s|};\n",
+                    this.context.getFont(resizedFont), this.fill.getOpacity(), this.context.getColor(this.fill),
                     x * scale, -y * scale, text);
         }
     }
@@ -412,6 +412,7 @@ public class TikzPainter extends AbstractPainter {
         result.append("\\usepackage[utf8]{inputenc}\n" +
                 "\\usepackage[english,russian]{babel}\n" +
                 "\\usepackage{pgfplots}\n" +
+                "\\usepackage{verbatim}\n" +
                 "\\usetikzlibrary{positioning}\n" +
                 "\\usetikzlibrary{shapes.geometric}\n" +
                 "\\usetikzlibrary{shapes.misc}\n" +
@@ -420,7 +421,10 @@ public class TikzPainter extends AbstractPainter {
                 "\\usetikzlibrary{matrix}\n" +
                 "\\usetikzlibrary{decorations.text}\n" +
                 "\\usepackage{fontspec}\n" +
-                "\\usetikzlibrary{backgrounds}\n");
+                "\\usetikzlibrary{backgrounds}\n\n" +
+                "\\makeatletter\n" +
+                "\\newcommand{\\verbatimfont}[1]{\\def\\verbatim@font{#1}}%\n" +
+                "\\makeatother\n\n");
 
         if (backgroundColor == null) {
             backgroundColor = Color.WHITE;
@@ -448,7 +452,7 @@ public class TikzPainter extends AbstractPainter {
         result.append("\\begin{document}\n");
         if (DiagramBlockModel.IS_DEBUG_TIKZ_INCLUDE_COMMENTS)
             result.append("\n% При формировании документа могли возникнуть некоторые неточности при расчёте, поэтому я пихнул ещё и resizebox, чтоб уж наверняка\n");
-        result.append(String.format(Locale.ENGLISH, "\\resizebox{%f cm}{!}{\n", maxWidth));
+        //result.append(String.format(Locale.ENGLISH, "\\resizebox{%f cm}{!}{\n", maxWidth));
 
         if (DiagramBlockModel.IS_DEBUG_TIKZ_INCLUDE_COMMENTS)
             result.append("\n% Собственно, сама блок схема\n");
@@ -458,7 +462,7 @@ public class TikzPainter extends AbstractPainter {
         result.append(doc);
 
         result.append("\\end{tikzpicture}\n");
-        result.append("}\n");
+        //result.append("}\n");
         result.append("\\end{document}");
 
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file),
