@@ -40,7 +40,7 @@ public class DiagramBlockModel implements History.Cloneable<DiagramBlockModel> {
     // Количество плиток для объединения их в одну плитку
     public static double TILES_IN_TILE = 10;
     // Название шрифта
-    public static String FONT_BASIC_NAME = "American Typewriter";
+    public static String FONT_BASIC_NAME = "Calibri";
     // Расстояние между линиями в многострочном тексте
     public static double LINE_SPACING = 3;
     // Расстояние между элементами блок схем
