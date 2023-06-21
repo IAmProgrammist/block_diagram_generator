@@ -53,7 +53,7 @@ public class BDCycleFixedController extends BDElementController implements TextE
         super(object);
         JSONObject data = object.getJSONObject("data");
 
-        BDContainerController body = new BDContainerController(object.getJSONObject("body"));
+        BDContainerController body = new BDContainerController(data.getJSONObject("body"));
 
         this.model = new BDCycleFixedModel(data.getString("data"), body);
         this.model.body.setParentContainer(this);

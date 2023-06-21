@@ -38,10 +38,8 @@ public class DiagramBlockController {
     @FXML
     public ListView<HBox> elements;
     public History<DiagramBlockModel> applicationHistory;
-    final KeyCombination undoCombintaion = new KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN);
-    final KeyCombination newFileCombination = new KeyCodeCombination(KeyCode.O, KeyCombination.CONTROL_DOWN);
-    final KeyCombination redoCombination = new KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN);
-    final KeyCombination saveCombination = new KeyCodeCombination(KeyCode.S, KeyCombination.SHORTCUT_DOWN);
+    final KeyCombination undoCombintaion = new KeyCodeCombination(KeyCode.Z, KeyCombination.CONTROL_DOWN);
+    final KeyCombination redoCombination = new KeyCodeCombination(KeyCode.Z, KeyCombination.CONTROL_DOWN, KeyCombination.SHIFT_DOWN);
     final KeyCombination delete = new KeyCodeCombination(KeyCode.DELETE);
     @FXML
     public MenuItem menuNew;
@@ -55,6 +53,12 @@ public class DiagramBlockController {
     public MenuItem menuExport;
     @FXML
     public MenuItem menuQuit;
+    @FXML
+    public MenuItem menuUndo;
+    @FXML
+    public MenuItem menuRedo;
+    @FXML
+    public MenuItem menuDelete;
     AbstractPainter gc;
 
     public boolean checkIfSaved() {
@@ -74,12 +78,8 @@ public class DiagramBlockController {
 
             if (result.isPresent() && result.get().getButtonData() == ButtonType.YES.getButtonData()) {
                 return save();
-            } else if (result.isPresent() && result.get().getButtonData() == ButtonType.NO.getButtonData()) {
-                return true;
-            }
+            } else return result.isPresent() && result.get().getButtonData() == ButtonType.NO.getButtonData();
         }
-
-        return false;
     }
 
     public void checkAndExit() {
@@ -87,6 +87,54 @@ public class DiagramBlockController {
             Platform.exit();
             System.exit(0);
         }
+    }
+
+    public void export() {
+        double oldCS = model.canvasScale;
+        double oldPX = model.posX;
+        double oldPY = model.posY;
+        DiagramBlockModel.VIEWPORT_MODE = false;
+        model.canvasScale = 1;
+        model.posX = 0;
+        model.posY = 0;
+        BDContainerController currentState = model.root;
+        BDContainerController clone = model.root.clone();
+        DiagramBlockModel.basicFont = Font.font(DiagramBlockModel.FONT_BASIC_NAME,
+                model.canvasScale * DiagramBlockModel.FONT_BASIC_SIZE);
+        model.root = clone;
+        model.root.recalculateSizes();
+        SaveDialogController controller = new SaveDialogController(this, Main.stage);
+        controller.showAndWait().ifPresent(el -> {
+                    if (el != null) {
+                        if (el.fileExtension == SaveDialogModel.FILE_EXTENSION_SVG) {
+                            SVGPainter p = new SVGPainter(el.widthPixels, el.heightPixels);
+                            model.root.update(p, new Pair<>(0.0, 0.0), 1);
+                            p.saveAsSVG(new File(el.file));
+                        } else if (el.fileExtension == SaveDialogModel.FILE_EXTENSION_TEX) {
+                            TikzPainter texPainter = new TikzPainter();
+                            view.repaint(texPainter);
+                            texPainter.save(new File(el.file), el.widthCantimeters);
+                        } else {
+                            ImagePainter p = new ImagePainter(el.originalWidth, el.originalHeight, el.scale);
+                            view.repaint(p);
+                            if (el.fileExtension == SaveDialogModel.FILE_EXTENSION_JPG) {
+                                p.saveAsJPG(new File(el.file));
+                            } else {
+                                p.saveAsPNG(new File(el.file));
+                            }
+                        }
+                    }
+                }
+        );
+        model.root = currentState;
+        model.canvasScale = oldCS;
+        model.posX = oldPX;
+        model.posY = oldPY;
+        DiagramBlockModel.basicFont = Font.font(DiagramBlockModel.FONT_BASIC_NAME,
+                model.canvasScale * DiagramBlockModel.FONT_BASIC_SIZE);
+        DiagramBlockModel.VIEWPORT_MODE = true;
+        model.root.recalculateSizes();
+        view.repaint(gc);
     }
 
     public void checkAndNew() {
@@ -102,6 +150,14 @@ public class DiagramBlockController {
             model.root.update(gc, new Pair<>(DiagramBlockModel.canvasMousePosX,
                     DiagramBlockModel.canvasMousePosY), model.canvasScale);
             view.repaint(gc);
+
+            currentPath = null;
+
+            applicationHistory.clear();
+            applicationHistory.pushElement(this.model.clone());
+            applicationHistory.save();
+
+            updateTitle();
         }
     }
 
@@ -116,6 +172,9 @@ public class DiagramBlockController {
             updateBDContentsEditor();
             DiagramBlockModel clonedAppState = model.clone();
             applicationHistory.pushElement(clonedAppState);
+
+            updateTitle();
+
             view.repaint(gc);
         }
     }
@@ -136,6 +195,9 @@ public class DiagramBlockController {
         DiagramBlockModel.onDataUpdate = () -> {
             DiagramBlockModel clonedAppState = model.clone();
             applicationHistory.pushElement(clonedAppState);
+
+            updateTitle();
+
             model.root.recalculateSizes();
             view.repaint(gc);
         };
@@ -222,70 +284,58 @@ public class DiagramBlockController {
             view.repaint(gc);
         });
 
-        menuQuit.setOnAction(event -> {
-            checkAndExit();
-        });
+        menuQuit.setOnAction(event -> checkAndExit());
 
-        menuNew.setOnAction(event -> {
-            checkAndNew();
-        });
+        menuNew.setOnAction(event -> checkAndNew());
 
-        menuSave.setOnAction(event -> {
-            save();
-        });
+        menuSave.setOnAction(event -> save());
 
         menuSaveAs.setOnAction(event -> {
             if (pickFile(true))
                 save();
         });
 
-        menuExport.setOnAction(event -> {
-            double oldCS = model.canvasScale;
-            double oldPX = model.posX;
-            double oldPY = model.posY;
-            DiagramBlockModel.VIEWPORT_MODE = false;
-            model.canvasScale = 1;
-            model.posX = 0;
-            model.posY = 0;
-            BDContainerController currentState = model.root;
-            BDContainerController clone = model.root.clone();
+        menuExport.setOnAction(event -> export());
+
+        menuUndo.setOnAction(event -> {
+            this.model = applicationHistory.prev();
+
+            updateTitle();
+
+            this.model.selected = model.root.getSelected();
+            this.view.model = model;
+
             DiagramBlockModel.basicFont = Font.font(DiagramBlockModel.FONT_BASIC_NAME,
                     model.canvasScale * DiagramBlockModel.FONT_BASIC_SIZE);
-            model.root = clone;
-            model.root.recalculateSizes();
-            SaveDialogController controller = new SaveDialogController(this, Main.stage);
-            controller.showAndWait().ifPresent(el -> {
+            updateBDContentsEditor();
 
+            this.view.repaint(gc);
+        });
 
-                        if (el != null) {
-                            if (el.fileExtension == SaveDialogModel.FILE_EXTENSION_SVG) {
-                                SVGPainter p = new SVGPainter(el.widthPixels, el.heightPixels);
-                                view.repaint(p);
-                                p.saveAsSVG(new File(el.file));
-                            } else if (el.fileExtension == SaveDialogModel.FILE_EXTENSION_TEX) {
-                                TikzPainter texPainter = new TikzPainter();
-                                view.repaint(texPainter);
-                                texPainter.save(new File(el.file), el.widthCantimeters);
-                            } else {
-                                ImagePainter p = new ImagePainter(el.originalWidth, el.originalHeight, el.scale);
-                                view.repaint(p);
-                                if (el.fileExtension == SaveDialogModel.FILE_EXTENSION_JPG) {
-                                    p.saveAsJPG(new File(el.file));
-                                } else {
-                                    p.saveAsPNG(new File(el.file));
-                                }
-                            }
-                        }
-                    }
-            );
-            model.root = currentState;
-            model.canvasScale = oldCS;
-            model.posX = oldPX;
-            model.posY = oldPY;
+        menuRedo.setOnAction(event -> {
+            this.model = applicationHistory.next();
+
+            updateTitle();
+
+            this.model.selected = model.root.getSelected();
+            this.view.model = model;
+
             DiagramBlockModel.basicFont = Font.font(DiagramBlockModel.FONT_BASIC_NAME,
                     model.canvasScale * DiagramBlockModel.FONT_BASIC_SIZE);
-            DiagramBlockModel.VIEWPORT_MODE = true;
+            updateBDContentsEditor();
+            this.view.repaint(gc);
+        });
+
+        menuDelete.setOnAction(event -> {
+            if (model.selected != null) model.selected.remove();
+            model.selected = null;
             model.root.recalculateSizes();
+            DiagramBlockModel clonedAppState = model.clone();
+            applicationHistory.pushElement(clonedAppState);
+
+            updateTitle();
+
+            updateBDContentsEditor();
             view.repaint(gc);
         });
 
@@ -301,42 +351,14 @@ public class DiagramBlockController {
                 model.root.update(gc, new Pair<>(DiagramBlockModel.canvasMousePosX,
                         DiagramBlockModel.canvasMousePosY), model.canvasScale);
                 view.repaint(gc);
+                updateBDContentsEditor();
             }
         });
 
-        Main.rewriteKeyPressedEvent = event -> {
-            if (undoCombintaion.match(event)) {
-                this.model = applicationHistory.prev();
-                this.model.selected = model.root.getSelected();
-                this.view.model = model;
+        currentPath = null;
 
-                DiagramBlockModel.basicFont = Font.font(DiagramBlockModel.FONT_BASIC_NAME,
-                        model.canvasScale * DiagramBlockModel.FONT_BASIC_SIZE);
-                updateBDContentsEditor();
-                this.view.repaint(gc);
-            } else if (redoCombination.match(event)) {
-                this.model = applicationHistory.next();
-                this.model.selected = model.root.getSelected();
-                this.view.model = model;
+        updateTitle();
 
-                DiagramBlockModel.basicFont = Font.font(DiagramBlockModel.FONT_BASIC_NAME,
-                        model.canvasScale * DiagramBlockModel.FONT_BASIC_SIZE);
-                updateBDContentsEditor();
-                this.view.repaint(gc);
-            } else if (delete.match(event)) {
-                if (model.selected != null) model.selected.remove();
-                model.selected = null;
-                model.root.recalculateSizes();
-                DiagramBlockModel clonedAppState = model.clone();
-                applicationHistory.pushElement(clonedAppState);
-                updateBDContentsEditor();
-                view.repaint(gc);
-            } else if (saveCombination.match(event)) {
-                save();
-            } else if (newFileCombination.match(event)) {
-                checkAndNew();
-            }
-        };
         applicationHistory = new History<>(model.clone());
         view.repaint(gc);
     }
@@ -383,12 +405,12 @@ public class DiagramBlockController {
     }
 
     public boolean load() {
-        if (!pickFile(false))
+        if (!checkIfSaved() || !pickFile(false))
             return false;
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(currentPath),
                 StandardCharsets.UTF_8))) {
-             String res = "";
+            String res = "";
             while (reader.ready()) {
                 res += reader.readLine() + "\n";
             }
@@ -398,6 +420,12 @@ public class DiagramBlockController {
             BDElementController cnt = BDElementController.fromJSONObject(origin);
 
             this.model.root = cnt instanceof BDContainerController ? (BDContainerController) cnt : new BDContainerController(cnt);
+
+            applicationHistory.clear();
+            applicationHistory.pushElement(this.model.clone());
+            applicationHistory.save();
+
+            updateTitle();
 
             return true;
         } catch (FileNotFoundException e) {
@@ -436,6 +464,8 @@ public class DiagramBlockController {
                     StandardCharsets.UTF_8))) {
                 writer.write(this.model.root.exportToJSON().toString());
                 applicationHistory.save();
+
+                updateTitle();
             } catch (FileNotFoundException e) {
                 throw new RuntimeException(e);
             } catch (IOException e) {
@@ -446,5 +476,14 @@ public class DiagramBlockController {
         }
 
         return false;
+    }
+
+    private void updateTitle() {
+        if (currentPath == null)
+            Main.stage.setTitle(Main.rb.getString("untitled_project"));
+        else if (applicationHistory.isSaved())
+            Main.stage.setTitle(currentPath.getName() + " [" + currentPath.getPath() + "]");
+        else
+            Main.stage.setTitle(currentPath.getName() + "* [" + currentPath.getPath() + "]");
     }
 }

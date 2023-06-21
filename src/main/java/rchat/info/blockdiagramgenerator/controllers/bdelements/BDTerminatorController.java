@@ -78,6 +78,7 @@ public class BDTerminatorController extends BDElementController implements TextE
         this.model = new BDTerminatorModel(content);
         this.view = new BDTerminatorView(this.model);
         this.selected = selected;
+        this.setControls();
         recalculateSizes();
     }
 

@@ -3,6 +3,14 @@ package rchat.info.blockdiagramgenerator;
 import java.util.Stack;
 
 public class History<T> extends Stack<History.Cloneable<T>> {
+    public void clear(History.Cloneable<T> initValue) {
+        super.clear();
+
+        this.add(initValue);
+        currentIndex = 0;
+        savedIndex = 0;
+    }
+
     public interface Cloneable<E> {
         public E clone();
     }

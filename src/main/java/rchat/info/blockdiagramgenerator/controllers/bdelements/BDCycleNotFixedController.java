@@ -43,6 +43,8 @@ public class BDCycleNotFixedController extends BDElementController implements Te
         this.view = new BDCycleNotFixedView(this.model);
         this.model.body.setParentContainer(this);
         this.selected = selected;
+        this.setControls();
+        recalculateSizes();
     }
 
     public BDCycleNotFixedController(JSONObject object) {

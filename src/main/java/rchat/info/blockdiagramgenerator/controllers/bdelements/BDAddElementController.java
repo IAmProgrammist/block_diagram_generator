@@ -37,8 +37,8 @@ public class BDAddElementController extends BDElementController {
 
         this.model = new BDAddElementModel();
         this.view = new BDAddElementView(this.model);
-        this.setControls();
         this.selected = selected;
+        this.setControls();
         recalculateSizes();
     }
 
