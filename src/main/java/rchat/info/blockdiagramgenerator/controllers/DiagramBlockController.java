@@ -240,7 +240,6 @@ public class DiagramBlockController {
         });
 
         menuExport.setOnAction(event -> {
-            model.root.recalculateSizes();
             double oldCS = model.canvasScale;
             double oldPX = model.posX;
             double oldPY = model.posY;
@@ -253,6 +252,7 @@ public class DiagramBlockController {
             DiagramBlockModel.basicFont = Font.font(DiagramBlockModel.FONT_BASIC_NAME,
                     model.canvasScale * DiagramBlockModel.FONT_BASIC_SIZE);
             model.root = clone;
+            model.root.recalculateSizes();
             SaveDialogController controller = new SaveDialogController(this, Main.stage);
             controller.showAndWait().ifPresent(el -> {
 
@@ -260,15 +260,15 @@ public class DiagramBlockController {
                         if (el != null) {
                             if (el.fileExtension == SaveDialogModel.FILE_EXTENSION_SVG) {
                                 SVGPainter p = new SVGPainter(el.widthPixels, el.heightPixels);
-                                model.root.update(p, new Pair<>(0.0, 0.0), 1.0);
+                                view.repaint(p);
                                 p.saveAsSVG(new File(el.file));
                             } else if (el.fileExtension == SaveDialogModel.FILE_EXTENSION_TEX) {
                                 TikzPainter texPainter = new TikzPainter();
-                                model.root.update(texPainter, new Pair<>(0.0, 0.0), 1.0);
+                                view.repaint(texPainter);
                                 texPainter.save(new File(el.file), el.widthCantimeters);
                             } else {
                                 ImagePainter p = new ImagePainter(el.originalWidth, el.originalHeight, el.scale);
-                                model.root.update(p, new Pair<>(0.0, 0.0), 1.0);
+                                view.repaint(p);
                                 if (el.fileExtension == SaveDialogModel.FILE_EXTENSION_JPG) {
                                     p.saveAsJPG(new File(el.file));
                                 } else {
@@ -285,8 +285,7 @@ public class DiagramBlockController {
             DiagramBlockModel.basicFont = Font.font(DiagramBlockModel.FONT_BASIC_NAME,
                     model.canvasScale * DiagramBlockModel.FONT_BASIC_SIZE);
             DiagramBlockModel.VIEWPORT_MODE = true;
-            model.root.update(gc, new Pair<>(DiagramBlockModel.canvasMousePosX,
-                    DiagramBlockModel.canvasMousePosY), model.canvasScale);
+            model.root.recalculateSizes();
             view.repaint(gc);
         });
 
