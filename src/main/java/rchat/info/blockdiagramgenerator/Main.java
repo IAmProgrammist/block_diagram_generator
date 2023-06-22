@@ -8,8 +8,10 @@ import javafx.scene.Scene;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.controlsfx.dialog.FontSelectorDialog;
 import org.json.JSONObject;
 import rchat.info.blockdiagramgenerator.models.DiagramBlockModel;
+import rchat.info.blockdiagramgenerator.models.Style;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -28,7 +30,19 @@ public class Main extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
+        Style.init();
         this.stage = stage;
+
+        Style k = Style.getCurrentStyle();
+
+        /*FontSelectorDialog fs = new FontSelectorDialog(null);
+        fs.setTitle("Select Font");
+        fs.setHeaderText("");
+        fs.setContentText("asdasdada");
+        fs.show();
+*/
+
+
         FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("layouts/styles-dialog.fxml"));
         rb = ResourceBundle.getBundle("rchat/info/blockdiagramgenerator/bundles/languages");
         fxmlLoader.setResources(rb);

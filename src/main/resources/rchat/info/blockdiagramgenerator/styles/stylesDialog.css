@@ -1,0 +1,12 @@
+#styleList > Label {
+    -fx-padding: 5px, 0px, 5px, 0px;
+        -fx-border-insets: 5px, 0px, 5px, 0px;
+        -fx-background-insets: 5px, 0px, 5px, 0px;
+        -fx-font-weight: 700;
+}
+
+#styleList > VBox {
+    -fx-padding: 2px, 0px, 2px, 0px;
+        -fx-border-insets: 2px, 0px, 2px, 0px;
+        -fx-background-insets: 2px, 0px, 2px, 0px;
+}

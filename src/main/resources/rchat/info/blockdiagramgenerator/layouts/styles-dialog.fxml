@@ -5,167 +5,277 @@
 <?import javafx.scene.layout.*?>
 <?import rchat.info.blockdiagramgenerator.elements.*?>
 
-<VBox prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1">
-   <children>
-      <HBox alignment="CENTER">
-         <children>
-            <TextField promptText="Имя темы" />
-            <Button mnemonicParsing="false" text="Клонировать" />
-            <Button mnemonicParsing="false" text="Импорт" />
-         </children>
-         <VBox.margin>
-            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-         </VBox.margin>
-      </HBox>
-      <HBox alignment="CENTER">
-         <children>
-            <ChoiceBox prefWidth="150.0" />
-            <Button mnemonicParsing="false" text="Удалить" />
-            <Button mnemonicParsing="false" text="Экспорт" />
-         </children>
-         <VBox.margin>
-            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-         </VBox.margin>
-      </HBox>
-      <SplitPane dividerPositions="0.6320187165775399" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="1.0E7" VBox.vgrow="ALWAYS">
-        <items>
-            <AnchorPane prefHeight="200.0" prefWidth="200.0">
-                <children>
-                    <ResizableCanvas fx:id="canvas" height="350.0" width="450.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                </children>
-            </AnchorPane>
-            <ScrollPane hbarPolicy="NEVER" prefHeight="200.0" prefWidth="200.0">
-              <content>
-                <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefWidth="1.0E8">
+<VBox prefHeight="386.0" prefWidth="600.0" stylesheets="@../styles/stylesDialog.css" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1">
+    <children>
+        <HBox alignment="CENTER">
+            <children>
+                <TextField promptText="Имя темы" />
+                <Button mnemonicParsing="false" text="Клонировать" />
+                <Button mnemonicParsing="false" text="Импорт" />
+            </children>
+            <VBox.margin>
+                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+            </VBox.margin>
+        </HBox>
+        <HBox alignment="CENTER">
+            <children>
+                <ChoiceBox prefWidth="150.0" />
+                <Button mnemonicParsing="false" text="Удалить" />
+                <Button mnemonicParsing="false" text="Экспорт" />
+            </children>
+            <VBox.margin>
+                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+            </VBox.margin>
+        </HBox>
+        <SplitPane dividerPositions="0.5735294117647057" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" VBox.vgrow="ALWAYS">
+            <items>
+                <AnchorPane prefHeight="200.0" prefWidth="200.0">
                     <children>
-                    <VBox>
-                        <children>
-                            <CheckBox mnemonicParsing="false" text="Добавлять debug информацию в .tex файл" />
-                        </children>
-                    </VBox>
-                    <VBox>
-                           <children>
-                              <Label text="Текст для положительных веток в циклах и условии" />
-                              <TextField />
-                           </children>
-                    </VBox>
-                    <VBox>
-                           <children>
-                              <Label text="Текст для отрицательных веток в циклах и условии" />
-                              <TextField />
-                           </children>
-                    </VBox>
-                    <VBox>
-                           <children>
-                              <Label text="Длина линии в прерывающейся линии" />
-                              <TextField />
-                           </children>
-                    </VBox>
-                    <VBox>
-                           <children>
-                              <Label text="Длина пропуска в прерывающейся линии" />
-                              <TextField />
-                           </children>
-                    </VBox>
-                    <VBox>
-                           <children>
-                              <Label text="Ширина/высота плитки во viewport в пикселях при стандартном размере холста" />
-                              <TextField />
-                           </children>
-                    </VBox>
-                    <VBox>
-                           <children>
-                              <Label text="Размер текста в пикселях при стандартном размере холста" />
-                              <TextField />
-                           </children>
-                    </VBox>
-                    <VBox>
-                           <children>
-                              <Label text="Ширина границы блок схем в пикселях при стандартном размере холста" />
-                              <TextField />
-                           </children>
-                    </VBox>
-                    <VBox>
-                           <children>
-                              <Label text="Ширина плиток сетки во viewport в пикселях" />
-                              <TextField />
-                           </children>
-                    </VBox>
-                    <VBox>
-                           <children>
-                              <Label text="Ширина границы выбранного элемента в пикселях" />
-                              <TextField />
-                           </children>
-                    </VBox>
-                    <VBox>
-                           <children>
-                              <Label text="Количество плиток для в одной плитке" />
-                              <TextField />
-                           </children>
-                    </VBox>
-                    <VBox>
-                           <children>
-                              <Label text="Количество плиток для в одной плитке" />
-                              <TextField />
-                           </children>
-                    </VBox>
-                    <VBox>
-                           <children>
-                              <Label text="Название шрифта" />
-                              <TextField />
-                           </children>
-                    </VBox>
-                    <VBox>
-                           <children>
-                              <Label text="Расстояние между линиями в многострочном тексте в пикселях" />
-                              <TextField />
-                           </children>
-                    </VBox>
-                    <VBox>
-                           <children>
-                              <Label text="Расстояние между элементами блок схем в пикселях" />
-                              <TextField />
-                           </children>
-                    </VBox>
-                    <VBox>
-                           <children>
-                              <Label text="Ширина соединителей элементов блок схем в пикселях" />
-                              <TextField />
-                           </children>
-                    </VBox>
-                    <VBox>
-                           <children>
-                              <Label text="Отступ текста в пикселях" />
-                              <TextField />
-                           </children>
-                    </VBox>
-                    <VBox>
-                           <children>
-                              <Label text="Минимальная длина плеча в циклах, решениях в пикселях" />
-                              <TextField />
-                           </children>
-                    </VBox>
-                    <VBox>
-                           <children>
-                              <Label text="Отступ между ветками в блоке 'решение'" />
-                              <TextField />
-                           </children>
-                    </VBox>
-                    <VBox>
-                           <children>
-                              <Label text="Отрисовывать границы элементов в режиме debug" />
-                              <ColorPicker />
-                           </children>
-                    </VBox>
-                        <!-->Next is OVERFLOW_SELECTION_COLOR</-->
+                        <ResizableCanvas fx:id="canvas" height="350.0" width="450.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                     </children>
-                     <padding>
-                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                     </padding>
-                </VBox>
-              </content>
-            </ScrollPane>
-        </items>
-      </SplitPane>
-   </children>
+                </AnchorPane>
+                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" nodeOrientation="LEFT_TO_RIGHT" prefHeight="200.0" prefWidth="287.0">
+                    <content>
+                        <VBox fx:id="styleList" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefWidth="200.0">
+                            <children>
+                                <Label text="Внешнее оформление блок схемы" />
+                                <Separator prefWidth="200.0" />
+                                <VBox prefWidth="200.0">
+                                    <children>
+                                        <Label text="Шрифт" />
+                                        <TextField fx:id="fontBasicName" />
+                                    </children>
+                                </VBox>
+                                <VBox>
+                                    <children>
+                                        <Label text="Цвет обводки" />
+                                        <ColorPicker fx:id="strokeColor" />
+                                    </children>
+                                </VBox>
+                                <VBox>
+                                    <children>
+                                        <Label text="Цвет шрифта" />
+                                        <ColorPicker fx:id="fontColor" />
+                                    </children>
+                                </VBox>
+                                <VBox>
+                                    <children>
+                                        <Label text="Цвет фона элемента" />
+                                        <ColorPicker fx:id="bdBackgroundColor" />
+                                    </children>
+                                </VBox>
+                                <VBox>
+                                    <children>
+                                        <Label text="Цвет фона" />
+                                        <ColorPicker fx:id="backgroundColor" />
+                                    </children>
+                                </VBox>
+
+                                <Label text="Размеры в блок схеме" />
+                                <Separator prefWidth="200.0" />
+                                <VBox prefWidth="200.0">
+                                    <children>
+                                        <Label text="Размер текста " />
+                                        <TextField fx:id="fontBasicSize" />
+                                    </children>
+                                </VBox>
+                                <VBox>
+                                    <children>
+                                        <Label text="Ширина границы блок схем " />
+                                        <TextField fx:id="strokeWidthDefault" />
+                                    </children>
+                                </VBox>
+                                <VBox>
+                                    <children>
+                                        <Label text="Ширина соединителей элементов блок схем " />
+                                        <TextField fx:id="connectorsWidth" />
+                                    </children>
+                                </VBox>
+                                <VBox>
+                                    <children>
+                                        <Label text="Отступ текста " />
+                                        <TextField fx:id="textPadding" />
+                                    </children>
+                                </VBox>
+                                <VBox>
+                                    <children>
+                                        <Label text="Расстояние между линиями в многострочном тексте " />
+                                        <TextField fx:id="lineSpacing" />
+                                    </children>
+                                </VBox>
+                                <VBox>
+                                    <children>
+                                        <Label text="Расстояние между элементами блок схем " />
+                                        <TextField fx:id="elementsSpacing" />
+                                    </children>
+                                </VBox>
+                                <VBox>
+                                    <children>
+                                        <Label text="Отступ между ветками в блоке 'решение'" />
+                                        <TextField fx:id="decisionBlocksPadding" />
+                                    </children>
+                                </VBox>
+                                <VBox>
+                                    <children>
+                                        <Label text="Минимальная длина плеча в циклах, решениях " />
+                                        <TextField fx:id="minDecisionShoulderLen" />
+                                    </children>
+                                </VBox>
+                                <VBox>
+                                    <children>
+                                        <Label text="Длина линии в прерывающейся линии" />
+                                        <TextField fx:id="dashLineWidthLine" />
+                                    </children>
+                                </VBox>
+                                <VBox>
+                                    <children>
+                                        <Label text="Длина пропуска в прерывающейся линии" />
+                                        <TextField fx:id="dashLineWidthSpace" />
+                                    </children>
+                                </VBox>
+
+                                <Label text="Прочее в блок схемах" />
+                                <Separator prefWidth="200.0" />
+                                <VBox>
+                                    <children>
+                                        <Label text="Текст для положительных веток в циклах и условии" />
+                                        <TextField fx:id="positiveBranchText" />
+                                    </children>
+                                </VBox>
+                                <VBox>
+                                    <children>
+                                        <Label text="Текст для отрицательных веток в циклах и условии" />
+                                        <TextField fx:id="negativeBranchText" />
+                                    </children>
+                                </VBox>
+
+                                <Label text="Внешнее оформление в viewport" />
+                                <Separator prefWidth="200.0" />
+                                <VBox>
+                                    <children>
+                                        <Label text="Цвет сетки" />
+                                        <ColorPicker fx:id="gridColor" />
+                                    </children>
+                                </VBox>
+                                <VBox>
+                                    <children>
+                                        <Label text="Цвет границы выделенного объекта" />
+                                        <ColorPicker fx:id="selectedColor" />
+                                    </children>
+                                </VBox>
+                                <VBox>
+                                    <children>
+                                        <Label text="Цвет границы при наведении на объект" />
+                                        <ColorPicker fx:id="overflowSelectionColor" />
+                                    </children>
+                                </VBox>
+                                <VBox>
+                                    <children>
+                                        <Label text="Цвет выделеной области в режиме перетаскивания элемента" />
+                                        <ColorPicker fx:id="dragndropForegroundColor" />
+                                    </children>
+                                </VBox>
+
+                                <Label text="Размеры в viewport" />
+                                <Separator prefWidth="200.0" />
+                                <VBox>
+                                    <children>
+                                        <Label text="Ширина/высота плитки " />
+                                        <TextField fx:id="tileSize" />
+                                    </children>
+                                </VBox>
+                                <VBox>
+                                    <children>
+                                        <Label text="Ширина границы сетки" />
+                                        <TextField fx:id="tileStrokeWidthDefault" />
+                                    </children>
+                                </VBox>
+                                <VBox>
+                                    <children>
+                                        <Label text="Ширина границы выбранного элемента " />
+                                        <TextField fx:id="selectionBorderWidth" />
+                                    </children>
+                                </VBox>
+                                <VBox>
+                                    <children>
+                                        <Label text="Отступ области выбора для контейнера при наведении" />
+                                        <TextField fx:id="containerOverflowPadding" />
+                                    </children>
+                                </VBox>
+                                <VBox>
+                                    <children>
+                                        <Label text="Максимальная ширина выделеной области в режиме перетаскивания элемента" />
+                                        <TextField fx:id="maxBdContainerDragndropWidth" />
+                                    </children>
+                                </VBox>
+                                <VBox>
+                                    <children>
+                                        <Label text="Расширение границы выделеной области в режиме перетаскивания элемента" />
+                                        <TextField fx:id="maxBdContainerDragndropWidthMargin" />
+                                    </children>
+                                </VBox>
+
+                                <Label text="Прочее в viewport" />
+                                <Separator prefWidth="200.0" />
+                                <VBox>
+                                    <children>
+                                        <Label text="Количество плиток в одной плитке" />
+                                        <TextField fx:id="tilesInTile" />
+                                    </children>
+                                </VBox>
+
+                                <Label text="Debug" />
+                                <Separator prefWidth="200.0" />
+                                <VBox>
+                                    <children>
+                                        <CheckBox fx:id="isDebugModeEnabled" mnemonicParsing="false" text="Включить режим debug" />
+                                    </children>
+                                </VBox>
+                                <VBox>
+                                    <children>
+                                        <CheckBox fx:id="isDebugShowFps" mnemonicParsing="false" text="Вывод FPS в название приложения" />
+                                    </children>
+                                </VBox>
+                                <VBox>
+                                    <children>
+                                        <CheckBox fx:id="isDebugTikzIncludeComments" mnemonicParsing="false" text="Добавлять debug информацию в .tex файл" />
+                                    </children>
+                                </VBox>
+                                <VBox>
+                                    <children>
+                                        <CheckBox fx:id="debugDrawBorders" mnemonicParsing="false" text="Отрисовывать границы элементов в debug" />
+                                    </children>
+                                </VBox>
+                                <VBox>
+                                    <children>
+                                        <Label text="Цвет границы элементов в режиме debug" />
+                                        <ColorPicker fx:id="debugBorderColor" />
+                                    </children>
+                                </VBox>
+                            </children>
+                            <padding>
+                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                            </padding>
+                        </VBox>
+                    </content>
+                </ScrollPane>
+            </items>
+        </SplitPane>
+        <HBox alignment="TOP_RIGHT" prefHeight="28.0" prefWidth="600.0">
+            <children>
+                <Button mnemonicParsing="false" text="Отмена">
+                    <HBox.margin>
+                        <Insets right="10.0" />
+                    </HBox.margin>
+                </Button>
+                <Button mnemonicParsing="false" text="Выбрать" />
+            </children>
+            <opaqueInsets>
+                <Insets />
+            </opaqueInsets>
+            <padding>
+                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+            </padding>
+        </HBox>
+    </children>
 </VBox>

@@ -3,6 +3,7 @@ package rchat.info.blockdiagramgenerator.models;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
+import org.controlsfx.dialog.FontSelectorDialog;
 import rchat.info.blockdiagramgenerator.History;
 import rchat.info.blockdiagramgenerator.controllers.bdelements.BDContainerController;
 import rchat.info.blockdiagramgenerator.controllers.bdelements.BDElementController;
@@ -59,7 +60,7 @@ public class DiagramBlockModel implements History.Cloneable<DiagramBlockModel> {
     public static Color STROKE_COLOR = Color.BLACK;
     public static Color FONT_COLOR = Color.BLACK;
     public static Color GRID_COLOR = new Color(0.8, 0.8, 0.8, 1);
-    public static Color BD_BACKGROUND_COLOR = new Color(1, 1, 1, 1);
+    public static Color BD_BACKGROUND_COLOR = Color.WHITE;
     public static Color BACKGROUND_COLOR = new Color(0.9, 0.9, 0.9, 1);
     public static boolean IS_DEBUG_MODE_ENABLED = false;
     public static boolean DEBUG_DRAW_BORDERS = false;

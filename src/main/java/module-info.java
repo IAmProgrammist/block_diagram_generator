@@ -4,7 +4,9 @@ module rchat.info.blockdiagramgenerator {
     requires javafx.swing;
     requires org.jfree.svg;
     requires java.desktop;
+    requires org.controlsfx.controls;
     requires org.json;
+    requires java.prefs;
 
     opens rchat.info.blockdiagramgenerator to javafx.fxml;
     exports rchat.info.blockdiagramgenerator;
