@@ -79,7 +79,8 @@ public class BDDataController extends BDElementController implements TextEditabl
 
     @Override
     public void update(AbstractPainter gc, Pair<Double, Double> position, double scale) {
-        view.repaint(gc, position, isMouseInElement(position), selected, scale, context.getCurrentStyle());
+        view.repaint(gc, position, context.model.basicFont, isMouseInElement(position), selected, context.isViewportMode(),
+                context.isDragMode(), scale, context.getCurrentStyle());
     }
 
     @Override
@@ -111,6 +112,11 @@ public class BDDataController extends BDElementController implements TextEditabl
     @Override
     public BDElementController clone() {
         return new BDDataController(context, getModel().data, this.selected);
+    }
+
+    @Override
+    public BDElementController clone(DiagramBlockController newContext) {
+        return new BDDataController(newContext, getModel().data, this.selected);
     }
 
     @Override

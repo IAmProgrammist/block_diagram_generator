@@ -1,15 +1,13 @@
 package rchat.info.blockdiagramgenerator.views.bdelements;
 
 import javafx.geometry.Dimension2D;
-import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.text.Font;
 import javafx.util.Pair;
 import rchat.info.blockdiagramgenerator.Utils;
 import rchat.info.blockdiagramgenerator.models.DiagramBlockModel;
 import rchat.info.blockdiagramgenerator.models.Style;
 import rchat.info.blockdiagramgenerator.models.bdelements.BDTerminatorModel;
 import rchat.info.blockdiagramgenerator.painter.AbstractPainter;
-
-import static rchat.info.blockdiagramgenerator.models.DiagramBlockModel.basicFont;
 
 public class BDTerminatorView extends BDElementView {
     protected BDTerminatorModel model;
@@ -18,8 +16,8 @@ public class BDTerminatorView extends BDElementView {
     }
 
     @Override
-    public void repaint(AbstractPainter gc, Pair<Double, Double> drawPoint,
-                        boolean selectionOverflow, boolean selected, double scale, Style style) {
+    public void repaint(AbstractPainter gc, Pair<Double, Double> drawPoint, Font basicFont,
+                        boolean selectionOverflow, boolean selected, boolean isViewport, boolean isDragmode, double scale, Style style) {
         Dimension2D size = model.getSize();
         double textHeight = size.getHeight() * scale;
         double totalWidth = size.getWidth() * scale;
@@ -38,11 +36,11 @@ public class BDTerminatorView extends BDElementView {
             gc.fillText(line, (totalWidth - d.getWidth()) / 2 + (drawPoint.getKey() * scale), drawPoint.getValue() * scale + currentLevel);
             currentLevel += style.getLineSpacing() * scale;
         }
-        if (DiagramBlockModel.VIEWPORT_MODE) {
+        if (isViewport) {
             if (selected) {
                 drawSelectBorder(gc, drawPoint, model.getSize(), scale, style);
             } else if (selectionOverflow) {
-                if (DiagramBlockModel.dragMode) {
+                if (isDragmode) {
                     drawDragNDropForeground(gc, drawPoint, model.getSize(), scale, style);
                 } else drawOverflowBorder(gc, drawPoint, model.getSize(), scale, style);
             }

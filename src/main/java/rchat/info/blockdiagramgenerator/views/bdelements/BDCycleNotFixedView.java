@@ -2,14 +2,13 @@ package rchat.info.blockdiagramgenerator.views.bdelements;
 
 import javafx.geometry.Dimension2D;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.text.Font;
 import javafx.util.Pair;
 import rchat.info.blockdiagramgenerator.Utils;
 import rchat.info.blockdiagramgenerator.models.DiagramBlockModel;
 import rchat.info.blockdiagramgenerator.models.Style;
 import rchat.info.blockdiagramgenerator.models.bdelements.BDCycleNotFixedModel;
 import rchat.info.blockdiagramgenerator.painter.AbstractPainter;
-
-import static rchat.info.blockdiagramgenerator.models.DiagramBlockModel.basicFont;
 
 public class BDCycleNotFixedView extends BDElementView {
 
@@ -20,8 +19,8 @@ public class BDCycleNotFixedView extends BDElementView {
     }
 
     @Override
-    public void repaint(AbstractPainter gc, Pair<Double, Double> drawPoint,
-                        boolean selectionOverflow, boolean selected, double scale, Style style) {
+    public void repaint(AbstractPainter gc, Pair<Double, Double> drawPoint, Font basicFont,
+                        boolean selectionOverflow, boolean selected, boolean isViewport, boolean isDragmode, double scale, Style style) {
         Dimension2D rhombusSize = model.getRhombusSize();
         Dimension2D textSize = model.getRhombusTextSize();
         double rhombusWidth = rhombusSize.getWidth() * scale;
@@ -126,15 +125,15 @@ public class BDCycleNotFixedView extends BDElementView {
                         (rightRhombusConnector.getValue() + bottomPoint) * scale,
                         (rightRhombusConnector.getValue() + bottomPoint) * scale}, 4);
 
-        if (DiagramBlockModel.VIEWPORT_MODE) {
-            if (selectionOverflow && DiagramBlockModel.dragMode && Utils.isPointInBounds(new Pair<>(DiagramBlockModel.canvasMousePosX, DiagramBlockModel.canvasMousePosY),
-                    drawPoint, model.getRhombusSize())) {
+        if (isViewport) {
+            if (selectionOverflow && isDragmode /*&& Utils.isPointInBounds(new Pair<>(DiagramBlockModel.canvasMousePosX, DiagramBlockModel.canvasMousePosY),
+                    drawPoint, model.getRhombusSize())*/) {
                 drawPoint = new Pair<>(drawPoint.getKey() - (model.getDistanceToLeftBound() - rhombusWidth / scale / 2), drawPoint.getValue());
                 drawDragNDropForeground(gc, drawPoint, model.getSize(), scale, style);
             } else if (selected) {
                 drawPoint = new Pair<>(drawPoint.getKey() - (model.getDistanceToLeftBound() - rhombusWidth / scale / 2), drawPoint.getValue());
                 drawSelectBorder(gc, drawPoint, model.getSize(), scale, style);
-            } else if (selectionOverflow && !DiagramBlockModel.dragMode) {
+            } else if (selectionOverflow) {
                 drawPoint = new Pair<>(drawPoint.getKey() - (model.getDistanceToLeftBound() - rhombusWidth / scale / 2), drawPoint.getValue());
                 drawOverflowBorder(gc, drawPoint, model.getSize(), scale, style);
             }

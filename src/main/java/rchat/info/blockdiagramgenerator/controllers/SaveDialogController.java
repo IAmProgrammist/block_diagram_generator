@@ -11,9 +11,16 @@ import javafx.scene.control.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Window;
+import javafx.util.Pair;
 import javafx.util.StringConverter;
 import rchat.info.blockdiagramgenerator.models.DiagramBlockModel;
 import rchat.info.blockdiagramgenerator.models.SaveDialogModel;
+import rchat.info.blockdiagramgenerator.models.Style;
+import rchat.info.blockdiagramgenerator.painter.AbstractPainter;
+import rchat.info.blockdiagramgenerator.painter.ImagePainter;
+import rchat.info.blockdiagramgenerator.painter.SVGPainter;
+import rchat.info.blockdiagramgenerator.painter.TikzPainter;
+import rchat.info.blockdiagramgenerator.views.DiagramBlockView;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,7 +29,48 @@ import java.util.ResourceBundle;
 import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
 
+import static rchat.info.blockdiagramgenerator.models.Style.getCurrentStyle;
+
 public class SaveDialogController extends Dialog<SaveDialogModel> {
+    class SaveDialogDiagramBlockController extends DiagramBlockController {
+        Style style;
+        public SaveDialogDiagramBlockController(DiagramBlockModel model, AbstractPainter gc, Style style) {
+            super(null, null, gc);
+            this.style = style;
+            this.model = model.clone(this);
+            this.view = new DiagramBlockView(this.model);
+            this.model.posX = -1;
+            this.model.posY = -1;
+            this.setCanvasScale(1.0);
+            this.model.selected = null;
+        }
+
+        @Override
+        public Style getCurrentStyle() {
+            return style;
+        }
+
+        @Override
+        public double canvasMousePosX() {
+            return 0;
+        }
+
+        @Override
+        public double canvasMousePosY() {
+            return 0;
+        }
+
+        @Override
+        public boolean isViewportMode() {
+            return false;
+        }
+
+        @Override
+        public boolean isDragMode() {
+            return false;
+        }
+    }
+
     @FXML
     TextField widthText;
     @FXML
@@ -221,6 +269,35 @@ public class SaveDialogController extends Dialog<SaveDialogModel> {
             setResultConverter(buttonType -> {
                 if (!Objects.equals(ButtonBar.ButtonData.APPLY, buttonType.getButtonData())) {
                     return null;
+                }
+
+                SaveDialogModel el = connection.getValue();
+
+                if (el.fileExtension == SaveDialogModel.FILE_EXTENSION_SVG) {
+                    SVGPainter p = new SVGPainter(el.widthPixels, el.heightPixels);
+                    DiagramBlockModel newModel = main.model;
+                    SaveDialogDiagramBlockController controller =
+                            new SaveDialogDiagramBlockController(newModel, p, Style.getCurrentStyle());
+                    controller.repaint(new Dimension2D(el.widthPixels, el.heightPixels));
+                    p.saveAsSVG(new File(el.file));
+                } else if (el.fileExtension == SaveDialogModel.FILE_EXTENSION_TEX) {
+                    TikzPainter texPainter = new TikzPainter();
+                    DiagramBlockModel newModel = main.model;
+                    SaveDialogDiagramBlockController controller =
+                            new SaveDialogDiagramBlockController(newModel, texPainter, Style.getCurrentStyle());
+                    controller.repaint(new Dimension2D(el.widthPixels, el.heightPixels));
+                    texPainter.save(new File(el.file), el.widthCantimeters, getCurrentStyle().isDebugModeEnabled() && getCurrentStyle().isDebugTikzIncludeComments());
+                } else {
+                    ImagePainter p = new ImagePainter(el.originalWidth, el.originalHeight, el.scale);
+                    DiagramBlockModel newModel = main.model;
+                    SaveDialogDiagramBlockController controller =
+                            new SaveDialogDiagramBlockController(newModel, p, Style.getCurrentStyle());
+                    controller.repaint(new Dimension2D(el.widthPixels, el.heightPixels));
+                    if (el.fileExtension == SaveDialogModel.FILE_EXTENSION_JPG) {
+                        p.saveAsJPG(new File(el.file));
+                    } else {
+                        p.saveAsPNG(new File(el.file));
+                    }
                 }
 
                 return connection.getValue();

@@ -2,6 +2,7 @@ package rchat.info.blockdiagramgenerator.controllers;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.geometry.Dimension2D;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.*;
@@ -17,6 +18,7 @@ import rchat.info.blockdiagramgenerator.Main;
 import rchat.info.blockdiagramgenerator.controllers.bdelements.*;
 import rchat.info.blockdiagramgenerator.elements.ResizableCanvas;
 import rchat.info.blockdiagramgenerator.models.DiagramBlockModel;
+import rchat.info.blockdiagramgenerator.models.EditorModel;
 import rchat.info.blockdiagramgenerator.models.SaveDialogModel;
 import rchat.info.blockdiagramgenerator.models.Style;
 import rchat.info.blockdiagramgenerator.painter.*;
@@ -28,6 +30,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class EditorController extends DiagramBlockController {
+    EditorModel eModel;
     public File currentPath;
     @FXML
     public ResizableCanvas canvas;
@@ -54,6 +57,8 @@ public class EditorController extends DiagramBlockController {
     public MenuItem menuRedo;
     @FXML
     public MenuItem menuDelete;
+
+
 
     public boolean checkIfSaved() {
         if (applicationHistory.isSaved()) {
@@ -87,48 +92,20 @@ public class EditorController extends DiagramBlockController {
         double oldCS = model.canvasScale;
         double oldPX = model.posX;
         double oldPY = model.posY;
-        DiagramBlockModel.VIEWPORT_MODE = false;
-        model.canvasScale = 1;
+        setCanvasScale(1);
         model.posX = 0;
         model.posY = 0;
         BDContainerController currentState = model.root;
-        BDContainerController clone = model.root.clone();
-        DiagramBlockModel.basicFont = Font.font(getCurrentStyle().getFontBasicName(),
-                model.canvasScale * getCurrentStyle().getFontBasicSize());
-        model.root = clone;
+        model.root = model.root.clone();
         model.root.recalculateSizes();
         SaveDialogController controller = new SaveDialogController(this, Main.stage);
-        controller.showAndWait().ifPresent(el -> {
-                    if (el != null) {
-                        if (el.fileExtension == SaveDialogModel.FILE_EXTENSION_SVG) {
-                            SVGPainter p = new SVGPainter(el.widthPixels, el.heightPixels);
-                            model.root.update(p, new Pair<>(0.0, 0.0), 1);
-                            p.saveAsSVG(new File(el.file));
-                        } else if (el.fileExtension == SaveDialogModel.FILE_EXTENSION_TEX) {
-                            TikzPainter texPainter = new TikzPainter();
-                            view.repaint(texPainter, Style.getCurrentStyle());
-                            texPainter.save(new File(el.file), el.widthCantimeters, getCurrentStyle().isDebugModeEnabled() && getCurrentStyle().isDebugTikzIncludeComments());
-                        } else {
-                            ImagePainter p = new ImagePainter(el.originalWidth, el.originalHeight, el.scale);
-                            view.repaint(p, Style.getCurrentStyle());
-                            if (el.fileExtension == SaveDialogModel.FILE_EXTENSION_JPG) {
-                                p.saveAsJPG(new File(el.file));
-                            } else {
-                                p.saveAsPNG(new File(el.file));
-                            }
-                        }
-                    }
-                }
-        );
+        controller.showAndWait();
         model.root = currentState;
-        model.canvasScale = oldCS;
+        setCanvasScale(oldCS);
         model.posX = oldPX;
         model.posY = oldPY;
-        DiagramBlockModel.basicFont = Font.font(getCurrentStyle().getFontBasicName(),
-                model.canvasScale * getCurrentStyle().getFontBasicSize());
-        DiagramBlockModel.VIEWPORT_MODE = true;
         model.root.recalculateSizes();
-        view.repaint(gc, Style.getCurrentStyle());
+        repaint(new Dimension2D(eModel.canvasWidth, eModel.canvasHeight));
     }
 
     public void checkAndNew() {
@@ -136,14 +113,11 @@ public class EditorController extends DiagramBlockController {
             model.root = new BDContainerController(this);
             model.posX = 0;
             model.posY = 0;
-            model.canvasScale = 1;
+            setCanvasScale(1);
             model.selected = null;
-            DiagramBlockModel.VIEWPORT_MODE = true;
-            DiagramBlockModel.basicFont = Font.font(getCurrentStyle().getFontBasicName(),
-                    model.canvasScale * getCurrentStyle().getFontBasicSize());
-            model.root.update(gc, new Pair<>(DiagramBlockModel.canvasMousePosX,
-                    DiagramBlockModel.canvasMousePosY), model.canvasScale);
-            view.repaint(gc, Style.getCurrentStyle());
+            model.root.update(gc, new Pair<>(eModel.canvasMousePosX,
+                    eModel.canvasMousePosY), model.canvasScale);
+            repaint(new Dimension2D(eModel.canvasWidth, eModel.canvasHeight));
 
             currentPath = null;
 
@@ -169,7 +143,7 @@ public class EditorController extends DiagramBlockController {
 
             updateTitle();
 
-            view.repaint(gc, Style.getCurrentStyle());
+            repaint(new Dimension2D(eModel.canvasWidth, eModel.canvasHeight));
         }
     }
 
@@ -182,10 +156,15 @@ public class EditorController extends DiagramBlockController {
         }
     }
 
+    public EditorController() {
+        super(null, null, null);
+    }
+
     @FXML
     public void initialize() {
-        gc = new CanvasPainter(canvas.getGraphicsContext2D());
-        model = DiagramBlockModel.initDefault();
+        eModel = new EditorModel();
+        this.gc = new CanvasPainter(canvas.getGraphicsContext2D());
+        this.model = DiagramBlockModel.initDefault();
         DiagramBlockModel.onDataUpdate = () -> {
             DiagramBlockModel clonedAppState = model.clone();
             applicationHistory.pushElement(clonedAppState);
@@ -193,10 +172,10 @@ public class EditorController extends DiagramBlockController {
             updateTitle();
 
             model.root.recalculateSizes();
-            view.repaint(gc, Style.getCurrentStyle());
+            repaint(new Dimension2D(eModel.canvasWidth, eModel.canvasHeight));
         };
-        view = new DiagramBlockView(model);
-        DiagramBlockModel.basicFont = Font.font(getCurrentStyle().getFontBasicName(), model.canvasScale * getCurrentStyle().getFontBasicSize());
+        this.view = new DiagramBlockView(model);
+        setCanvasScale(1);
 
         elements.getItems().forEach(el -> {
             el.setOnDragDetected((event -> {
@@ -204,14 +183,14 @@ public class EditorController extends DiagramBlockController {
                 ClipboardContent cbc = new ClipboardContent();
                 cbc.putString(el.getProperties().get("datatype").toString());
                 db.setContent(cbc);
-                DiagramBlockModel.dragMode = true;
+                eModel.dragMode = true;
 
                 event.consume();
             }));
 
             el.setOnDragDone(event -> {
                 event.acceptTransferModes(TransferMode.COPY);
-                DiagramBlockModel.dragMode = false;
+                eModel.dragMode = false;
                 select();
                 if (this.model.selected != null) {
                     BDElementController replacing = BDElementController.fromString(this, el.getProperties().get("datatype").toString());
@@ -222,11 +201,11 @@ public class EditorController extends DiagramBlockController {
             });
         });
         canvas.setOnDragOver(event -> {
-                    DiagramBlockModel.mousePosX = event.getX();
-                    DiagramBlockModel.mousePosY = event.getY();
-                    DiagramBlockModel.canvasMousePosX = DiagramBlockModel.mousePosX / this.model.canvasScale;
-                    DiagramBlockModel.canvasMousePosY = DiagramBlockModel.mousePosY / this.model.canvasScale;
-                    view.repaint(gc, Style.getCurrentStyle());
+                    eModel.mousePosX = event.getX();
+                    eModel.mousePosY = event.getY();
+                    eModel.canvasMousePosX = eModel.mousePosX / this.model.canvasScale;
+                    eModel.canvasMousePosY = eModel.mousePosY / this.model.canvasScale;
+                    repaint(new Dimension2D(eModel.canvasWidth, eModel.canvasHeight));
                 }
         );
 
@@ -262,20 +241,20 @@ public class EditorController extends DiagramBlockController {
                 new BDTerminatorController("Конец"));*/
         model.root = new BDContainerController(this);
         canvas.widthProperty().addListener((observable, oldValue, newValue) -> {
-            DiagramBlockModel.canvasWidth = newValue.doubleValue();
-            view.repaint(gc, Style.getCurrentStyle());
+            eModel.canvasWidth = newValue.doubleValue();
+            repaint(new Dimension2D(eModel.canvasWidth, eModel.canvasHeight));
         });
         canvas.heightProperty().addListener((observable, oldValue, newValue) -> {
-            DiagramBlockModel.canvasHeight = newValue.doubleValue();
-            canvas.setHeight(DiagramBlockModel.canvasHeight);
-            view.repaint(gc, Style.getCurrentStyle());
+            eModel.canvasHeight = newValue.doubleValue();
+            canvas.setHeight(eModel.canvasHeight);
+            repaint(new Dimension2D(eModel.canvasWidth, eModel.canvasHeight));
         });
         canvas.setOnMouseMoved(event -> {
-            DiagramBlockModel.mousePosX = event.getX();
-            DiagramBlockModel.mousePosY = event.getY();
-            DiagramBlockModel.canvasMousePosX = DiagramBlockModel.mousePosX / this.model.canvasScale;
-            DiagramBlockModel.canvasMousePosY = DiagramBlockModel.mousePosY / this.model.canvasScale;
-            view.repaint(gc, Style.getCurrentStyle());
+            eModel.mousePosX = event.getX();
+            eModel.mousePosY = event.getY();
+            eModel.canvasMousePosX = eModel.mousePosX / this.model.canvasScale;
+            eModel.canvasMousePosY = eModel.mousePosY / this.model.canvasScale;
+            repaint(new Dimension2D(eModel.canvasWidth, eModel.canvasHeight));
         });
 
         menuQuit.setOnAction(event -> checkAndExit());
@@ -298,12 +277,11 @@ public class EditorController extends DiagramBlockController {
 
             this.model.selected = model.root.getSelected();
             this.view.model = model;
+            setCanvasScale(this.model.canvasScale);
 
-            DiagramBlockModel.basicFont = Font.font(getCurrentStyle().getFontBasicName(),
-                    model.canvasScale * getCurrentStyle().getFontBasicSize());
             updateBDContentsEditor();
 
-            this.view.repaint(gc, Style.getCurrentStyle());
+            repaint(new Dimension2D(eModel.canvasWidth, eModel.canvasHeight));
         });
 
         menuRedo.setOnAction(event -> {
@@ -313,11 +291,10 @@ public class EditorController extends DiagramBlockController {
 
             this.model.selected = model.root.getSelected();
             this.view.model = model;
+            setCanvasScale(this.model.canvasScale);
 
-            DiagramBlockModel.basicFont = Font.font(getCurrentStyle().getFontBasicName(),
-                    model.canvasScale * getCurrentStyle().getFontBasicSize());
             updateBDContentsEditor();
-            this.view.repaint(gc, Style.getCurrentStyle());
+            repaint(new Dimension2D(eModel.canvasWidth, eModel.canvasHeight));
         });
 
         menuDelete.setOnAction(event -> {
@@ -330,21 +307,18 @@ public class EditorController extends DiagramBlockController {
             updateTitle();
 
             updateBDContentsEditor();
-            view.repaint(gc, Style.getCurrentStyle());
+            repaint(new Dimension2D(eModel.canvasWidth, eModel.canvasHeight));
         });
 
         menuOpen.setOnAction(event -> {
             if (checkIfSaved() && load()) {
                 model.posX = 0;
                 model.posY = 0;
-                model.canvasScale = 1;
+                setCanvasScale(1);
                 model.selected = null;
-                DiagramBlockModel.VIEWPORT_MODE = true;
-                DiagramBlockModel.basicFont = Font.font(getCurrentStyle().getFontBasicName(),
-                        model.canvasScale * getCurrentStyle().getFontBasicSize());
-                model.root.update(gc, new Pair<>(DiagramBlockModel.canvasMousePosX,
-                        DiagramBlockModel.canvasMousePosY), model.canvasScale);
-                view.repaint(gc, Style.getCurrentStyle());
+                model.root.update(gc, new Pair<>(eModel.canvasMousePosX,
+                        eModel.canvasMousePosY), model.canvasScale);
+                repaint(new Dimension2D(eModel.canvasWidth, eModel.canvasHeight));
                 updateBDContentsEditor();
             }
         });
@@ -354,35 +328,32 @@ public class EditorController extends DiagramBlockController {
         updateTitle();
 
         applicationHistory = new History<>(model.clone());
-        view.repaint(gc, Style.getCurrentStyle());
+        repaint(new Dimension2D(eModel.canvasWidth, eModel.canvasHeight));
     }
 
     public void onCanvasScrolled(ScrollEvent event) {
         double scrollTime = event.getDeltaY();
         double scale = Math.pow(DiagramBlockModel.CANVAS_RESCALE_FACTOR, scrollTime);
-        model.canvasScale *= scale;
+        setCanvasScale(model.canvasScale * scale);
 
-        double newCanvasHeight = DiagramBlockModel.canvasHeight * scale;
-        double newCanvasWidth = DiagramBlockModel.canvasWidth * scale;
+        double newCanvasHeight = eModel.canvasHeight * scale;
+        double newCanvasWidth = eModel.canvasWidth * scale;
 
-        double oldRelMouseX = DiagramBlockModel.mousePosX / DiagramBlockModel.canvasWidth;
-        double oldRelMouseY = DiagramBlockModel.mousePosY / DiagramBlockModel.canvasHeight;
-        double newRelMouseX = DiagramBlockModel.mousePosX / newCanvasWidth;
-        double newRelMouseY = DiagramBlockModel.mousePosY / newCanvasHeight;
+        double oldRelMouseX = eModel.mousePosX / eModel.canvasWidth;
+        double oldRelMouseY = eModel.mousePosY / eModel.canvasHeight;
+        double newRelMouseX = eModel.mousePosX / newCanvasWidth;
+        double newRelMouseY = eModel.mousePosY / newCanvasHeight;
         model.posX += newCanvasWidth * (newRelMouseX - oldRelMouseX) / model.canvasScale;
         model.posY += newCanvasHeight * (newRelMouseY - oldRelMouseY) / model.canvasScale;
 
-        DiagramBlockModel.basicFont = Font.font(getCurrentStyle().getFontBasicName(),
-                model.canvasScale * getCurrentStyle().getFontBasicSize());
-
-        view.repaint(gc, Style.getCurrentStyle());
+        repaint(new Dimension2D(eModel.canvasWidth, eModel.canvasHeight));
     }
 
     public void onMousePressed(MouseEvent event) {
         canvas.requestFocus();
         if (event.isSecondaryButtonDown()) {
-            model.startX = event.getX();
-            model.startY = event.getY();
+            eModel.startX = event.getX();
+            eModel.startY = event.getY();
         } else if (event.isPrimaryButtonDown()) {
             select();
         }
@@ -390,11 +361,11 @@ public class EditorController extends DiagramBlockController {
 
     public void onCanvasMouseDragged(MouseEvent event) {
         if (event.isSecondaryButtonDown()) {
-            model.posX += (event.getX() - model.startX) / model.canvasScale;
-            model.posY += (event.getY() - model.startY) / model.canvasScale;
-            model.startX = event.getX();
-            model.startY = event.getY();
-            view.repaint(gc, Style.getCurrentStyle());
+            model.posX += (event.getX() - eModel.startX) / model.canvasScale;
+            model.posY += (event.getY() - eModel.startY) / model.canvasScale;
+            eModel.startX = event.getX();
+            eModel.startY = event.getY();
+            repaint(new Dimension2D(eModel.canvasWidth, eModel.canvasHeight));
         }
     }
 
@@ -482,7 +453,27 @@ public class EditorController extends DiagramBlockController {
     }
 
     @Override
-    public Style getCurrentStyle(){
+    public Style getCurrentStyle() {
         return Style.getCurrentStyle();
+    }
+
+    @Override
+    public double canvasMousePosX() {
+        return eModel.canvasMousePosX;
+    }
+
+    @Override
+    public double canvasMousePosY() {
+        return eModel.canvasMousePosY;
+    }
+
+    @Override
+    public boolean isViewportMode() {
+        return true;
+    }
+
+    @Override
+    public boolean isDragMode() {
+        return eModel.dragMode;
     }
 }

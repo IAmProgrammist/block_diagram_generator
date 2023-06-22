@@ -170,7 +170,8 @@ public class BDDecisionController extends BDElementController implements TextEdi
 
     @Override
     public void update(AbstractPainter gc, Pair<Double, Double> position, double scale) {
-        view.repaint(gc, position, isMouseInElement(position), selected, scale, context.getCurrentStyle());
+        view.repaint(gc, position, context.model.basicFont, isMouseInElement(position), selected, context.isViewportMode(),
+                context.isDragMode(), scale, context.getCurrentStyle());
     }
 
     @Override
@@ -472,6 +473,13 @@ public class BDDecisionController extends BDElementController implements TextEdi
     @Override
     public BDElementController clone() {
         return new BDDecisionController(context, model.positive.clone(), model.positiveBranch,
+                model.negative.clone(), model.negativeBranch,
+                getModel().data, this.selected);
+    }
+
+    @Override
+    public BDElementController clone(DiagramBlockController newContext) {
+        return new BDDecisionController(newContext, model.positive.clone(), model.positiveBranch,
                 model.negative.clone(), model.negativeBranch,
                 getModel().data, this.selected);
     }

@@ -72,7 +72,8 @@ public class BDCycleNotFixedController extends BDElementController implements Te
 
     @Override
     public void update(AbstractPainter gc, Pair<Double, Double> position, double scale) {
-        view.repaint(gc, position, isMouseInElement(position), selected, scale, context.getCurrentStyle());
+        view.repaint(gc, position, context.model.basicFont, isMouseInElement(position), selected, context.isViewportMode(),
+                context.isDragMode(), scale, context.getCurrentStyle());
     }
 
     @Override
@@ -178,6 +179,11 @@ public class BDCycleNotFixedController extends BDElementController implements Te
     @Override
     public BDElementController clone() {
         return new BDCycleNotFixedController(context, model.body.clone(), this.model.data, this.selected);
+    }
+
+    @Override
+    public BDElementController clone(DiagramBlockController newContext) {
+        return new BDCycleNotFixedController(newContext, model.body.clone(), this.model.data, this.selected);
     }
 
     @Override

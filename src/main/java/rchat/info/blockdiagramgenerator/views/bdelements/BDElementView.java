@@ -1,14 +1,15 @@
 package rchat.info.blockdiagramgenerator.views.bdelements;
 
 import javafx.geometry.Dimension2D;
+import javafx.scene.text.Font;
 import javafx.util.Pair;
 import rchat.info.blockdiagramgenerator.models.DiagramBlockModel;
 import rchat.info.blockdiagramgenerator.models.Style;
 import rchat.info.blockdiagramgenerator.painter.AbstractPainter;
 
 public abstract class BDElementView {
-    public abstract void repaint(AbstractPainter gc, Pair<Double, Double> drawPoint, boolean selectionOverflow,
-                                 boolean selected, double scale, Style style);
+    public abstract void repaint(AbstractPainter gc, Pair<Double, Double> drawPoint, Font basicFont, boolean selectionOverflow,
+                                 boolean selected, boolean isViewport, boolean isDragmode, double scale, Style style);
 
     public void drawOverflowBorder(AbstractPainter gc, Pair<Double, Double> drawPoint, Dimension2D size, double scale, Style style) {
         gc.setStroke(style.getOverflowSelectionColor());

@@ -1,5 +1,8 @@
 package rchat.info.blockdiagramgenerator;
 
+import rchat.info.blockdiagramgenerator.controllers.DiagramBlockController;
+import rchat.info.blockdiagramgenerator.models.DiagramBlockModel;
+
 import java.util.Stack;
 
 public class History<T> extends Stack<History.Cloneable<T>> {
@@ -13,6 +16,8 @@ public class History<T> extends Stack<History.Cloneable<T>> {
 
     public interface Cloneable<E> {
         public E clone();
+
+        public E clone(DiagramBlockController newContext);
     }
 
     public History(History.Cloneable<T> initValue) {

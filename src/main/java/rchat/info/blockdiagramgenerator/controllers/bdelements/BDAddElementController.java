@@ -47,7 +47,8 @@ public class BDAddElementController extends BDElementController {
 
     @Override
     public void update(AbstractPainter gc, Pair<Double, Double> position, double scale) {
-        view.repaint(gc, position, isMouseInElement(position), selected, scale, context.getCurrentStyle());
+        view.repaint(gc, position, context.model.basicFont, isMouseInElement(position), selected, context.isViewportMode(),
+                context.isDragMode(), scale, context.getCurrentStyle());
     }
 
     // You can't remove BDAddElement! Why would you do that?
@@ -92,6 +93,11 @@ public class BDAddElementController extends BDElementController {
     @Override
     public BDAddElementController clone() {
         return new BDAddElementController(context, selected);
+    }
+
+    @Override
+    public BDElementController clone(DiagramBlockController newContext) {
+        return new BDAddElementController(newContext, selected);
     }
 
     @Override

@@ -28,7 +28,7 @@ public class BDContainerController extends BDElementController implements Collec
     public BDContainerController(DiagramBlockController context) {
         super(context, EXPORT_IDENTIFIER);
 
-        if (DiagramBlockModel.VIEWPORT_MODE) {
+        if (context.isViewportMode()) {
             this.model = new BDContainerModel(new BDAddElementController(context));
         } else {
             this.model = new BDContainerModel();
@@ -46,7 +46,7 @@ public class BDContainerController extends BDElementController implements Collec
         elements = Arrays.stream(elements)
                 .filter(el -> !(el instanceof BDAddElementController))
                 .collect(Collectors.toList()).toArray(new BDElementController[0]);
-        if (elements.length == 0 && DiagramBlockModel.VIEWPORT_MODE) {
+        if (elements.length == 0 && context.isViewportMode()) {
             this.model = new BDContainerModel(new BDAddElementController(context));
         } else {
             this.model = new BDContainerModel(elements);
@@ -64,7 +64,7 @@ public class BDContainerController extends BDElementController implements Collec
         elements = Arrays.stream(elements)
                 .filter(el -> !(el instanceof BDAddElementController))
                 .collect(Collectors.toList()).toArray(new BDElementController[0]);
-        if (elements.length == 0 && DiagramBlockModel.VIEWPORT_MODE) {
+        if (elements.length == 0 && context.isViewportMode()) {
             this.model = new BDContainerModel(new BDAddElementController(context));
         } else {
             this.model = new BDContainerModel(elements);
@@ -88,7 +88,7 @@ public class BDContainerController extends BDElementController implements Collec
         BDElementController[] elementsAr = elements.stream()
                 .filter(el -> !(el == null || el instanceof BDAddElementController))
                 .collect(Collectors.toList()).toArray(new BDElementController[0]);
-        if (elementsAr.length == 0 && DiagramBlockModel.VIEWPORT_MODE) {
+        if (elementsAr.length == 0 && context.isViewportMode()) {
             this.model = new BDContainerModel(new BDAddElementController(context));
         } else {
             this.model = new BDContainerModel(elementsAr);
@@ -119,7 +119,9 @@ public class BDContainerController extends BDElementController implements Collec
 
     @Override
     public void update(AbstractPainter gc, Pair<Double, Double> position, double scale) {
-        view.repaint(gc, position, isMouseInElement(position), selected, scale, this.context.getCurrentStyle());
+        view.repaint(gc, position, isMouseInElement(position), selected, context.isViewportMode(), context.isDragMode(),
+                scale, this.context.getCurrentStyle(), new Pair<>(this.context.canvasMousePosX(),
+                this.context.canvasMousePosY()));
     }
 
     // We're doing this because there is may be only one element in container, so hitbox for this only element and
@@ -132,7 +134,7 @@ public class BDContainerController extends BDElementController implements Collec
         Pair<Double, Double> fixedPosition = new Pair<>(position.getKey() - context.getCurrentStyle().getContainerOverflowPadding(),
                 position.getValue() - context.getCurrentStyle().getContainerOverflowPadding());
         return Utils.isPointInBounds(
-                new Pair<>(DiagramBlockModel.canvasMousePosX, DiagramBlockModel.canvasMousePosY), fixedPosition,
+                new Pair<>(context.canvasMousePosX(), context.canvasMousePosY()), fixedPosition,
                 fixedSize);
     }
 
@@ -314,6 +316,16 @@ public class BDContainerController extends BDElementController implements Collec
     }
 
     @Override
+    public BDContainerController clone(DiagramBlockController newContext) {
+        BDElementController[] elements = new BDElementController[size()];
+        int i = 0;
+        for (BDElementController controller : this) {
+            elements[i++] = controller.clone(newContext);
+        }
+        return new BDContainerController(newContext, this.selected, elements);
+    }
+
+    @Override
     public void setControls() {
         this.controllings = Collections.emptyList();
     }
@@ -321,7 +333,7 @@ public class BDContainerController extends BDElementController implements Collec
     @Override
     public void removeFromContainer(BDElementController bdElementController) {
         model.elements.remove(bdElementController);
-        if (model.elements.size() == 0 && DiagramBlockModel.VIEWPORT_MODE) {
+        if (model.elements.size() == 0 && context.isViewportMode()) {
             model.elements.add(new BDAddElementController(context));
             model.elements.get(0).setParentContainer(this);
         }

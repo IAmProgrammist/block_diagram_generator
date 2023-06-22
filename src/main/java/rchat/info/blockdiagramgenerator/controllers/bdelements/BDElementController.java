@@ -73,7 +73,7 @@ public abstract class BDElementController implements History.Cloneable<BDElement
 
     public boolean isMouseInElement(Pair<Double, Double> position) {
         return Utils.isPointInBounds(
-                new Pair<>(DiagramBlockModel.canvasMousePosX, DiagramBlockModel.canvasMousePosY), position,
+                new Pair<>(context.canvasMousePosX(), context.canvasMousePosY()), position,
                 getModel().getSize());
     }
 

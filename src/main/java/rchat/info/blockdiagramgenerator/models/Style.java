@@ -149,7 +149,7 @@ public final class Style {
         putColor(styleNode, "fontColor", style.fontColor);
         putColor(styleNode, "bdBackgroundColor", style.bdBackgroundColor);
         putColor(styleNode, "gridColor", style.gridColor);
-        putColor(styleNode, "backgroundColor", style.selectedColor);
+        putColor(styleNode, "backgroundColor", style.backgroundColor);
         putColor(styleNode, "selectedColor", style.selectedColor);
         putColor(styleNode, "overflowSelectionColor", style.overflowSelectionColor);
         putColor(styleNode, "dragndropForegroundColor", style.dragndropForegroundColor);
