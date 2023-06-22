@@ -404,10 +404,10 @@ public class TikzPainter extends AbstractPainter {
 
         // TODO: добавить все зависимости
         StringBuilder result = new StringBuilder();
-        if (DiagramBlockModel.IS_DEBUG_TIKZ_INCLUDE_COMMENTS)
+        if (DiagramBlockModel.IS_DEBUG_MODE_ENABLED && DiagramBlockModel.IS_DEBUG_TIKZ_INCLUDE_COMMENTS)
             result.append("% Созданная блок схема работает для article.\n");
         result.append("\\documentclass{article}\n\n");
-        if (DiagramBlockModel.IS_DEBUG_TIKZ_INCLUDE_COMMENTS)
+        if (DiagramBlockModel.IS_DEBUG_MODE_ENABLED && DiagramBlockModel.IS_DEBUG_TIKZ_INCLUDE_COMMENTS)
             result.append("% Необходимые зависимости\n");
         result.append("\\usepackage[utf8]{inputenc}\n" +
                 "\\usepackage[english,russian]{babel}\n" +
@@ -433,28 +433,27 @@ public class TikzPainter extends AbstractPainter {
         getColor(backgroundColor);
 
 
-        if (DiagramBlockModel.IS_DEBUG_TIKZ_INCLUDE_COMMENTS)
+        if (DiagramBlockModel.IS_DEBUG_MODE_ENABLED && DiagramBlockModel.IS_DEBUG_TIKZ_INCLUDE_COMMENTS)
             result.append("% Шрифты\n");
         // Adding fonts
         for (Map.Entry<Font, String> fontEntity : fonts.entrySet()) {
             result.append(String.format(Locale.ENGLISH, "\\newfontfamily\\%s[Scale=%f]{%s}\n", fontEntity.getValue(), fontEntity.getKey().getSize(), fontEntity.getKey().getName()));
         }
 
-        if (DiagramBlockModel.IS_DEBUG_TIKZ_INCLUDE_COMMENTS)
+        if (DiagramBlockModel.IS_DEBUG_MODE_ENABLED && DiagramBlockModel.IS_DEBUG_TIKZ_INCLUDE_COMMENTS)
             result.append("\n% Цвета\n");
         // Adding colors
         for (Map.Entry<Color, String> colorEntity : colors.entrySet()) {
             result.append(String.format(Locale.ENGLISH, "\\definecolor{%s}{rgb}{%f,%f,%f}\n", colorEntity.getValue(),
                     colorEntity.getKey().getRed(), colorEntity.getKey().getGreen(), colorEntity.getKey().getBlue()));
         }
-        if (DiagramBlockModel.IS_DEBUG_TIKZ_INCLUDE_COMMENTS)
+        if (DiagramBlockModel.IS_DEBUG_MODE_ENABLED && DiagramBlockModel.IS_DEBUG_TIKZ_INCLUDE_COMMENTS)
             result.append("\n% Документ\n");
         result.append("\\begin{document}\n");
-        if (DiagramBlockModel.IS_DEBUG_TIKZ_INCLUDE_COMMENTS)
+        if (DiagramBlockModel.IS_DEBUG_MODE_ENABLED && DiagramBlockModel.IS_DEBUG_TIKZ_INCLUDE_COMMENTS)
             result.append("\n% При формировании документа могли возникнуть некоторые неточности при расчёте, поэтому я пихнул ещё и resizebox, чтоб уж наверняка\n");
-        //result.append(String.format(Locale.ENGLISH, "\\resizebox{%f cm}{!}{\n", maxWidth));
 
-        if (DiagramBlockModel.IS_DEBUG_TIKZ_INCLUDE_COMMENTS)
+        if (DiagramBlockModel.IS_DEBUG_MODE_ENABLED && DiagramBlockModel.IS_DEBUG_TIKZ_INCLUDE_COMMENTS)
             result.append("\n% Собственно, сама блок схема\n");
 
         result.append(String.format(Locale.ENGLISH, "\\begin{tikzpicture}[every node/.style={inner sep=0,outer sep=0}, background rectangle/.style={opacity=%f, fill=%s}, show background rectangle]\n", backgroundColor.getOpacity(), getColor(this.backgroundColor)));
@@ -462,7 +461,6 @@ public class TikzPainter extends AbstractPainter {
         result.append(doc);
 
         result.append("\\end{tikzpicture}\n");
-        //result.append("}\n");
         result.append("\\end{document}");
 
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file),

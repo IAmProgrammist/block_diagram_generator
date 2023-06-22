@@ -29,7 +29,7 @@ public class DiagramBlockModel implements History.Cloneable<DiagramBlockModel> {
     public static double CANVAS_RESCALE_FACTOR = 1.003;
     // Ширина/высота плитки во viewport в пикселях при canvasScale = 1.0
     public static double TILE_SIZE = 10;
-    // Размер текста при canvasScale = 1.0
+    // Размер текста в пикселях при canvasScale = 1.0
     public static double FONT_BASIC_SIZE = 50;
     // Ширина границы блок схем при canvasScale = 1.0
     public static double STROKE_WIDTH_DEFAULT = 5;
@@ -49,11 +49,9 @@ public class DiagramBlockModel implements History.Cloneable<DiagramBlockModel> {
     public static double CONNECTORS_WIDTH = 3;
     // Отступ текста
     public static double TEXT_PADDING = 30;
-    // Минимальное время которое должно пройти для следующей отрисовки canvas с прошлой отрисовки в миллисекундах
-    public static long FPS_LIMITER = 16;
     // Минимальная длина плеча в циклах, решениях
     public static double MIN_DECISION_SHOULDER_LEN = 50;
-    //
+    // Отступ между ветками в блоке "решение"
     public static double DECISION_BLOCKS_PADDING = 50;
     public static Color DEBUG_BORDER_COLOR = Color.PURPLE;
     public static Color OVERFLOW_SELECTION_COLOR = Color.DARKSEAGREEN;
@@ -145,9 +143,6 @@ public class DiagramBlockModel implements History.Cloneable<DiagramBlockModel> {
 
         if (properties.contains("CONTAINER_OVERFLOW_PADDING"))
             CONTAINER_OVERFLOW_PADDING = Double.parseDouble(properties.getProperty("CONTAINER_OVERFLOW_PADDING"));
-
-        if (properties.contains("CANVAS_RESCALE_FACTOR"))
-            CANVAS_RESCALE_FACTOR = Double.parseDouble(properties.getProperty("CANVAS_RESCALE_FACTOR"));
 
         if (properties.contains("TILE_SIZE"))
             TILE_SIZE = Double.parseDouble(properties.getProperty("TILE_SIZE"));
