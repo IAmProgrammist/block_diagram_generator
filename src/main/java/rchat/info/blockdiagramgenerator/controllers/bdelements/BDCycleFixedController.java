@@ -10,7 +10,9 @@ import javafx.util.Pair;
 import org.json.JSONObject;
 import rchat.info.blockdiagramgenerator.Main;
 import rchat.info.blockdiagramgenerator.Utils;
+import rchat.info.blockdiagramgenerator.controllers.DiagramBlockController;
 import rchat.info.blockdiagramgenerator.models.DiagramBlockModel;
+import rchat.info.blockdiagramgenerator.models.Style;
 import rchat.info.blockdiagramgenerator.models.bdelements.BDCycleFixedModel;
 import rchat.info.blockdiagramgenerator.models.bdelements.BDCycleNotFixedModel;
 import rchat.info.blockdiagramgenerator.models.bdelements.BDDecisionModel;
@@ -28,8 +30,8 @@ public class BDCycleFixedController extends BDElementController implements TextE
     public BDCycleFixedModel model;
     public BDCycleFixedView view;
 
-    public BDCycleFixedController(BDContainerController body, String content) {
-        super(EXPORT_IDENTIFIER);
+    public BDCycleFixedController(DiagramBlockController context, BDContainerController body, String content) {
+        super(context, EXPORT_IDENTIFIER);
 
         this.model = new BDCycleFixedModel(content, body);
         this.model.body.setParentContainer(this);
@@ -38,8 +40,8 @@ public class BDCycleFixedController extends BDElementController implements TextE
         recalculateSizes();
     }
 
-    public BDCycleFixedController(BDContainerController body, String content, boolean selected) {
-        super(EXPORT_IDENTIFIER);
+    public BDCycleFixedController(DiagramBlockController context, BDContainerController body, String content, boolean selected) {
+        super(context, EXPORT_IDENTIFIER);
 
         this.model = new BDCycleFixedModel(content, body);
         this.model.body.setParentContainer(this);
@@ -49,11 +51,11 @@ public class BDCycleFixedController extends BDElementController implements TextE
         recalculateSizes();
     }
 
-    public BDCycleFixedController(JSONObject object) {
-        super(object);
+    public BDCycleFixedController(DiagramBlockController context, JSONObject object) {
+        super(context, object);
         JSONObject data = object.getJSONObject("data");
 
-        BDContainerController body = new BDContainerController(data.getJSONObject("body"));
+        BDContainerController body = new BDContainerController(context, data.getJSONObject("body"));
 
         this.model = new BDCycleFixedModel(data.getString("data"), body);
         this.model.body.setParentContainer(this);
@@ -77,7 +79,7 @@ public class BDCycleFixedController extends BDElementController implements TextE
 
     @Override
     public void update(AbstractPainter gc, Pair<Double, Double> position, double scale) {
-        view.repaint(gc, position, isMouseInElement(position), selected, scale);
+        view.repaint(gc, position, isMouseInElement(position), selected, scale, context.getCurrentStyle());
     }
 
     @Override
@@ -89,9 +91,9 @@ public class BDCycleFixedController extends BDElementController implements TextE
         drawPoint = new Pair<>(drawPoint.getKey() + (model.getDistanceToLeftBound() - rhombusWidth / 2), drawPoint.getValue());
 
         Pair<Double, Double> bottomRhombusConnector = model.getBottomRhombusConnector(drawPoint);
-        Pair<Double, Double> fakeDrawPoint = model.body.getModel().getTopConnector(new Pair<>(bottomRhombusConnector.getKey(), bottomRhombusConnector.getValue() + DiagramBlockModel.ELEMENTS_SPACING));
+        Pair<Double, Double> fakeDrawPoint = model.body.getModel().getTopConnector(new Pair<>(bottomRhombusConnector.getKey(), bottomRhombusConnector.getValue() + context.getCurrentStyle().getElementsSpacing()));
         Pair<Double, Double> trueCenterDrawPoint = new Pair<>(bottomRhombusConnector.getKey() - (fakeDrawPoint.getKey() - bottomRhombusConnector.getKey()),
-                bottomRhombusConnector.getValue() + DiagramBlockModel.ELEMENTS_SPACING);
+                bottomRhombusConnector.getValue() + context.getCurrentStyle().getElementsSpacing());
         selected = model.body.select(trueCenterDrawPoint);
 
         if (selected != null) {
@@ -106,7 +108,7 @@ public class BDCycleFixedController extends BDElementController implements TextE
     public void recalculateSizes() {
         this.model.body.recalculateSizes();
         double maxLineLen = 0;
-        Font basicFont = new Font(DiagramBlockModel.FONT_BASIC_NAME, DiagramBlockModel.FONT_BASIC_SIZE);
+        Font basicFont = new Font(context.getCurrentStyle().getFontBasicName(), context.getCurrentStyle().getFontBasicSize());
         List<String> dataLines = getModel().getDataLines();
         double textHeight = dataLines.size() == 0 ? Utils.computeTextWidth(basicFont, "").getHeight() : 0;
         for (String line : dataLines) {
@@ -114,11 +116,11 @@ public class BDCycleFixedController extends BDElementController implements TextE
             if (d.getWidth() > maxLineLen) {
                 maxLineLen = d.getWidth();
             }
-            textHeight += d.getHeight() + DiagramBlockModel.LINE_SPACING;
+            textHeight += d.getHeight() + context.getCurrentStyle().getLineSpacing();
         }
-        textHeight -= DiagramBlockModel.LINE_SPACING;
-        double textWidth = maxLineLen + 2 * DiagramBlockModel.TEXT_PADDING;
-        textHeight += 2 * DiagramBlockModel.TEXT_PADDING;
+        textHeight -= context.getCurrentStyle().getLineSpacing();
+        double textWidth = maxLineLen + 2 * context.getCurrentStyle().getTextPadding();
+        textHeight += 2 * context.getCurrentStyle().getTextPadding();
         double a = Math.max(textHeight, textWidth);
 
         Dimension2D rhombusSize = new Dimension2D(a * 2, a);
@@ -129,12 +131,12 @@ public class BDCycleFixedController extends BDElementController implements TextE
         double rhombusHeight = rhombusSize.getHeight();
 
         double leftLineOffset = Math.max(Math.max(rhombusWidth / 2, model.body.getModel().getDistanceToLeftBound())
-                + DiagramBlockModel.DECISION_BLOCKS_PADDING, DiagramBlockModel.MIN_DECISION_SHOULDER_LEN);
+                + context.getCurrentStyle().getDecisionBlocksPadding(), context.getCurrentStyle().getMinDecisionShoulderLen());
 
         double leftBound = leftLineOffset;
         double rightLineOffset = Math.max(Math.max(rhombusWidth / 2, model.body.getModel().getDistanceToRightBound())
-                + DiagramBlockModel.DECISION_BLOCKS_PADDING, DiagramBlockModel.MIN_DECISION_SHOULDER_LEN);
-        double bottomPoint = rhombusHeight + 2 * DiagramBlockModel.ELEMENTS_SPACING + model.body.getModel().getSize().getHeight() + DiagramBlockModel.DECISION_BLOCKS_PADDING;
+                + context.getCurrentStyle().getDecisionBlocksPadding(), context.getCurrentStyle().getMinDecisionShoulderLen());
+        double bottomPoint = rhombusHeight + 2 * context.getCurrentStyle().getElementsSpacing() + model.body.getModel().getSize().getHeight() + context.getCurrentStyle().getDecisionBlocksPadding();
         double rightBound = rightLineOffset;
         Dimension2D size = new Dimension2D(Math.abs(leftBound + rightBound), bottomPoint);
         model.setMeasurements(size, leftBound, rightBound);
@@ -147,7 +149,7 @@ public class BDCycleFixedController extends BDElementController implements TextE
 
     @Override
     public BDElementController clone() {
-        return new BDCycleFixedController(model.body.clone(), this.model.data, this.selected);
+        return new BDCycleFixedController(context, model.body.clone(), this.model.data, this.selected);
     }
 
     @Override
@@ -216,7 +218,7 @@ public class BDCycleFixedController extends BDElementController implements TextE
     public void removeFromContainer(BDElementController bdElementController) {
         if (model.body == bdElementController) {
             model.body = null;
-            model.body = new BDContainerController();
+            model.body = new BDContainerController(context);
         }
     }
 

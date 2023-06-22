@@ -33,7 +33,7 @@ public final class Style {
     private static Style currentStyle;
     private static String DEFAULT_STYLE_NAME;
     private static Style DEFAULT_STYLE;
-    private String styleName;
+    private final String styleName;
     private String positiveBranchText;
     private String negativeBranchText;
     private String fontBasicName;
@@ -206,7 +206,7 @@ public final class Style {
 
     public static String[] getStyles() {
         try {
-            return Preferences.userNodeForPackage(Style.class).node("style").childrenNames();
+            return Preferences.userNodeForPackage(Style.class).node("styles").childrenNames();
         } catch (BackingStoreException e) {
             return new String[]{};
         }
@@ -214,7 +214,7 @@ public final class Style {
 
     public static Style getStyle(String styleName) {
         if (hasStyle(styleName)) {
-            Preferences style = Preferences.userNodeForPackage(Style.class).node("style").node(styleName);
+            Preferences style = Preferences.userNodeForPackage(Style.class).node("styles").node(styleName);
             return new Style(styleName, style.get("fontBasicName", DEFAULT_STYLE.fontBasicName),
                     getColor(style, "strokeColor", DEFAULT_STYLE.strokeColor),
                     getColor(style, "fontColor", DEFAULT_STYLE.fontColor),
@@ -257,7 +257,7 @@ public final class Style {
 
     private static boolean hasStyle(String styleName) {
         try {
-            return Preferences.userNodeForPackage(Style.class).node("style").nodeExists(styleName);
+            return Preferences.userNodeForPackage(Style.class).node("styles").nodeExists(styleName);
         } catch (Exception e) {
             return false;
         }
@@ -265,27 +265,27 @@ public final class Style {
 
     private static void update(String style, String key, String value) {
         if (hasStyle(style))
-            Preferences.userNodeForPackage(Style.class).node("style").node(style).put(key, value);
+            Preferences.userNodeForPackage(Style.class).node("styles").node(style).put(key, value);
     }
 
     private static void update(String style, String key, double value) {
         if (hasStyle(style))
-            Preferences.userNodeForPackage(Style.class).node("style").node(style).putDouble(key, value);
+            Preferences.userNodeForPackage(Style.class).node("styles").node(style).putDouble(key, value);
     }
 
     private static void update(String style, String key, int value) {
         if (hasStyle(style))
-            Preferences.userNodeForPackage(Style.class).node("style").node(style).putInt(key, value);
+            Preferences.userNodeForPackage(Style.class).node("styles").node(style).putInt(key, value);
     }
 
     private static void update(String style, String key, boolean value) {
         if (hasStyle(style))
-            Preferences.userNodeForPackage(Style.class).node("style").node(style).putBoolean(key, value);
+            Preferences.userNodeForPackage(Style.class).node("styles").node(style).putBoolean(key, value);
     }
 
     private static void update(String style, String key, Color value) {
         if (hasStyle(style))
-            putColor(Preferences.userNodeForPackage(Style.class).node("style").node(style), key, value);
+            putColor(Preferences.userNodeForPackage(Style.class).node("styles").node(style), key, value);
     }
 
     public void setPositiveBranchText(String positiveBranchText) {

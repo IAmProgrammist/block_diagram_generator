@@ -45,7 +45,7 @@ public class SaveDialogController extends Dialog<SaveDialogModel> {
     private ObjectProperty<SaveDialogModel> connection = new SimpleObjectProperty<>(null);
     public ResourceBundle rb;
 
-    public SaveDialogController(DiagramBlockController main, Window window) {
+    public SaveDialogController(EditorController main, Window window) {
         try {
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(getClass().getResource("/rchat/info/blockdiagramgenerator/layouts/save-dialog.fxml"));

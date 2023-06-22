@@ -1,16 +1,9 @@
 package rchat.info.blockdiagramgenerator.controllers.bdelements;
 
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.geometry.Dimension2D;
-import javafx.geometry.Insets;
-import javafx.scene.Node;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
-import javafx.scene.layout.HBox;
 import javafx.scene.text.Font;
-import javafx.scene.text.Text;
 import javafx.util.Pair;
 import javafx.util.StringConverter;
 import org.json.JSONObject;
@@ -18,15 +11,14 @@ import rchat.info.blockdiagramgenerator.Main;
 import rchat.info.blockdiagramgenerator.Utils;
 import rchat.info.blockdiagramgenerator.controllers.DiagramBlockController;
 import rchat.info.blockdiagramgenerator.models.DiagramBlockModel;
+import rchat.info.blockdiagramgenerator.models.Style;
 import rchat.info.blockdiagramgenerator.models.bdelements.*;
 import rchat.info.blockdiagramgenerator.painter.AbstractPainter;
 import rchat.info.blockdiagramgenerator.views.bdelements.BDDecisionView;
-import rchat.info.blockdiagramgenerator.views.bdelements.BDPreProcessView;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static rchat.info.blockdiagramgenerator.models.DiagramBlockModel.basicFont;
 import static rchat.info.blockdiagramgenerator.models.DiagramBlockModel.onDataUpdate;
 
 public class BDDecisionController extends BDElementController implements TextEditable, Container {
@@ -34,10 +26,10 @@ public class BDDecisionController extends BDElementController implements TextEdi
     public BDDecisionModel model;
     public BDDecisionView view;
 
-    public BDDecisionController(BDContainerController positive, BDDecisionModel.Branch positiveBranch,
+    public BDDecisionController(DiagramBlockController context, BDContainerController positive, BDDecisionModel.Branch positiveBranch,
                                 BDContainerController negative, BDDecisionModel.Branch negativeBranch,
                                 String content) {
-        super(EXPORT_IDENTIFIER);
+        super(context, EXPORT_IDENTIFIER);
 
         this.model = new BDDecisionModel(positive, positiveBranch, negative, negativeBranch, content);
         this.model.positive.setParentContainer(this);
@@ -47,10 +39,10 @@ public class BDDecisionController extends BDElementController implements TextEdi
         recalculateSizes();
     }
 
-    public BDDecisionController(BDContainerController positive, BDDecisionModel.Branch positiveBranch,
+    public BDDecisionController(DiagramBlockController context, BDContainerController positive, BDDecisionModel.Branch positiveBranch,
                                 BDContainerController negative, BDDecisionModel.Branch negativeBranch,
                                 String content, boolean selected) {
-        super(EXPORT_IDENTIFIER);
+        super(context, EXPORT_IDENTIFIER);
 
         this.model = new BDDecisionModel(positive, positiveBranch, negative, negativeBranch, content);
         this.view = new BDDecisionView(this.model);
@@ -61,8 +53,8 @@ public class BDDecisionController extends BDElementController implements TextEdi
         recalculateSizes();
     }
 
-    public BDDecisionController(JSONObject object) {
-        super(object);
+    public BDDecisionController(DiagramBlockController context, JSONObject object) {
+        super(context, object);
 
         JSONObject branches = object.getJSONObject("data");
 
@@ -70,13 +62,13 @@ public class BDDecisionController extends BDElementController implements TextEdi
         BDDecisionModel.Branch posBranch = Arrays.stream(BDDecisionModel.Branch.values())
                 .filter(element -> element.propName.equals(positiveBranch.getString("position")))
                 .findFirst().orElse(null);
-        BDContainerController posController = new BDContainerController(positiveBranch.getJSONObject("data"));
+        BDContainerController posController = new BDContainerController(context, positiveBranch.getJSONObject("data"));
 
         JSONObject negativeBranch = branches.getJSONObject("negative");
         BDDecisionModel.Branch negBranch = Arrays.stream(BDDecisionModel.Branch.values())
                 .filter(element -> element.propName.equals(negativeBranch.getString("position")))
                 .findFirst().orElse(null);
-        BDContainerController negController = new BDContainerController(negativeBranch.getJSONObject("data"));
+        BDContainerController negController = new BDContainerController(context, negativeBranch.getJSONObject("data"));
 
         this.model = new BDDecisionModel(posController, posBranch, negController, negBranch, branches.getString("data"));
         this.view = new BDDecisionView(this.model);
@@ -178,7 +170,7 @@ public class BDDecisionController extends BDElementController implements TextEdi
 
     @Override
     public void update(AbstractPainter gc, Pair<Double, Double> position, double scale) {
-        view.repaint(gc, position, isMouseInElement(position), selected, scale);
+        view.repaint(gc, position, isMouseInElement(position), selected, scale, context.getCurrentStyle());
     }
 
     @Override
@@ -204,9 +196,9 @@ public class BDDecisionController extends BDElementController implements TextEdi
                 restBranch = model.positiveBranch;
             }
             Pair<Double, Double> bottomRhombusConnector = model.getBottomRhombusConnector(drawPoint);
-            Pair<Double, Double> fakeDrawPoint = centerBranch.getModel().getTopConnector(new Pair<>(bottomRhombusConnector.getKey(), bottomRhombusConnector.getValue() + DiagramBlockModel.ELEMENTS_SPACING));
+            Pair<Double, Double> fakeDrawPoint = centerBranch.getModel().getTopConnector(new Pair<>(bottomRhombusConnector.getKey(), bottomRhombusConnector.getValue() + context.getCurrentStyle().getElementsSpacing()));
             Pair<Double, Double> trueCenterDrawPoint = new Pair<>(bottomRhombusConnector.getKey() - (fakeDrawPoint.getKey() - bottomRhombusConnector.getKey()),
-                    bottomRhombusConnector.getValue() + DiagramBlockModel.ELEMENTS_SPACING);
+                    bottomRhombusConnector.getValue() + context.getCurrentStyle().getElementsSpacing());
             selected = centerBranch.select(trueCenterDrawPoint);
             if (selected != null) {
                 this.selected = false;
@@ -214,30 +206,30 @@ public class BDDecisionController extends BDElementController implements TextEdi
             }
 
             if (restBranch == BDDecisionModel.Branch.LEFT) {
-                double restShoulderLen = centerBranch.getModel().getDistanceToLeftBound() + DiagramBlockModel.DECISION_BLOCKS_PADDING
+                double restShoulderLen = centerBranch.getModel().getDistanceToLeftBound() + context.getCurrentStyle().getDecisionBlocksPadding()
                         + restContainer.getModel().getSize().getWidth() - rhombusWidth / 2;
 
                 Pair<Double, Double> rhombusLeftConnector = model.getLeftRhombusConnector(drawPoint);
 
                 Pair<Double, Double> drawRestPoint = new Pair<>(rhombusLeftConnector.getKey() - restShoulderLen,
-                        model.getBottomRhombusConnector(drawPoint).getValue() + DiagramBlockModel.ELEMENTS_SPACING);
+                        model.getBottomRhombusConnector(drawPoint).getValue() + context.getCurrentStyle().getElementsSpacing());
                 Pair<Double, Double> restConnector = restContainer.getModel().getTopConnector(drawRestPoint);
-                if (rhombusLeftConnector.getKey() - restConnector.getKey() < DiagramBlockModel.MIN_DECISION_SHOULDER_LEN) {
-                    drawRestPoint = new Pair<>(drawRestPoint.getKey() - (DiagramBlockModel.MIN_DECISION_SHOULDER_LEN - rhombusLeftConnector.getKey() + restConnector.getKey()),
+                if (rhombusLeftConnector.getKey() - restConnector.getKey() < context.getCurrentStyle().getMinDecisionShoulderLen()) {
+                    drawRestPoint = new Pair<>(drawRestPoint.getKey() - (context.getCurrentStyle().getMinDecisionShoulderLen() - rhombusLeftConnector.getKey() + restConnector.getKey()),
                             drawRestPoint.getValue());
                 }
                 selected = restContainer.select(drawRestPoint);
             } else {
-                double restShoulderLen = centerBranch.getModel().getDistanceToRightBound() + DiagramBlockModel.DECISION_BLOCKS_PADDING
+                double restShoulderLen = centerBranch.getModel().getDistanceToRightBound() + context.getCurrentStyle().getDecisionBlocksPadding()
                         - rhombusWidth / 2;
 
                 Pair<Double, Double> rhombusRightConnector = model.getRightRhombusConnector(drawPoint);
 
                 Pair<Double, Double> drawRestPoint = new Pair<>(rhombusRightConnector.getKey() + restShoulderLen,
-                        model.getBottomRhombusConnector(drawPoint).getValue() + DiagramBlockModel.ELEMENTS_SPACING);
+                        model.getBottomRhombusConnector(drawPoint).getValue() + context.getCurrentStyle().getElementsSpacing());
                 Pair<Double, Double> restConnector = restContainer.getModel().getTopConnector(drawRestPoint);
-                if (restConnector.getKey() - rhombusRightConnector.getKey() < DiagramBlockModel.MIN_DECISION_SHOULDER_LEN) {
-                    drawRestPoint = new Pair<>(drawRestPoint.getKey() + (DiagramBlockModel.MIN_DECISION_SHOULDER_LEN - restConnector.getKey() + rhombusRightConnector.getKey()),
+                if (restConnector.getKey() - rhombusRightConnector.getKey() < context.getCurrentStyle().getMinDecisionShoulderLen()) {
+                    drawRestPoint = new Pair<>(drawRestPoint.getKey() + (context.getCurrentStyle().getMinDecisionShoulderLen() - restConnector.getKey() + rhombusRightConnector.getKey()),
                             drawRestPoint.getValue());
                 }
                 selected = restContainer.select(drawRestPoint);
@@ -249,14 +241,14 @@ public class BDDecisionController extends BDElementController implements TextEdi
             Pair<Double, Double> rhombusRightConnector = model.getRightRhombusConnector(drawPoint);
 
             if (model.negativeBranch == BDDecisionModel.Branch.LEFT) {
-                double negativeShoulderLen = DiagramBlockModel.DECISION_BLOCKS_PADDING + negativeSize.getWidth() - rhombusWidth / 2;
-                double positiveShoulderLen = DiagramBlockModel.DECISION_BLOCKS_PADDING - rhombusWidth / 2;
+                double negativeShoulderLen = context.getCurrentStyle().getDecisionBlocksPadding() + negativeSize.getWidth() - rhombusWidth / 2;
+                double positiveShoulderLen = context.getCurrentStyle().getDecisionBlocksPadding() - rhombusWidth / 2;
 
                 Pair<Double, Double> drawNegativePoint = new Pair<>(rhombusLeftConnector.getKey() - negativeShoulderLen,
-                        model.getBottomRhombusConnector(drawPoint).getValue() + DiagramBlockModel.ELEMENTS_SPACING);
+                        model.getBottomRhombusConnector(drawPoint).getValue() + context.getCurrentStyle().getElementsSpacing());
                 Pair<Double, Double> negConnector = model.negative.getModel().getTopConnector(drawNegativePoint);
-                if (rhombusLeftConnector.getKey() - negConnector.getKey() < DiagramBlockModel.MIN_DECISION_SHOULDER_LEN) {
-                    drawNegativePoint = new Pair<>(drawNegativePoint.getKey() - (DiagramBlockModel.MIN_DECISION_SHOULDER_LEN - rhombusLeftConnector.getKey() + negConnector.getKey()),
+                if (rhombusLeftConnector.getKey() - negConnector.getKey() < context.getCurrentStyle().getMinDecisionShoulderLen()) {
+                    drawNegativePoint = new Pair<>(drawNegativePoint.getKey() - (context.getCurrentStyle().getMinDecisionShoulderLen() - rhombusLeftConnector.getKey() + negConnector.getKey()),
                             drawNegativePoint.getValue());
                 }
 
@@ -268,10 +260,10 @@ public class BDDecisionController extends BDElementController implements TextEdi
 
 
                 Pair<Double, Double> drawPositivePoint = new Pair<>(rhombusRightConnector.getKey() + positiveShoulderLen,
-                        model.getBottomRhombusConnector(drawPoint).getValue() + DiagramBlockModel.ELEMENTS_SPACING);
+                        model.getBottomRhombusConnector(drawPoint).getValue() + context.getCurrentStyle().getElementsSpacing());
                 Pair<Double, Double> posConnector = model.positive.getModel().getTopConnector(drawPositivePoint);
-                if (posConnector.getKey() - rhombusRightConnector.getKey() < DiagramBlockModel.MIN_DECISION_SHOULDER_LEN) {
-                    drawPositivePoint = new Pair<>(drawPositivePoint.getKey() + (DiagramBlockModel.MIN_DECISION_SHOULDER_LEN - (posConnector.getKey() - rhombusRightConnector.getKey())),
+                if (posConnector.getKey() - rhombusRightConnector.getKey() < context.getCurrentStyle().getMinDecisionShoulderLen()) {
+                    drawPositivePoint = new Pair<>(drawPositivePoint.getKey() + (context.getCurrentStyle().getMinDecisionShoulderLen() - (posConnector.getKey() - rhombusRightConnector.getKey())),
                             drawPositivePoint.getValue());
                 }
 
@@ -279,14 +271,14 @@ public class BDDecisionController extends BDElementController implements TextEdi
                 selected = model.positive.select(drawPositivePoint);
 
             } else {
-                double positiveShoulderLen = DiagramBlockModel.DECISION_BLOCKS_PADDING + positiveSize.getWidth() - rhombusWidth / 2;
-                double negativeShoulderLen = DiagramBlockModel.DECISION_BLOCKS_PADDING - rhombusWidth / 2;
+                double positiveShoulderLen = context.getCurrentStyle().getDecisionBlocksPadding() + positiveSize.getWidth() - rhombusWidth / 2;
+                double negativeShoulderLen = context.getCurrentStyle().getDecisionBlocksPadding() - rhombusWidth / 2;
 
                 Pair<Double, Double> drawPositivePoint = new Pair<>(rhombusLeftConnector.getKey() - positiveShoulderLen,
-                        model.getBottomRhombusConnector(drawPoint).getValue() + DiagramBlockModel.ELEMENTS_SPACING);
+                        model.getBottomRhombusConnector(drawPoint).getValue() + context.getCurrentStyle().getElementsSpacing());
                 Pair<Double, Double> posConnector = model.positive.getModel().getTopConnector(drawPositivePoint);
-                if (rhombusLeftConnector.getKey() - posConnector.getKey() < DiagramBlockModel.MIN_DECISION_SHOULDER_LEN) {
-                    drawPositivePoint = new Pair<>(drawPositivePoint.getKey() - (DiagramBlockModel.MIN_DECISION_SHOULDER_LEN - rhombusLeftConnector.getKey() + posConnector.getKey()),
+                if (rhombusLeftConnector.getKey() - posConnector.getKey() < context.getCurrentStyle().getMinDecisionShoulderLen()) {
+                    drawPositivePoint = new Pair<>(drawPositivePoint.getKey() - (context.getCurrentStyle().getMinDecisionShoulderLen() - rhombusLeftConnector.getKey() + posConnector.getKey()),
                             drawPositivePoint.getValue());
                 }
                 selected = model.positive.select(drawPositivePoint);
@@ -295,10 +287,10 @@ public class BDDecisionController extends BDElementController implements TextEdi
                     return selected;
                 }
                 Pair<Double, Double> drawNegativePoint = new Pair<>(rhombusRightConnector.getKey() + negativeShoulderLen,
-                        model.getBottomRhombusConnector(drawPoint).getValue() + DiagramBlockModel.ELEMENTS_SPACING);
+                        model.getBottomRhombusConnector(drawPoint).getValue() + context.getCurrentStyle().getElementsSpacing());
                 Pair<Double, Double> negConnector = model.negative.getModel().getTopConnector(drawNegativePoint);
-                if (negConnector.getKey() - rhombusRightConnector.getKey() < DiagramBlockModel.MIN_DECISION_SHOULDER_LEN) {
-                    drawNegativePoint = new Pair<>(drawNegativePoint.getKey() + (DiagramBlockModel.MIN_DECISION_SHOULDER_LEN - (negConnector.getKey() - rhombusRightConnector.getKey())),
+                if (negConnector.getKey() - rhombusRightConnector.getKey() < context.getCurrentStyle().getMinDecisionShoulderLen()) {
+                    drawNegativePoint = new Pair<>(drawNegativePoint.getKey() + (context.getCurrentStyle().getMinDecisionShoulderLen() - (negConnector.getKey() - rhombusRightConnector.getKey())),
                             drawNegativePoint.getValue());
                 }
                 selected = model.negative.select(drawNegativePoint);
@@ -319,7 +311,7 @@ public class BDDecisionController extends BDElementController implements TextEdi
         this.model.positive.recalculateSizes();
         this.model.negative.recalculateSizes();
         double maxLineLen = 0;
-        Font basicFont = new Font(DiagramBlockModel.FONT_BASIC_NAME, DiagramBlockModel.FONT_BASIC_SIZE);
+        Font basicFont = new Font(context.getCurrentStyle().getFontBasicName(), context.getCurrentStyle().getFontBasicSize());
         List<String> dataLines = getModel().getDataLines();
         double textHeight = dataLines.size() == 0 ? Utils.computeTextWidth(basicFont, "").getHeight() : 0;
         for (String line : dataLines) {
@@ -327,10 +319,10 @@ public class BDDecisionController extends BDElementController implements TextEdi
             if (d.getWidth() > maxLineLen) {
                 maxLineLen = d.getWidth();
             }
-            textHeight += d.getHeight() + DiagramBlockModel.LINE_SPACING;
+            textHeight += d.getHeight() + context.getCurrentStyle().getLineSpacing();
         }
-        textHeight -= DiagramBlockModel.LINE_SPACING;
-        double textWidth = maxLineLen + 2 * DiagramBlockModel.TEXT_PADDING;
+        textHeight -= context.getCurrentStyle().getLineSpacing();
+        double textWidth = maxLineLen + 2 * context.getCurrentStyle().getTextPadding();
         double diag = textHeight + textWidth / 2;
 
         Dimension2D rhombusSize = new Dimension2D(diag * 2, diag);
@@ -359,39 +351,39 @@ public class BDDecisionController extends BDElementController implements TextEdi
                 restBranch = model.positiveBranch;
             }
             Pair<Double, Double> bottomRhombusConnector = model.getBottomRhombusConnector(drawPoint);
-            Pair<Double, Double> fakeDrawPoint = centerBranch.getModel().getTopConnector(new Pair<>(bottomRhombusConnector.getKey(), bottomRhombusConnector.getValue() + DiagramBlockModel.ELEMENTS_SPACING));
+            Pair<Double, Double> fakeDrawPoint = centerBranch.getModel().getTopConnector(new Pair<>(bottomRhombusConnector.getKey(), bottomRhombusConnector.getValue() + context.getCurrentStyle().getElementsSpacing()));
             Pair<Double, Double> trueCenterDrawPoint = new Pair<>(bottomRhombusConnector.getKey() - (fakeDrawPoint.getKey() - bottomRhombusConnector.getKey()),
-                    bottomRhombusConnector.getValue() + DiagramBlockModel.ELEMENTS_SPACING);
+                    bottomRhombusConnector.getValue() + context.getCurrentStyle().getElementsSpacing());
             leftPoint = Math.min(trueCenterDrawPoint.getKey(), model.getLeftRhombusConnector(drawPoint).getKey());
             rightPoint = Math.max(trueCenterDrawPoint.getKey() + centerBranch.getModel().getSize().getWidth(),
                     model.getRightRhombusConnector(drawPoint).getKey());
 
             if (restBranch == BDDecisionModel.Branch.LEFT) {
-                double restShoulderLen = centerBranch.getModel().getDistanceToLeftBound() + DiagramBlockModel.DECISION_BLOCKS_PADDING
+                double restShoulderLen = centerBranch.getModel().getDistanceToLeftBound() + context.getCurrentStyle().getDecisionBlocksPadding()
                         + restContainer.getModel().getSize().getWidth() - rhombusWidth / 2;
 
                 Pair<Double, Double> rhombusLeftConnector = model.getLeftRhombusConnector(drawPoint);
 
                 Pair<Double, Double> drawRestPoint = new Pair<>(rhombusLeftConnector.getKey() - restShoulderLen,
-                        model.getBottomRhombusConnector(drawPoint).getValue() + DiagramBlockModel.ELEMENTS_SPACING);
+                        model.getBottomRhombusConnector(drawPoint).getValue() + context.getCurrentStyle().getElementsSpacing());
                 Pair<Double, Double> restConnector = restContainer.getModel().getTopConnector(drawRestPoint);
-                if (rhombusLeftConnector.getKey() - restConnector.getKey() < DiagramBlockModel.MIN_DECISION_SHOULDER_LEN) {
-                    drawRestPoint = new Pair<>(drawRestPoint.getKey() - (DiagramBlockModel.MIN_DECISION_SHOULDER_LEN - rhombusLeftConnector.getKey() + restConnector.getKey()),
+                if (rhombusLeftConnector.getKey() - restConnector.getKey() < context.getCurrentStyle().getMinDecisionShoulderLen()) {
+                    drawRestPoint = new Pair<>(drawRestPoint.getKey() - (context.getCurrentStyle().getMinDecisionShoulderLen() - rhombusLeftConnector.getKey() + restConnector.getKey()),
                             drawRestPoint.getValue());
                 }
 
                 leftPoint = drawRestPoint.getKey();
             } else {
-                double restShoulderLen = centerBranch.getModel().getDistanceToRightBound() + DiagramBlockModel.DECISION_BLOCKS_PADDING
+                double restShoulderLen = centerBranch.getModel().getDistanceToRightBound() + context.getCurrentStyle().getDecisionBlocksPadding()
                         - rhombusWidth / 2;
 
                 Pair<Double, Double> rhombusRightConnector = model.getRightRhombusConnector(drawPoint);
 
                 Pair<Double, Double> drawRestPoint = new Pair<>(rhombusRightConnector.getKey() + restShoulderLen,
-                        model.getBottomRhombusConnector(drawPoint).getValue() + DiagramBlockModel.ELEMENTS_SPACING);
+                        model.getBottomRhombusConnector(drawPoint).getValue() + context.getCurrentStyle().getElementsSpacing());
                 Pair<Double, Double> restConnector = restContainer.getModel().getTopConnector(drawRestPoint);
-                if (restConnector.getKey() - rhombusRightConnector.getKey() < DiagramBlockModel.MIN_DECISION_SHOULDER_LEN) {
-                    drawRestPoint = new Pair<>(drawRestPoint.getKey() + (DiagramBlockModel.MIN_DECISION_SHOULDER_LEN - restConnector.getKey() + rhombusRightConnector.getKey()),
+                if (restConnector.getKey() - rhombusRightConnector.getKey() < context.getCurrentStyle().getMinDecisionShoulderLen()) {
+                    drawRestPoint = new Pair<>(drawRestPoint.getKey() + (context.getCurrentStyle().getMinDecisionShoulderLen() - restConnector.getKey() + rhombusRightConnector.getKey()),
                             drawRestPoint.getValue());
                 }
 
@@ -409,23 +401,23 @@ public class BDDecisionController extends BDElementController implements TextEdi
             Pair<Double, Double> rhombusRightConnector = model.getRightRhombusConnector(drawPoint);
 
             if (model.negativeBranch == BDDecisionModel.Branch.LEFT) {
-                double negativeShoulderLen = DiagramBlockModel.DECISION_BLOCKS_PADDING + negativeSize.getWidth() - rhombusWidth / 2;
-                double positiveShoulderLen = DiagramBlockModel.DECISION_BLOCKS_PADDING - rhombusWidth / 2;
+                double negativeShoulderLen = context.getCurrentStyle().getDecisionBlocksPadding() + negativeSize.getWidth() - rhombusWidth / 2;
+                double positiveShoulderLen = context.getCurrentStyle().getDecisionBlocksPadding() - rhombusWidth / 2;
 
                 Pair<Double, Double> drawNegativePoint = new Pair<>(rhombusLeftConnector.getKey() - negativeShoulderLen,
-                        model.getBottomRhombusConnector(drawPoint).getValue() + DiagramBlockModel.ELEMENTS_SPACING);
+                        model.getBottomRhombusConnector(drawPoint).getValue() + context.getCurrentStyle().getElementsSpacing());
                 Pair<Double, Double> negConnector = model.negative.getModel().getTopConnector(drawNegativePoint);
-                if (rhombusLeftConnector.getKey() - negConnector.getKey() < DiagramBlockModel.MIN_DECISION_SHOULDER_LEN) {
-                    drawNegativePoint = new Pair<>(drawNegativePoint.getKey() - (DiagramBlockModel.MIN_DECISION_SHOULDER_LEN - rhombusLeftConnector.getKey() + negConnector.getKey()),
+                if (rhombusLeftConnector.getKey() - negConnector.getKey() < context.getCurrentStyle().getMinDecisionShoulderLen()) {
+                    drawNegativePoint = new Pair<>(drawNegativePoint.getKey() - (context.getCurrentStyle().getMinDecisionShoulderLen() - rhombusLeftConnector.getKey() + negConnector.getKey()),
                             drawNegativePoint.getValue());
                 }
                 leftPoint = drawNegativePoint.getKey();
 
                 Pair<Double, Double> drawPositivePoint = new Pair<>(rhombusRightConnector.getKey() + positiveShoulderLen,
-                        model.getBottomRhombusConnector(drawPoint).getValue() + DiagramBlockModel.ELEMENTS_SPACING);
+                        model.getBottomRhombusConnector(drawPoint).getValue() + context.getCurrentStyle().getElementsSpacing());
                 Pair<Double, Double> posConnector = model.positive.getModel().getTopConnector(drawPositivePoint);
-                if (posConnector.getKey() - rhombusRightConnector.getKey() < DiagramBlockModel.MIN_DECISION_SHOULDER_LEN) {
-                    drawPositivePoint = new Pair<>(drawPositivePoint.getKey() + (DiagramBlockModel.MIN_DECISION_SHOULDER_LEN - (posConnector.getKey() - rhombusRightConnector.getKey())),
+                if (posConnector.getKey() - rhombusRightConnector.getKey() < context.getCurrentStyle().getMinDecisionShoulderLen()) {
+                    drawPositivePoint = new Pair<>(drawPositivePoint.getKey() + (context.getCurrentStyle().getMinDecisionShoulderLen() - (posConnector.getKey() - rhombusRightConnector.getKey())),
                             drawPositivePoint.getValue());
                 }
                 rightPoint = drawPositivePoint.getKey() + model.positive.getModel().getSize().getWidth();
@@ -434,23 +426,23 @@ public class BDDecisionController extends BDElementController implements TextEdi
                 // Right bound
                 rightBound = Math.abs(topConnector.getKey() - (drawPositivePoint.getKey() + model.positive.getModel().getSize().getWidth()));
             } else {
-                double positiveShoulderLen = DiagramBlockModel.DECISION_BLOCKS_PADDING + positiveSize.getWidth() - rhombusWidth / 2;
-                double negativeShoulderLen = DiagramBlockModel.DECISION_BLOCKS_PADDING - rhombusWidth / 2;
+                double positiveShoulderLen = context.getCurrentStyle().getDecisionBlocksPadding() + positiveSize.getWidth() - rhombusWidth / 2;
+                double negativeShoulderLen = context.getCurrentStyle().getDecisionBlocksPadding() - rhombusWidth / 2;
 
                 Pair<Double, Double> drawPositivePoint = new Pair<>(rhombusLeftConnector.getKey() - positiveShoulderLen,
-                        model.getBottomRhombusConnector(drawPoint).getValue() + DiagramBlockModel.ELEMENTS_SPACING);
+                        model.getBottomRhombusConnector(drawPoint).getValue() + context.getCurrentStyle().getElementsSpacing());
                 Pair<Double, Double> posConnector = model.positive.getModel().getTopConnector(drawPositivePoint);
-                if (rhombusLeftConnector.getKey() - posConnector.getKey() < DiagramBlockModel.MIN_DECISION_SHOULDER_LEN) {
-                    drawPositivePoint = new Pair<>(drawPositivePoint.getKey() - (DiagramBlockModel.MIN_DECISION_SHOULDER_LEN - rhombusLeftConnector.getKey() + posConnector.getKey()),
+                if (rhombusLeftConnector.getKey() - posConnector.getKey() < context.getCurrentStyle().getMinDecisionShoulderLen()) {
+                    drawPositivePoint = new Pair<>(drawPositivePoint.getKey() - (context.getCurrentStyle().getMinDecisionShoulderLen() - rhombusLeftConnector.getKey() + posConnector.getKey()),
                             drawPositivePoint.getValue());
                 }
                 leftPoint = drawPositivePoint.getKey();
 
                 Pair<Double, Double> drawNegativePoint = new Pair<>(rhombusRightConnector.getKey() + negativeShoulderLen,
-                        model.getBottomRhombusConnector(drawPoint).getValue() + DiagramBlockModel.ELEMENTS_SPACING);
+                        model.getBottomRhombusConnector(drawPoint).getValue() + context.getCurrentStyle().getElementsSpacing());
                 Pair<Double, Double> negConnector = model.negative.getModel().getTopConnector(drawNegativePoint);
-                if (negConnector.getKey() - rhombusRightConnector.getKey() < DiagramBlockModel.MIN_DECISION_SHOULDER_LEN) {
-                    drawNegativePoint = new Pair<>(drawNegativePoint.getKey() + (DiagramBlockModel.MIN_DECISION_SHOULDER_LEN - (negConnector.getKey() - rhombusRightConnector.getKey())),
+                if (negConnector.getKey() - rhombusRightConnector.getKey() < context.getCurrentStyle().getMinDecisionShoulderLen()) {
+                    drawNegativePoint = new Pair<>(drawNegativePoint.getKey() + (context.getCurrentStyle().getMinDecisionShoulderLen() - (negConnector.getKey() - rhombusRightConnector.getKey())),
                             drawNegativePoint.getValue());
                 }
                 rightPoint = drawNegativePoint.getKey() + model.negative.getModel().getSize().getWidth();
@@ -461,7 +453,7 @@ public class BDDecisionController extends BDElementController implements TextEdi
             }
         }
         Dimension2D size = new Dimension2D(Math.abs(rightPoint - leftPoint),
-                rhombusSize.getHeight() + 2 * DiagramBlockModel.ELEMENTS_SPACING + Math.max(model.negative.getModel().getSize().getHeight(), model.positive.getModel().getSize().getHeight()));
+                rhombusSize.getHeight() + 2 * context.getCurrentStyle().getElementsSpacing() + Math.max(model.negative.getModel().getSize().getHeight(), model.positive.getModel().getSize().getHeight()));
         model.setMeasurements(size, leftBound, rightBound);
     }
 
@@ -479,7 +471,7 @@ public class BDDecisionController extends BDElementController implements TextEdi
 
     @Override
     public BDElementController clone() {
-        return new BDDecisionController(model.positive.clone(), model.positiveBranch,
+        return new BDDecisionController(context, model.positive.clone(), model.positiveBranch,
                 model.negative.clone(), model.negativeBranch,
                 getModel().data, this.selected);
     }
@@ -499,10 +491,10 @@ public class BDDecisionController extends BDElementController implements TextEdi
     public void removeFromContainer(BDElementController bdElementController) {
         if (model.positive == bdElementController) {
             model.positive = null;
-            model.positive = new BDContainerController();
+            model.positive = new BDContainerController(context);
         } else if (model.negative == bdElementController) {
             model.negative = null;
-            model.negative = new BDContainerController();
+            model.negative = new BDContainerController(context);
         }
     }
 

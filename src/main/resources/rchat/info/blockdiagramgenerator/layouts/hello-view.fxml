@@ -8,7 +8,7 @@
 <?import rchat.info.blockdiagramgenerator.elements.*?>
 
 <?import javafx.scene.input.KeyCodeCombination?>
-<VBox prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="rchat.info.blockdiagramgenerator.controllers.DiagramBlockController">
+<VBox prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="rchat.info.blockdiagramgenerator.controllers.EditorController">
     <MenuBar fx:id="menuBar" useSystemMenuBar="true">
         <menus>
             <Menu text="Файл">

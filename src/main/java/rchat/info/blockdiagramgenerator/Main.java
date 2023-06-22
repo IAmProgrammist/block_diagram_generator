@@ -33,17 +33,9 @@ public class Main extends Application {
         Style.init();
         this.stage = stage;
 
-        Style k = Style.getCurrentStyle();
+        Style currentStyle = Style.getCurrentStyle();
 
-        /*FontSelectorDialog fs = new FontSelectorDialog(null);
-        fs.setTitle("Select Font");
-        fs.setHeaderText("");
-        fs.setContentText("asdasdada");
-        fs.show();
-*/
-
-
-        FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("layouts/styles-dialog.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("layouts/hello-view.fxml"));
         rb = ResourceBundle.getBundle("rchat/info/blockdiagramgenerator/bundles/languages");
         fxmlLoader.setResources(rb);
         Scene scene = new Scene(fxmlLoader.load(), DiagramBlockModel.canvasWidth, DiagramBlockModel.canvasHeight);
@@ -54,8 +46,8 @@ public class Main extends Application {
         });
         stage.setScene(scene);
         stage.show();
-        if (DiagramBlockModel.IS_DEBUG_MODE_ENABLED) {
-            if (DiagramBlockModel.IS_DEBUG_SHOW_FPS) {
+        if (currentStyle.isDebugModeEnabled()) {
+            if (currentStyle.isDebugShowFps()) {
                 AnimationTimer frameRateMeter = new AnimationTimer() {
 
                     @Override

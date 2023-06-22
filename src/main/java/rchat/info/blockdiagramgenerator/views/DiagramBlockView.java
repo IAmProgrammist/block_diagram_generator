@@ -4,6 +4,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Paint;
 import javafx.util.Pair;
 import rchat.info.blockdiagramgenerator.models.DiagramBlockModel;
+import rchat.info.blockdiagramgenerator.models.Style;
 import rchat.info.blockdiagramgenerator.painter.AbstractPainter;
 
 public class DiagramBlockView {
@@ -14,13 +15,13 @@ public class DiagramBlockView {
     }
 
     // Repaint canvas from controller.model
-    public void repaint(AbstractPainter gc) {
+    public void repaint(AbstractPainter gc, Style style) {
         gc.clearRect(0, 0, DiagramBlockModel.canvasWidth, DiagramBlockModel.canvasHeight);
-        gc.drawBackground(DiagramBlockModel.BACKGROUND_COLOR);
+        gc.drawBackground(style.getBackgroundColor());
         if (DiagramBlockModel.VIEWPORT_MODE) {
-            gc.setStroke(DiagramBlockModel.GRID_COLOR);
-            gc.setLineWidth(DiagramBlockModel.TILE_STROKE_WIDTH_DEFAULT);
-            double calculatedTileSize = Math.pow(DiagramBlockModel.TILES_IN_TILE, -Math.floor(Math.log(model.canvasScale) / Math.log(DiagramBlockModel.TILES_IN_TILE))) * DiagramBlockModel.TILE_SIZE;
+            gc.setStroke(style.getGridColor());
+            gc.setLineWidth(style.getTileStrokeWidthDefault());
+            double calculatedTileSize = Math.pow(style.getTilesInTile(), -Math.floor(Math.log(model.canvasScale) / Math.log(style.getTilesInTile()))) * style.getTileSize();
             for (double x = model.posX - Math.ceil(model.posX / calculatedTileSize) * calculatedTileSize;
                  x < DiagramBlockModel.canvasWidth / model.canvasScale;
                  x += calculatedTileSize) {
