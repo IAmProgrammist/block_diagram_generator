@@ -11,9 +11,12 @@ import javax.imageio.ImageIO;
 import javax.imageio.metadata.IIOInvalidTreeException;
 import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.metadata.IIOMetadataNode;
+import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.io.File;
 import java.util.Arrays;
+
+import static java.awt.image.BufferedImage.TYPE_INT_RGB;
 
 public class ImagePainter extends AbstractPainter {
     private static final double INCH_2_CM = 2.54;
@@ -25,6 +28,7 @@ public class ImagePainter extends AbstractPainter {
     public static final String DENSITY_UNITS_PIXELS_PER_CM = "02";
     // When scale equals 1.0
     private static final double DPI_DEFAULT = 72;
+
     public ImagePainter(double originWidth, double originHeight,
                         double scale) {
         this.canvas = new Canvas(originWidth * scale, originHeight * scale);
@@ -133,7 +137,7 @@ public class ImagePainter extends AbstractPainter {
                     renderedImage,
                     "png",
                     writeDirectory);
-        }catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
@@ -142,12 +146,13 @@ public class ImagePainter extends AbstractPainter {
     public boolean saveAsJPG(File writeDirectory) {
         try {
             WritableImage bufferedImage = canvas.snapshot(null, null);
-            RenderedImage renderedImage = SwingFXUtils.fromFXImage(bufferedImage, null);
+            BufferedImage bi = SwingFXUtils.fromFXImage(bufferedImage, null);
+
             return ImageIO.write(
-                    renderedImage,
+                    bi,
                     "jpg",
                     writeDirectory);
-        }catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return false;
         }

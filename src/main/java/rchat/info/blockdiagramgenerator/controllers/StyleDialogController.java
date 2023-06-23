@@ -1,15 +1,19 @@
 package rchat.info.blockdiagramgenerator.controllers;
 
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Dimension2D;
 import javafx.scene.control.*;
-import javafx.scene.input.*;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
+import javafx.stage.Window;
 import javafx.util.Pair;
 import org.controlsfx.dialog.FontSelectorDialog;
 import org.json.JSONObject;
@@ -18,6 +22,7 @@ import rchat.info.blockdiagramgenerator.controllers.bdelements.*;
 import rchat.info.blockdiagramgenerator.elements.ResizableCanvas;
 import rchat.info.blockdiagramgenerator.models.DiagramBlockModel;
 import rchat.info.blockdiagramgenerator.models.EditorModel;
+import rchat.info.blockdiagramgenerator.models.SaveDialogModel;
 import rchat.info.blockdiagramgenerator.models.Style;
 import rchat.info.blockdiagramgenerator.models.bdelements.BDDecisionModel;
 import rchat.info.blockdiagramgenerator.painter.AbstractPainter;
@@ -26,8 +31,11 @@ import rchat.info.blockdiagramgenerator.views.DiagramBlockView;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
+import java.util.ResourceBundle;
 
 public class StyleDialogController extends Dialog<Style> {
+
 
     public CheckBox toggleEditMode;
     public CheckBox toggleDragMode;
@@ -293,261 +301,293 @@ public class StyleDialogController extends Dialog<Style> {
     StyleDialogDiagramBlockController dbController;
     String[] styles;
     Style cStyle;
+    private ObjectProperty<Style> connection = new SimpleObjectProperty<>(null);
 
-    @FXML
-    public void initialize() {
-        elements = new Control[]{fontBasicName, strokeColor, fontColor, bdBackgroundColor, backgroundColor, fontBasicSize, strokeWidthDefault,
-                connectorsWidth, textPadding, lineSpacing, elementsSpacing, decisionBlocksPadding, minDecisionShoulderLen, dashLineWidthLine,
-                dashLineWidthSpace, positiveBranchText, negativeBranchText, gridColor, selectedColor, overflowSelectionColor, dragndropForegroundColor,
-                tileSize, tileStrokeWidthDefault, selectionBorderWidth, containerOverflowPadding, maxBdContainerDragndropWidth, maxBdContainerDragndropWidthMargin,
-                tilesInTile, isDebugModeEnabled, isDebugShowFps, isDebugTikzIncludeComments, debugDrawBorders, debugBorderColor};
+    public StyleDialogController(DiagramBlockModel cloned, Window window) {
+        try {
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(getClass().getResource("/rchat/info/blockdiagramgenerator/layouts/styles-dialog.fxml"));
+            ResourceBundle rb = ResourceBundle.getBundle("rchat/info/blockdiagramgenerator/bundles/languages");
+            loader.setResources(rb);
+            loader.setController(this);
 
-        fontBasicSize.setTextFormatter(fontBasicSizeFormatter);
-        strokeWidthDefault.setTextFormatter(strokeWidthDefaultFormatter);
-        connectorsWidth.setTextFormatter(connectorsWidthFormatter);
-        textPadding.setTextFormatter(textPaddingFormatter);
-        lineSpacing.setTextFormatter(lineSpacingFormatter);
-        elementsSpacing.setTextFormatter(elementsSpacingFormatter);
-        decisionBlocksPadding.setTextFormatter(decisionBlocksPaddingFormatter);
-        minDecisionShoulderLen.setTextFormatter(minDecisionShoulderLenFormatter);
-        dashLineWidthLine.setTextFormatter(dashLineWidthLineFormatter);
-        dashLineWidthSpace.setTextFormatter(dashLineWidthSpaceFormatter);
-        tileSize.setTextFormatter(tileSizeFormatter);
-        tileStrokeWidthDefault.setTextFormatter(tileStrokeWidthDefaultFormatter);
-        selectionBorderWidth.setTextFormatter(selectionBorderWidthFormatter);
-        containerOverflowPadding.setTextFormatter(containerOverflowPaddingFormatter);
-        maxBdContainerDragndropWidth.setTextFormatter(maxBdContainerDragndropWidthFormatter);
-        maxBdContainerDragndropWidthMargin.setTextFormatter(maxBdContainerDragndropWidthMarginFormatter);
-        tilesInTile.setTextFormatter(tilesInTileFormatter);
+            DialogPane pane = loader.load();
 
-        styles = Style.getStyles();
-        cStyle = Style.getCurrentStyle();
+            initOwner(window);
+            initModality(Modality.APPLICATION_MODAL);
 
-        if (cStyle.getStyleName().equals(Style.DEFAULT_STYLE_NAME))
-            deleteStyle.setDisable(true);
-        else
-            deleteStyle.setDisable(false);
+            setResizable(true);
+            setTitle(rb.getString("style_dialog_title"));
 
-        stylesList.getItems().setAll(styles);
-        stylesList.setValue(cStyle.getStyleName());
-        updateStyleControls();
+            setDialogPane(pane);
 
-        stylesList.valueProperty().addListener((observable, oldValue, newValue) -> {
-            cStyle = Style.getStyle((String) newValue);
+            elements = new Control[]{fontBasicName, strokeColor, fontColor, bdBackgroundColor, backgroundColor, fontBasicSize, strokeWidthDefault,
+                    connectorsWidth, textPadding, lineSpacing, elementsSpacing, decisionBlocksPadding, minDecisionShoulderLen, dashLineWidthLine,
+                    dashLineWidthSpace, positiveBranchText, negativeBranchText, gridColor, selectedColor, overflowSelectionColor, dragndropForegroundColor,
+                    tileSize, tileStrokeWidthDefault, selectionBorderWidth, containerOverflowPadding, maxBdContainerDragndropWidth, maxBdContainerDragndropWidthMargin,
+                    tilesInTile, isDebugModeEnabled, isDebugShowFps, isDebugTikzIncludeComments, debugDrawBorders, debugBorderColor};
 
-            dbController.setCurrentStyle(cStyle);
+            fontBasicSize.setTextFormatter(fontBasicSizeFormatter);
+            strokeWidthDefault.setTextFormatter(strokeWidthDefaultFormatter);
+            connectorsWidth.setTextFormatter(connectorsWidthFormatter);
+            textPadding.setTextFormatter(textPaddingFormatter);
+            lineSpacing.setTextFormatter(lineSpacingFormatter);
+            elementsSpacing.setTextFormatter(elementsSpacingFormatter);
+            decisionBlocksPadding.setTextFormatter(decisionBlocksPaddingFormatter);
+            minDecisionShoulderLen.setTextFormatter(minDecisionShoulderLenFormatter);
+            dashLineWidthLine.setTextFormatter(dashLineWidthLineFormatter);
+            dashLineWidthSpace.setTextFormatter(dashLineWidthSpaceFormatter);
+            tileSize.setTextFormatter(tileSizeFormatter);
+            tileStrokeWidthDefault.setTextFormatter(tileStrokeWidthDefaultFormatter);
+            selectionBorderWidth.setTextFormatter(selectionBorderWidthFormatter);
+            containerOverflowPadding.setTextFormatter(containerOverflowPaddingFormatter);
+            maxBdContainerDragndropWidth.setTextFormatter(maxBdContainerDragndropWidthFormatter);
+            maxBdContainerDragndropWidthMargin.setTextFormatter(maxBdContainerDragndropWidthMarginFormatter);
+            tilesInTile.setTextFormatter(tilesInTileFormatter);
+
+            styles = Style.getStyles();
+            cStyle = Style.getCurrentStyle();
 
             if (cStyle.getStyleName().equals(Style.DEFAULT_STYLE_NAME))
                 deleteStyle.setDisable(true);
             else
                 deleteStyle.setDisable(false);
 
+            stylesList.getItems().setAll(styles);
+            stylesList.setValue(cStyle.getStyleName());
             updateStyleControls();
 
-        });
+            stylesList.valueProperty().addListener((observable, oldValue, newValue) -> {
+                cStyle = Style.getStyle((String) newValue);
 
-        eModel = new EditorModel();
-        this.gc = new CanvasPainter(canvas.getGraphicsContext2D());
-        dbController = new StyleDialogDiagramBlockController(this.gc, cStyle, eModel);
-        dbController.model.onDataUpdate = () -> {
-            dbController.model.root.recalculateSizes();
+                dbController.setCurrentStyle(cStyle);
+
+                if (cStyle.getStyleName().equals(Style.DEFAULT_STYLE_NAME))
+                    deleteStyle.setDisable(true);
+                else
+                    deleteStyle.setDisable(false);
+
+                updateStyleControls();
+
+            });
+
+            eModel = new EditorModel();
+            this.gc = new CanvasPainter(canvas.getGraphicsContext2D());
+            dbController = new StyleDialogDiagramBlockController(this.gc, cStyle, eModel);
+            dbController.model.onDataUpdate = () -> {
+                dbController.model.root.recalculateSizes();
+                dbController.repaint(new Dimension2D(eModel.canvasWidth, eModel.canvasHeight));
+            };
+            dbController.setCanvasScale(1);
+
+
+            if (cloned == null)
+                dbController.setModel(new DiagramBlockModel(new BDContainerController(dbController,
+                        new BDTerminatorController(dbController, "Начало"),
+                        new BDDataController(dbController, "Ввод input"),
+                        new BDDecisionController(dbController,
+                                new BDContainerController(dbController, new BDDataController(dbController, "Вывод\n\"Последовательность\nпуста\"")), BDDecisionModel.Branch.LEFT,
+                                new BDContainerController(dbController,
+                                        new BDProcessController(dbController, "min := input"),
+                                        new BDDataController(dbController, "Ввод input"),
+                                        new BDDecisionController(dbController, new BDContainerController(dbController, new BDDataController(dbController, "Вывод\n\"Последовательность\nсодержит только один\nэлемент\"")), BDDecisionModel.Branch.LEFT,
+                                                new BDContainerController(dbController,
+                                                        new BDProcessController(dbController, "nextAfterMin := input"),
+                                                        new BDCycleNotFixedController(dbController,
+                                                                new BDContainerController(dbController,
+                                                                        new BDProcessController(dbController, "previousElement :=\ninput"),
+                                                                        new BDDataController(dbController, "Ввод input"),
+                                                                        new BDDecisionController(dbController,
+                                                                                new BDContainerController(dbController,
+                                                                                        new BDProcessController(dbController, "min :=\npreviousElement"),
+                                                                                        new BDProcessController(dbController, "nextAfterMin := input")
+                                                                                ), BDDecisionModel.Branch.LEFT,
+                                                                                new BDContainerController(dbController),
+                                                                                BDDecisionModel.Branch.RIGHT,
+                                                                                "previousElement ≤ min"
+                                                                        ),
+                                                                        new BDDecisionController(dbController, new BDContainerController(dbController, new BDDataController(dbController, "Вывод \"Последний\nэлемент\nпоследовательности\nминимальный\"")), BDDecisionModel.Branch.LEFT, new BDContainerController(dbController, new BDDataController(dbController, "Вывод nextAfterMin")), BDDecisionModel.Branch.RIGHT, "nextAfterMin = 0")
+                                                                )
+                                                                , "input ≠ 0")
+                                                ), BDDecisionModel.Branch.RIGHT, "input = 0")
+                                ), BDDecisionModel.Branch.RIGHT, "input = 0"),
+                        new BDTerminatorController(dbController, "Конец"))));
+            else
+                dbController.setModel(new DiagramBlockModel(cloned.root.clone(dbController)));
+
+            canvas.widthProperty().addListener((observable, oldValue, newValue) -> {
+                eModel.canvasWidth = newValue.doubleValue();
+                canvas.setWidth(eModel.canvasWidth);
+                dbController.repaint(new Dimension2D(eModel.canvasWidth, eModel.canvasHeight));
+            });
+            canvas.heightProperty().addListener((observable, oldValue, newValue) -> {
+                eModel.canvasHeight = newValue.doubleValue();
+                canvas.setHeight(eModel.canvasHeight);
+                dbController.repaint(new Dimension2D(eModel.canvasWidth, eModel.canvasHeight));
+            });
+            canvas.setOnMouseMoved(event -> {
+                eModel.mousePosX = event.getX();
+                eModel.mousePosY = event.getY();
+                eModel.canvasMousePosX = eModel.mousePosX / dbController.model.canvasScale;
+                eModel.canvasMousePosY = eModel.mousePosY / dbController.model.canvasScale;
+                dbController.repaint(new Dimension2D(eModel.canvasWidth, eModel.canvasHeight));
+            });
+            toggleEditMode.selectedProperty().addListener((observable, oldValue, newValue) -> dbController.setViewportMode(newValue));
+            toggleDragMode.selectedProperty().addListener((observable, oldValue, newValue) -> dbController.setDragMode(newValue));
             dbController.repaint(new Dimension2D(eModel.canvasWidth, eModel.canvasHeight));
-        };
-        dbController.setCanvasScale(1);
 
-        dbController.setModel(new DiagramBlockModel(new BDContainerController(dbController,
-                new BDTerminatorController(dbController, "Начало"),
-                new BDDataController(dbController, "Ввод input"),
-                new BDDecisionController(dbController,
-                        new BDContainerController(dbController, new BDDataController(dbController, "Вывод\n\"Последовательность\nпуста\"")), BDDecisionModel.Branch.LEFT,
-                        new BDContainerController(dbController,
-                                new BDProcessController(dbController, "min := input"),
-                                new BDDataController(dbController, "Ввод input"),
-                                new BDDecisionController(dbController, new BDContainerController(dbController, new BDDataController(dbController, "Вывод\n\"Последовательность\nсодержит только один\nэлемент\"")), BDDecisionModel.Branch.LEFT,
-                                        new BDContainerController(dbController,
-                                                new BDProcessController(dbController, "nextAfterMin := input"),
-                                                new BDCycleNotFixedController(dbController,
-                                                        new BDContainerController(dbController,
-                                                                new BDProcessController(dbController, "previousElement :=\ninput"),
-                                                                new BDDataController(dbController, "Ввод input"),
-                                                                new BDDecisionController(dbController,
-                                                                        new BDContainerController(dbController,
-                                                                                new BDProcessController(dbController, "min :=\npreviousElement"),
-                                                                                new BDProcessController(dbController, "nextAfterMin := input")
-                                                                        ), BDDecisionModel.Branch.LEFT,
-                                                                        new BDContainerController(dbController),
-                                                                        BDDecisionModel.Branch.RIGHT,
-                                                                        "previousElement ≤ min"
-                                                                ),
-                                                                new BDDecisionController(dbController, new BDContainerController(dbController, new BDDataController(dbController, "Вывод \"Последний\nэлемент\nпоследовательности\nминимальный\"")), BDDecisionModel.Branch.LEFT, new BDContainerController(dbController, new BDDataController(dbController, "Вывод nextAfterMin")), BDDecisionModel.Branch.RIGHT, "nextAfterMin = 0")
-                                                        )
-                                                        , "input ≠ 0")
-                                        ), BDDecisionModel.Branch.RIGHT, "input = 0")
-                        ), BDDecisionModel.Branch.RIGHT, "input = 0"),
-                new BDTerminatorController(dbController, "Конец"))));
-        canvas.widthProperty().addListener((observable, oldValue, newValue) -> {
-            eModel.canvasWidth = newValue.doubleValue();
-            canvas.setWidth(eModel.canvasWidth);
-            dbController.repaint(new Dimension2D(eModel.canvasWidth, eModel.canvasHeight));
-        });
-        canvas.heightProperty().addListener((observable, oldValue, newValue) -> {
-            eModel.canvasHeight = newValue.doubleValue();
-            canvas.setHeight(eModel.canvasHeight);
-            dbController.repaint(new Dimension2D(eModel.canvasWidth, eModel.canvasHeight));
-        });
-        canvas.setOnMouseMoved(event -> {
-            eModel.mousePosX = event.getX();
-            eModel.mousePosY = event.getY();
-            eModel.canvasMousePosX = eModel.mousePosX / dbController.model.canvasScale;
-            eModel.canvasMousePosY = eModel.mousePosY / dbController.model.canvasScale;
-            dbController.repaint(new Dimension2D(eModel.canvasWidth, eModel.canvasHeight));
-        });
-        toggleEditMode.selectedProperty().addListener((observable, oldValue, newValue) -> dbController.setViewportMode(newValue));
-        toggleDragMode.selectedProperty().addListener((observable, oldValue, newValue) -> dbController.setDragMode(newValue));
-        dbController.repaint(new Dimension2D(eModel.canvasWidth, eModel.canvasHeight));
+            fontBasicName.textProperty().addListener((observable, oldValue, newValue) -> {
+                cStyle.setFontBasicName(newValue);
+                dbController.setCurrentStyle(cStyle);
+            });
 
-        fontBasicName.textProperty().addListener((observable, oldValue, newValue) -> {
-            cStyle.setFontBasicName(newValue);
-            dbController.setCurrentStyle(cStyle);
-        });
+            positiveBranchText.textProperty().addListener((observable, oldValue, newValue) -> {
+                cStyle.setPositiveBranchText(newValue);
+                dbController.setCurrentStyle(cStyle);
+            });
 
-        positiveBranchText.textProperty().addListener((observable, oldValue, newValue) -> {
-            cStyle.setPositiveBranchText(newValue);
-            dbController.setCurrentStyle(cStyle);
-        });
-
-        negativeBranchText.textProperty().addListener((observable, oldValue, newValue) -> {
-            cStyle.setNegativeBranchText(newValue);
-            dbController.setCurrentStyle(cStyle);
-        });
+            negativeBranchText.textProperty().addListener((observable, oldValue, newValue) -> {
+                cStyle.setNegativeBranchText(newValue);
+                dbController.setCurrentStyle(cStyle);
+            });
 
 
-        strokeColor.valueProperty().addListener((observable, oldValue, newValue) -> {
-            cStyle.setStrokeColor(newValue);
-            dbController.setCurrentStyle(cStyle);
-        });
-        fontColor.valueProperty().addListener((observable, oldValue, newValue) -> {
-            cStyle.setFontColor(newValue);
-            dbController.setCurrentStyle(cStyle);
-        });
-        bdBackgroundColor.valueProperty().addListener((observable, oldValue, newValue) -> {
-            cStyle.setBdBackgroundColor(newValue);
-            dbController.setCurrentStyle(cStyle);
-        });
-        backgroundColor.valueProperty().addListener((observable, oldValue, newValue) -> {
-            cStyle.setBackgroundColor(newValue);
-            dbController.setCurrentStyle(cStyle);
-        });
-        gridColor.valueProperty().addListener((observable, oldValue, newValue) -> {
-            cStyle.setGridColor(newValue);
-            dbController.setCurrentStyle(cStyle);
-        });
-        selectedColor.valueProperty().addListener((observable, oldValue, newValue) -> {
-            cStyle.setSelectedColor(newValue);
-            dbController.setCurrentStyle(cStyle);
-        });
-        overflowSelectionColor.valueProperty().addListener((observable, oldValue, newValue) -> {
-            cStyle.setOverflowSelectionColor(newValue);
-            dbController.setCurrentStyle(cStyle);
-        });
-        dragndropForegroundColor.valueProperty().addListener((observable, oldValue, newValue) -> {
-            cStyle.setDragndropForegroundColor(newValue);
-            dbController.setCurrentStyle(cStyle);
-        });
-        debugBorderColor.valueProperty().addListener((observable, oldValue, newValue) -> {
-            cStyle.setDebugBorderColor(newValue);
-            dbController.setCurrentStyle(cStyle);
-        });
+            strokeColor.valueProperty().addListener((observable, oldValue, newValue) -> {
+                cStyle.setStrokeColor(newValue);
+                dbController.setCurrentStyle(cStyle);
+            });
+            fontColor.valueProperty().addListener((observable, oldValue, newValue) -> {
+                cStyle.setFontColor(newValue);
+                dbController.setCurrentStyle(cStyle);
+            });
+            bdBackgroundColor.valueProperty().addListener((observable, oldValue, newValue) -> {
+                cStyle.setBdBackgroundColor(newValue);
+                dbController.setCurrentStyle(cStyle);
+            });
+            backgroundColor.valueProperty().addListener((observable, oldValue, newValue) -> {
+                cStyle.setBackgroundColor(newValue);
+                dbController.setCurrentStyle(cStyle);
+            });
+            gridColor.valueProperty().addListener((observable, oldValue, newValue) -> {
+                cStyle.setGridColor(newValue);
+                dbController.setCurrentStyle(cStyle);
+            });
+            selectedColor.valueProperty().addListener((observable, oldValue, newValue) -> {
+                cStyle.setSelectedColor(newValue);
+                dbController.setCurrentStyle(cStyle);
+            });
+            overflowSelectionColor.valueProperty().addListener((observable, oldValue, newValue) -> {
+                cStyle.setOverflowSelectionColor(newValue);
+                dbController.setCurrentStyle(cStyle);
+            });
+            dragndropForegroundColor.valueProperty().addListener((observable, oldValue, newValue) -> {
+                cStyle.setDragndropForegroundColor(newValue);
+                dbController.setCurrentStyle(cStyle);
+            });
+            debugBorderColor.valueProperty().addListener((observable, oldValue, newValue) -> {
+                cStyle.setDebugBorderColor(newValue);
+                dbController.setCurrentStyle(cStyle);
+            });
 
 
+            isDebugModeEnabled.selectedProperty().addListener((observable, oldValue, newValue) -> {
+                cStyle.setDebugModeEnabled(newValue);
+                dbController.setCurrentStyle(cStyle);
+            });
+            isDebugShowFps.selectedProperty().addListener((observable, oldValue, newValue) -> {
+                cStyle.setDebugShowFps(newValue);
+                dbController.setCurrentStyle(cStyle);
+            });
+            isDebugTikzIncludeComments.selectedProperty().addListener((observable, oldValue, newValue) -> {
+                cStyle.setDebugTikzIncludeComments(newValue);
+                dbController.setCurrentStyle(cStyle);
+            });
+            debugDrawBorders.selectedProperty().addListener((observable, oldValue, newValue) -> {
+                cStyle.setDebugDrawBorders(newValue);
+                dbController.setCurrentStyle(cStyle);
+            });
 
-        isDebugModeEnabled.selectedProperty().addListener((observable, oldValue, newValue) -> {
-            cStyle.setDebugModeEnabled(newValue);
-            dbController.setCurrentStyle(cStyle);
-        });
-        isDebugShowFps.selectedProperty().addListener((observable, oldValue, newValue) -> {
-            cStyle.setDebugShowFps(newValue);
-            dbController.setCurrentStyle(cStyle);
-        });
-        isDebugTikzIncludeComments.selectedProperty().addListener((observable, oldValue, newValue) -> {
-            cStyle.setDebugTikzIncludeComments(newValue);
-            dbController.setCurrentStyle(cStyle);
-        });
-        debugDrawBorders.selectedProperty().addListener((observable, oldValue, newValue) -> {
-            cStyle.setDebugDrawBorders(newValue);
-            dbController.setCurrentStyle(cStyle);
-        });
 
+            fontBasicSizeFormatter.valueProperty().addListener((observable, oldValue, newValue) -> {
+                cStyle.setFontBasicSize(newValue);
+                dbController.setCurrentStyle(cStyle);
+            });
+            strokeWidthDefaultFormatter.valueProperty().addListener((observable, oldValue, newValue) -> {
+                cStyle.setStrokeWidthDefault(newValue);
+                dbController.setCurrentStyle(cStyle);
+            });
+            connectorsWidthFormatter.valueProperty().addListener((observable, oldValue, newValue) -> {
+                cStyle.setConnectorsWidth(newValue);
+                dbController.setCurrentStyle(cStyle);
+            });
+            textPaddingFormatter.valueProperty().addListener((observable, oldValue, newValue) -> {
+                cStyle.setTextPadding(newValue);
+                dbController.setCurrentStyle(cStyle);
+            });
+            lineSpacingFormatter.valueProperty().addListener((observable, oldValue, newValue) -> {
+                cStyle.setLineSpacing(newValue);
+                dbController.setCurrentStyle(cStyle);
+            });
+            elementsSpacingFormatter.valueProperty().addListener((observable, oldValue, newValue) -> {
+                cStyle.setElementsSpacing(newValue);
+                dbController.setCurrentStyle(cStyle);
+            });
+            decisionBlocksPaddingFormatter.valueProperty().addListener((observable, oldValue, newValue) -> {
+                cStyle.setDecisionBlocksPadding(newValue);
+                dbController.setCurrentStyle(cStyle);
+            });
+            minDecisionShoulderLenFormatter.valueProperty().addListener((observable, oldValue, newValue) -> {
+                cStyle.setMinDecisionShoulderLen(newValue);
+                dbController.setCurrentStyle(cStyle);
+            });
+            dashLineWidthLineFormatter.valueProperty().addListener((observable, oldValue, newValue) -> {
+                cStyle.setDashLineWidthLine(newValue);
+                dbController.setCurrentStyle(cStyle);
+            });
+            dashLineWidthSpaceFormatter.valueProperty().addListener((observable, oldValue, newValue) -> {
+                cStyle.setDashLineWidthSpace(newValue);
+                dbController.setCurrentStyle(cStyle);
+            });
+            tileSizeFormatter.valueProperty().addListener((observable, oldValue, newValue) -> {
+                cStyle.setTileSize(newValue);
+                dbController.setCurrentStyle(cStyle);
+            });
+            tileStrokeWidthDefaultFormatter.valueProperty().addListener((observable, oldValue, newValue) -> {
+                cStyle.setTileStrokeWidthDefault(newValue);
+                dbController.setCurrentStyle(cStyle);
+            });
+            TextFormatter<Integer> selectionBorderWidthFormatter = TextareaUtils.uIntTextFormatter();
+            fontBasicSizeFormatter.valueProperty().addListener((observable, oldValue, newValue) -> {
+                cStyle.setFontBasicSize(newValue);
+                dbController.setCurrentStyle(cStyle);
+            });
+            containerOverflowPaddingFormatter.valueProperty().addListener((observable, oldValue, newValue) -> {
+                cStyle.setContainerOverflowPadding(newValue);
+                dbController.setCurrentStyle(cStyle);
+            });
+            maxBdContainerDragndropWidthFormatter.valueProperty().addListener((observable, oldValue, newValue) -> {
+                cStyle.setMaxBdContainerDragndropWidth(newValue);
+                dbController.setCurrentStyle(cStyle);
+            });
+            maxBdContainerDragndropWidthMarginFormatter.valueProperty().addListener((observable, oldValue, newValue) -> {
+                cStyle.setMaxBdContainerDragndropWidthMargin(newValue);
+                dbController.setCurrentStyle(cStyle);
+            });
+            tilesInTileFormatter.valueProperty().addListener((observable, oldValue, newValue) -> {
+                cStyle.setTilesInTile(newValue);
+                dbController.setCurrentStyle(cStyle);
+            });
 
-        fontBasicSizeFormatter.valueProperty().addListener((observable, oldValue, newValue) -> {
-            cStyle.setFontBasicSize(newValue);
-            dbController.setCurrentStyle(cStyle);
-        });
-        strokeWidthDefaultFormatter.valueProperty().addListener((observable, oldValue, newValue) -> {
-            cStyle.setStrokeWidthDefault(newValue);
-            dbController.setCurrentStyle(cStyle);
-        });
-        connectorsWidthFormatter.valueProperty().addListener((observable, oldValue, newValue) -> {
-            cStyle.setConnectorsWidth(newValue);
-            dbController.setCurrentStyle(cStyle);
-        });
-        textPaddingFormatter.valueProperty().addListener((observable, oldValue, newValue) -> {
-            cStyle.setTextPadding(newValue);
-            dbController.setCurrentStyle(cStyle);
-        });
-        lineSpacingFormatter.valueProperty().addListener((observable, oldValue, newValue) -> {
-            cStyle.setLineSpacing(newValue);
-            dbController.setCurrentStyle(cStyle);
-        });
-        elementsSpacingFormatter.valueProperty().addListener((observable, oldValue, newValue) -> {
-            cStyle.setElementsSpacing(newValue);
-            dbController.setCurrentStyle(cStyle);
-        });
-        decisionBlocksPaddingFormatter.valueProperty().addListener((observable, oldValue, newValue) -> {
-            cStyle.setDecisionBlocksPadding(newValue);
-            dbController.setCurrentStyle(cStyle);
-        });
-        minDecisionShoulderLenFormatter.valueProperty().addListener((observable, oldValue, newValue) -> {
-            cStyle.setMinDecisionShoulderLen(newValue);
-            dbController.setCurrentStyle(cStyle);
-        });
-        dashLineWidthLineFormatter.valueProperty().addListener((observable, oldValue, newValue) -> {
-            cStyle.setDashLineWidthLine(newValue);
-            dbController.setCurrentStyle(cStyle);
-        });
-        dashLineWidthSpaceFormatter.valueProperty().addListener((observable, oldValue, newValue) -> {
-            cStyle.setDashLineWidthSpace(newValue);
-            dbController.setCurrentStyle(cStyle);
-        });
-        tileSizeFormatter.valueProperty().addListener((observable, oldValue, newValue) -> {
-            cStyle.setTileSize(newValue);
-            dbController.setCurrentStyle(cStyle);
-        });
-        tileStrokeWidthDefaultFormatter.valueProperty().addListener((observable, oldValue, newValue) -> {
-            cStyle.setTileStrokeWidthDefault(newValue);
-            dbController.setCurrentStyle(cStyle);
-        });
-        TextFormatter<Integer> selectionBorderWidthFormatter = TextareaUtils.uIntTextFormatter();
-        fontBasicSizeFormatter.valueProperty().addListener((observable, oldValue, newValue) -> {
-            cStyle.setFontBasicSize(newValue);
-            dbController.setCurrentStyle(cStyle);
-        });
-        containerOverflowPaddingFormatter.valueProperty().addListener((observable, oldValue, newValue) -> {
-            cStyle.setContainerOverflowPadding(newValue);
-            dbController.setCurrentStyle(cStyle);
-        });
-        maxBdContainerDragndropWidthFormatter.valueProperty().addListener((observable, oldValue, newValue) -> {
-            cStyle.setMaxBdContainerDragndropWidth(newValue);
-            dbController.setCurrentStyle(cStyle);
-        });
-        maxBdContainerDragndropWidthMarginFormatter.valueProperty().addListener((observable, oldValue, newValue) -> {
-            cStyle.setMaxBdContainerDragndropWidthMargin(newValue);
-            dbController.setCurrentStyle(cStyle);
-        });
-        tilesInTileFormatter.valueProperty().addListener((observable, oldValue, newValue) -> {
-            cStyle.setTilesInTile(newValue);
-            dbController.setCurrentStyle(cStyle);
-        });
+            setResultConverter(buttonType -> {
+                if (!Objects.equals(ButtonBar.ButtonData.APPLY, buttonType.getButtonData())) {
+                    return null;
+                }
+
+                return cStyle;
+            });
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void updateStyleControls() {

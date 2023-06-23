@@ -4,6 +4,8 @@ import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Dimension2D;
@@ -11,8 +13,7 @@ import javafx.scene.control.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Window;
-import javafx.util.Pair;
-import javafx.util.StringConverter;
+import rchat.info.blockdiagramgenerator.Main;
 import rchat.info.blockdiagramgenerator.models.DiagramBlockModel;
 import rchat.info.blockdiagramgenerator.models.SaveDialogModel;
 import rchat.info.blockdiagramgenerator.models.Style;
@@ -26,10 +27,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.ResourceBundle;
-import java.util.function.UnaryOperator;
-import java.util.regex.Pattern;
-
-import static rchat.info.blockdiagramgenerator.models.Style.getCurrentStyle;
+import java.util.function.Consumer;
 
 public class SaveDialogController extends Dialog<SaveDialogModel> {
     class SaveDialogDiagramBlockController extends DiagramBlockController {
@@ -60,6 +58,12 @@ public class SaveDialogController extends Dialog<SaveDialogModel> {
         @Override
         public Style getCurrentStyle() {
             return style;
+        }
+
+        public void setStyle(Style style) {
+            this.style = style;
+            this.model.root = model.root.clone(this);
+            setCanvasScale(this.model.canvasScale);
         }
 
         @Override
@@ -99,6 +103,8 @@ public class SaveDialogController extends Dialog<SaveDialogModel> {
     TextField filePathText;
     @FXML
     Button filePathTextSelect;
+    @FXML
+    Button styleButton;
 
     boolean shouldEditDensity = true;
     boolean processTextChangingEvents = true;
@@ -130,6 +136,7 @@ public class SaveDialogController extends Dialog<SaveDialogModel> {
             densityText.setTextFormatter(densityTextFormatter);
 
             Style style = Style.getCurrentStyle();
+            styleButton.setText(style.getStyleName());
             SaveDialogDiagramBlockController saveDialogController = new SaveDialogDiagramBlockController(main.model, style);
 
             connection.setValue(new SaveDialogModel(saveDialogController.model.root.getModel().getSize().getWidth(),
@@ -258,6 +265,7 @@ public class SaveDialogController extends Dialog<SaveDialogModel> {
                 }
 
                 SaveDialogModel el = connection.getValue();
+                saveDialogController.setCanvasScale(el.scale);
 
                 if (el.fileExtension == SaveDialogModel.FILE_EXTENSION_SVG) {
                     saveDialogController.gc = new SVGPainter(el.widthPixels, el.heightPixels);
@@ -269,13 +277,13 @@ public class SaveDialogController extends Dialog<SaveDialogModel> {
                     ((TikzPainter) saveDialogController.gc).save(new File(el.file), el.widthCantimeters,
                             style.isDebugModeEnabled() && style.isDebugTikzIncludeComments());
                 } else {
-                    saveDialogController.gc = new ImagePainter(el.originalWidth, el.originalHeight, el.scale);
+                    saveDialogController.gc = new ImagePainter(el.widthPixels, el.heightPixels, 1);
                     saveDialogController.repaint(new Dimension2D(el.widthPixels, el.heightPixels));
-                    if (el.fileExtension == SaveDialogModel.FILE_EXTENSION_JPG) {
-                        ((ImagePainter) saveDialogController.gc).saveAsJPG(new File(el.file));
-                    } else {
-                        ((ImagePainter) saveDialogController.gc).saveAsPNG(new File(el.file));
-                    }
+                    //if (el.fileExtension == SaveDialogModel.FILE_EXTENSION_JPG) {
+                    //    ((ImagePainter) saveDialogController.gc).saveAsJPG(new File(el.file));
+                    //} else {
+                    ((ImagePainter) saveDialogController.gc).saveAsPNG(new File(el.file));
+                    //}
                 }
 
                 return connection.getValue();
@@ -285,7 +293,7 @@ public class SaveDialogController extends Dialog<SaveDialogModel> {
                 FileChooser fileChooser = new FileChooser();
                 fileChooser.getExtensionFilters().addAll(
                         new FileChooser.ExtensionFilter("SVG", "*.svg"),
-                        new FileChooser.ExtensionFilter("JPG", "*.jpg"),
+                        //new FileChooser.ExtensionFilter("JPG", "*.jpg"),
                         new FileChooser.ExtensionFilter("PNG", "*.png"),
                         new FileChooser.ExtensionFilter("TEX", "*.tex")
                 );
@@ -294,6 +302,31 @@ public class SaveDialogController extends Dialog<SaveDialogModel> {
                     filePathText.setText(file.getAbsolutePath());
                     connection.getValue().setPath(file.getAbsolutePath());
                 }
+            });
+
+            styleButton.setOnAction(event -> {
+                StyleDialogController stylePicker = new StyleDialogController(saveDialogController.model, Main.stage);
+                stylePicker.showAndWait().ifPresent(style1 -> {
+                    saveDialogController.setStyle(style1);
+                    saveDialogController.setCanvasScale(1.0);
+                    shouldEditDensity = false;
+                    String kyle = connection.getValue().file;
+                    Short mike = connection.getValue().fileExtension;
+                    connection.setValue(new SaveDialogModel((int) saveDialogController.model.root.getModel().getSize().getWidth(),
+                            (int) saveDialogController.model.root.getModel().getSize().getHeight(),
+                            DiagramBlockModel.DEFAULT_PPI));
+
+                    connection.getValue().file = kyle;
+                    connection.getValue().fileExtension = mike;
+
+                    densityTextFormatter.setValue((int) connection.getValue().density);
+                    densityTextMeasurments.setValue(rb.getString("measurments_pix_perinch"));
+
+                    shouldEditDensity = true;
+                    styleButton.setText(style1.getStyleName());
+                    widthTextMeasurments.setValue(rb.getString("measurments_pix"));
+                    widthTextFormatter.setValue((int) saveDialogController.model.root.getModel().getSize().getWidth());
+                });
             });
 
             setOnShowing(dialogEvent -> Platform.runLater(() -> filePathText.requestFocus()));

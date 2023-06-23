@@ -36,7 +36,7 @@ public class Main extends Application {
 
         Style currentStyle = Style.getCurrentStyle();
 
-        FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("layouts/styles-dialog.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("layouts/hello-view.fxml"));
         rb = ResourceBundle.getBundle("rchat/info/blockdiagramgenerator/bundles/languages");
         fxmlLoader.setResources(rb);
         Scene scene = new Scene(fxmlLoader.load());
@@ -71,6 +71,7 @@ public class Main extends Application {
                 frameRateMeter.start();
             }
         }
+
     }
 
     public static void main(String[] args) {
