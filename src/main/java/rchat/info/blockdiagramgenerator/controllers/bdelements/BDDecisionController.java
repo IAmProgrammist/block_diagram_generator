@@ -11,15 +11,18 @@ import rchat.info.blockdiagramgenerator.Main;
 import rchat.info.blockdiagramgenerator.Utils;
 import rchat.info.blockdiagramgenerator.controllers.DiagramBlockController;
 import rchat.info.blockdiagramgenerator.models.DiagramBlockModel;
-import rchat.info.blockdiagramgenerator.models.Style;
-import rchat.info.blockdiagramgenerator.models.bdelements.*;
+import rchat.info.blockdiagramgenerator.models.bdelements.BDCycleFixedModel;
+import rchat.info.blockdiagramgenerator.models.bdelements.BDCycleNotFixedModel;
+import rchat.info.blockdiagramgenerator.models.bdelements.BDDecisionModel;
+import rchat.info.blockdiagramgenerator.models.bdelements.BDElementModel;
 import rchat.info.blockdiagramgenerator.painter.AbstractPainter;
 import rchat.info.blockdiagramgenerator.views.bdelements.BDDecisionView;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
-
-import static rchat.info.blockdiagramgenerator.models.DiagramBlockModel.onDataUpdate;
 
 public class BDDecisionController extends BDElementController implements TextEditable, Container {
     public static String EXPORT_IDENTIFIER = "bd_element_decision";
@@ -109,7 +112,7 @@ public class BDDecisionController extends BDElementController implements TextEdi
         TextArea area = new TextArea(getText());
         area.textProperty().addListener((observable, oldValue, newValue) -> {
             setText(newValue);
-            if (DiagramBlockModel.onDataUpdate != null) onDataUpdate.run();
+            if (context.model.onDataUpdate != null) context.model.onDataUpdate.run();
         });
         controllings.add(area);
         controllings.add(new Separator());
@@ -155,14 +158,14 @@ public class BDDecisionController extends BDElementController implements TextEdi
             model.positiveBranch = newValue;
             negComboBox.setItems(FXCollections.observableArrayList(Arrays.stream(BDDecisionModel.Branch.values())
                     .filter((el) -> el != model.positiveBranch).collect(Collectors.toList())));
-            if (DiagramBlockModel.onDataUpdate != null) onDataUpdate.run();
+            if (context.model.onDataUpdate != null) context.model.onDataUpdate.run();
         });
 
         negComboBox.valueProperty().addListener((observable, oldValue, newValue) -> {
             model.negativeBranch = newValue;
             posComboBox.setItems(FXCollections.observableArrayList(Arrays.stream(BDDecisionModel.Branch.values())
                     .filter((el) -> el != model.negativeBranch).collect(Collectors.toList())));
-            if (DiagramBlockModel.onDataUpdate != null) onDataUpdate.run();
+            if (context.model.onDataUpdate != null) context.model.onDataUpdate.run();
         });
         controllings.add(negComboBox);
         controllings.add(new Separator());
@@ -479,8 +482,8 @@ public class BDDecisionController extends BDElementController implements TextEdi
 
     @Override
     public BDElementController clone(DiagramBlockController newContext) {
-        return new BDDecisionController(newContext, model.positive.clone(), model.positiveBranch,
-                model.negative.clone(), model.negativeBranch,
+        return new BDDecisionController(newContext, model.positive.clone(newContext), model.positiveBranch,
+                model.negative.clone(newContext), model.negativeBranch,
                 getModel().data, this.selected);
     }
 
@@ -510,10 +513,10 @@ public class BDDecisionController extends BDElementController implements TextEdi
     public void replaceInContainer(BDElementController replacing, BDElementController replacer) {
         if (replacing == this.model.positive && replacer instanceof BDContainerController) {
             this.model.positive = (BDContainerController) replacer;
-            onDataUpdate.run();
+            context.model.onDataUpdate.run();
         } else if (replacing == this.model.negative && replacer instanceof BDContainerController) {
             this.model.negative = (BDContainerController) replacer;
-            onDataUpdate.run();
+            context.model.onDataUpdate.run();
         }
     }
 

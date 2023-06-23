@@ -89,23 +89,8 @@ public class EditorController extends DiagramBlockController {
     }
 
     public void export() {
-        double oldCS = model.canvasScale;
-        double oldPX = model.posX;
-        double oldPY = model.posY;
-        setCanvasScale(1);
-        model.posX = 0;
-        model.posY = 0;
-        BDContainerController currentState = model.root;
-        model.root = model.root.clone();
-        model.root.recalculateSizes();
         SaveDialogController controller = new SaveDialogController(this, Main.stage);
         controller.showAndWait();
-        model.root = currentState;
-        setCanvasScale(oldCS);
-        model.posX = oldPX;
-        model.posY = oldPY;
-        model.root.recalculateSizes();
-        repaint(new Dimension2D(eModel.canvasWidth, eModel.canvasHeight));
     }
 
     public void checkAndNew() {
@@ -165,7 +150,7 @@ public class EditorController extends DiagramBlockController {
         eModel = new EditorModel();
         this.gc = new CanvasPainter(canvas.getGraphicsContext2D());
         this.model = DiagramBlockModel.initDefault();
-        DiagramBlockModel.onDataUpdate = () -> {
+        model.onDataUpdate = () -> {
             DiagramBlockModel clonedAppState = model.clone();
             applicationHistory.pushElement(clonedAppState);
 
@@ -208,37 +193,6 @@ public class EditorController extends DiagramBlockController {
                     repaint(new Dimension2D(eModel.canvasWidth, eModel.canvasHeight));
                 }
         );
-
-        /*model.root = new BDContainerController(
-                new BDTerminatorController("Начало"),
-                new BDDataController("Ввод input"),
-                new BDDecisionController(
-                        new BDContainerController(new BDDataController("Вывод\n\"Последовательность\nпуста\"")), BDDecisionModel.Branch.LEFT,
-                        new BDContainerController(
-                                new BDProcessController("min := input"),
-                                new BDDataController("Ввод input"),
-                                new BDDecisionController(new BDContainerController(new BDDataController("Вывод\n\"Последовательность\nсодержит только один\nэлемент\"")), BDDecisionModel.Branch.LEFT,
-                                        new BDContainerController(
-                                                new BDProcessController("nextAfterMin := input"),
-                                                new BDCycleNotFixedController(
-                                                        new BDContainerController(
-                                                                new BDProcessController("previousElement :=\ninput"),
-                                                                new BDDataController("Ввод input"),
-                                                                new BDDecisionController(
-                                                                        new BDContainerController(
-                                                                                new BDProcessController("min :=\npreviousElement"),
-                                                                                new BDProcessController("nextAfterMin := input")
-                                                                        ), BDDecisionModel.Branch.LEFT,
-                                                                        new BDContainerController(),
-                                                                        BDDecisionModel.Branch.RIGHT,
-                                                                        "previousElement ≤ min"
-                                                                ),
-                                                                new BDDecisionController(new BDContainerController(new BDDataController("Вывод \"Последний\nэлемент\nпоследовательности\nминимальный\"")), BDDecisionModel.Branch.LEFT, new BDContainerController(new BDDataController("Вывод nextAfterMin")), BDDecisionModel.Branch.RIGHT, "nextAfterMin = 0")
-                                                        )
-                                                        , "input ≠ 0")
-                                        ), BDDecisionModel.Branch.RIGHT, "input = 0")
-                        ), BDDecisionModel.Branch.RIGHT, "input = 0"),
-                new BDTerminatorController("Конец"));*/
         model.root = new BDContainerController(this);
         canvas.widthProperty().addListener((observable, oldValue, newValue) -> {
             eModel.canvasWidth = newValue.doubleValue();

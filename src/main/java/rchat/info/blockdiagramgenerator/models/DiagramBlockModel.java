@@ -19,7 +19,7 @@ public class DiagramBlockModel implements History.Cloneable<DiagramBlockModel> {
     public BDContainerController root;
     public BDElementController selected;
     public double canvasScale = 1.0;
-    public static Runnable onDataUpdate;
+    public Runnable onDataUpdate;
 
     public DiagramBlockModel() {
 
@@ -31,6 +31,11 @@ public class DiagramBlockModel implements History.Cloneable<DiagramBlockModel> {
         this.root = root;
         this.selected = root.getSelected();
         this.canvasScale = canvasScale;
+    }
+
+    public DiagramBlockModel(BDContainerController root) {
+        this.root = root;
+        this.selected = root.getSelected();
     }
 
     public static DiagramBlockModel initDefault() {

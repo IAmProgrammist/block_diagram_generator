@@ -10,8 +10,6 @@ import org.json.JSONObject;
 import rchat.info.blockdiagramgenerator.Main;
 import rchat.info.blockdiagramgenerator.Utils;
 import rchat.info.blockdiagramgenerator.controllers.DiagramBlockController;
-import rchat.info.blockdiagramgenerator.models.DiagramBlockModel;
-import rchat.info.blockdiagramgenerator.models.Style;
 import rchat.info.blockdiagramgenerator.models.bdelements.BDElementModel;
 import rchat.info.blockdiagramgenerator.models.bdelements.BDTerminatorModel;
 import rchat.info.blockdiagramgenerator.painter.AbstractPainter;
@@ -19,8 +17,6 @@ import rchat.info.blockdiagramgenerator.views.bdelements.BDTerminatorView;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static rchat.info.blockdiagramgenerator.models.DiagramBlockModel.onDataUpdate;
 
 public class BDTerminatorController extends BDElementController implements TextEditable {
     public static String EXPORT_IDENTIFIER = "bd_element_terminator";
@@ -62,7 +58,7 @@ public class BDTerminatorController extends BDElementController implements TextE
         TextArea area = new TextArea(getText());
         area.textProperty().addListener((observable, oldValue, newValue) -> {
             setText(newValue);
-            if (DiagramBlockModel.onDataUpdate != null) onDataUpdate.run();
+            if (context.model.onDataUpdate != null) context.model.onDataUpdate.run();
         });
         controllings.add(area);
         controllings.add(new Separator());

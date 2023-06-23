@@ -75,7 +75,7 @@ public class BDContainerView extends BDElementView {
             bottomConnector = element.getModel().getBottomConnector(drawElementPoint);
             currentLevel += element.getModel().getSize().getHeight() + style.getElementsSpacing();
         }
-        if (selectionOverflow && isDragmode && !isViewport) {
+        if (selectionOverflow && isDragmode) {
             for (int i = 0; i < model.elementYBorders.size() - 1; i++) {
                 Dimension2D dndCurrentSize = new Dimension2D(model.getSize().getWidth(),
                         model.elementYBorders.get(i + 1).getKey() -

@@ -1,21 +1,16 @@
 package rchat.info.blockdiagramgenerator.controllers.bdelements;
 
 import javafx.geometry.Dimension2D;
-import javafx.scene.Node;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.util.Pair;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import rchat.info.blockdiagramgenerator.Utils;
 import rchat.info.blockdiagramgenerator.controllers.DiagramBlockController;
 import rchat.info.blockdiagramgenerator.models.DiagramBlockModel;
-import rchat.info.blockdiagramgenerator.models.Style;
 import rchat.info.blockdiagramgenerator.models.bdelements.BDContainerModel;
-import rchat.info.blockdiagramgenerator.models.bdelements.BDCycleFixedModel;
 import rchat.info.blockdiagramgenerator.models.bdelements.BDElementModel;
 import rchat.info.blockdiagramgenerator.painter.AbstractPainter;
 import rchat.info.blockdiagramgenerator.views.bdelements.BDContainerView;
-import rchat.info.blockdiagramgenerator.views.bdelements.BDCycleFixedView;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -181,7 +176,7 @@ public class BDContainerController extends BDElementController implements Collec
                     .filter(bdElementController -> !(bdElementController instanceof BDAddElementController))
                     .collect(Collectors.toList());
             this.model.lastVisitedDragModePos = null;
-            DiagramBlockModel.onDataUpdate.run();
+            context.model.onDataUpdate.run();
         }
     }
 
@@ -342,6 +337,6 @@ public class BDContainerController extends BDElementController implements Collec
     @Override
     public void replaceInContainer(BDElementController replacing, BDElementController replacer) {
         model.elements.set(model.elements.indexOf(replacing), replacer);
-        DiagramBlockModel.onDataUpdate.run();
+        context.model.onDataUpdate.run();
     }
 }

@@ -1,29 +1,23 @@
 package rchat.info.blockdiagramgenerator.controllers.bdelements;
 
 import javafx.geometry.Dimension2D;
-import javafx.scene.Node;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
 import javafx.scene.text.Font;
-import javafx.scene.text.Text;
 import javafx.util.Pair;
 import org.json.JSONObject;
 import rchat.info.blockdiagramgenerator.Main;
 import rchat.info.blockdiagramgenerator.Utils;
 import rchat.info.blockdiagramgenerator.controllers.DiagramBlockController;
-import rchat.info.blockdiagramgenerator.models.DiagramBlockModel;
-import rchat.info.blockdiagramgenerator.models.Style;
 import rchat.info.blockdiagramgenerator.models.bdelements.BDCycleFixedModel;
 import rchat.info.blockdiagramgenerator.models.bdelements.BDCycleNotFixedModel;
 import rchat.info.blockdiagramgenerator.models.bdelements.BDDecisionModel;
 import rchat.info.blockdiagramgenerator.models.bdelements.BDElementModel;
 import rchat.info.blockdiagramgenerator.painter.AbstractPainter;
 import rchat.info.blockdiagramgenerator.views.bdelements.BDCycleFixedView;
-import rchat.info.blockdiagramgenerator.views.bdelements.BDCycleNotFixedView;
 
-import java.util.*;
-
-import static rchat.info.blockdiagramgenerator.models.DiagramBlockModel.onDataUpdate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 public class BDCycleFixedController extends BDElementController implements TextEditable, Container {
     public static String EXPORT_IDENTIFIER = "bd_element_modifier";
@@ -155,7 +149,7 @@ public class BDCycleFixedController extends BDElementController implements TextE
 
     @Override
     public BDElementController clone(DiagramBlockController newContext) {
-        return new BDCycleFixedController(newContext, model.body.clone(), this.model.data, this.selected);
+        return new BDCycleFixedController(newContext, model.body.clone(newContext), this.model.data, this.selected);
     }
 
     @Override
@@ -168,7 +162,7 @@ public class BDCycleFixedController extends BDElementController implements TextE
         controllings.add(area);
         area.textProperty().addListener((observable, oldValue, newValue) -> {
             setText(newValue);
-            if (DiagramBlockModel.onDataUpdate != null) onDataUpdate.run();
+            if (context.model.onDataUpdate != null) context.model.onDataUpdate.run();
         });
         controllings.add(new Separator());
     }
@@ -232,7 +226,7 @@ public class BDCycleFixedController extends BDElementController implements TextE
     public void replaceInContainer(BDElementController replacing, BDElementController replacer) {
         if (model.body == replacing && replacer instanceof BDContainerController) {
             model.body = (BDContainerController) replacer;
-            onDataUpdate.run();
+            context.model.onDataUpdate.run();
         }
     }
 }

@@ -34,8 +34,20 @@ import static rchat.info.blockdiagramgenerator.models.Style.getCurrentStyle;
 public class SaveDialogController extends Dialog<SaveDialogModel> {
     class SaveDialogDiagramBlockController extends DiagramBlockController {
         Style style;
+
         public SaveDialogDiagramBlockController(DiagramBlockModel model, AbstractPainter gc, Style style) {
             super(null, null, gc);
+            this.style = style;
+            this.model = model.clone(this);
+            this.view = new DiagramBlockView(this.model);
+            this.model.posX = -1;
+            this.model.posY = -1;
+            this.setCanvasScale(1.0);
+            this.model.selected = null;
+        }
+
+        public SaveDialogDiagramBlockController(DiagramBlockModel model, Style style) {
+            super(null, null, null);
             this.style = style;
             this.model = model.clone(this);
             this.view = new DiagramBlockView(this.model);
@@ -146,10 +158,13 @@ public class SaveDialogController extends Dialog<SaveDialogModel> {
             heightText.setTextFormatter(heightTextFormatter);
             densityText.setTextFormatter(densityTextFormatter);
 
-            connection.setValue(new SaveDialogModel(main.model.root.getModel().getSize().getWidth(),
-                    main.model.root.getModel().getSize().getHeight(),
+            Style style = Style.getCurrentStyle();
+            SaveDialogDiagramBlockController saveDialogController = new SaveDialogDiagramBlockController(main.model, style);
+
+            connection.setValue(new SaveDialogModel(saveDialogController.model.root.getModel().getSize().getWidth(),
+                    saveDialogController.model.root.getModel().getSize().getHeight(),
                     DiagramBlockModel.DEFAULT_PPI));
-            widthTextFormatter.setValue((int) main.model.root.getModel().getSize().getWidth());
+            widthTextFormatter.setValue((int) saveDialogController.model.root.getModel().getSize().getWidth());
 
             widthText.textProperty().addListener((observable, oldValue, newValue) -> {
                 if (processTextChangingEvents) {
@@ -186,7 +201,7 @@ public class SaveDialogController extends Dialog<SaveDialogModel> {
                 widthTextFormatter.setValue((int) size.getWidth());
                 heightTextFormatter.setValue((int) size.getHeight());
             });
-            heightTextFormatter.setValue((int) main.model.root.getModel().getSize().getHeight());
+            heightTextFormatter.setValue((int) saveDialogController.model.root.getModel().getSize().getHeight());
 
             heightText.textProperty().addListener((observable, oldValue, newValue) -> {
                 if (processTextChangingEvents) {
@@ -256,7 +271,7 @@ public class SaveDialogController extends Dialog<SaveDialogModel> {
 
             densityTextMeasurments.valueProperty().addListener((observable, oldValue, newValue) -> {
                 if (oldValue == newValue) return;
-                if (newValue.equals( rb.getString("measurments_pix_perinch"))) {
+                if (newValue.equals(rb.getString("measurments_pix_perinch"))) {
                     shouldEditDensity = false;
                     densityTextFormatter.setValue((int) connection.getValue().getDensity(false));
                 } else {
@@ -274,29 +289,21 @@ public class SaveDialogController extends Dialog<SaveDialogModel> {
                 SaveDialogModel el = connection.getValue();
 
                 if (el.fileExtension == SaveDialogModel.FILE_EXTENSION_SVG) {
-                    SVGPainter p = new SVGPainter(el.widthPixels, el.heightPixels);
-                    DiagramBlockModel newModel = main.model;
-                    SaveDialogDiagramBlockController controller =
-                            new SaveDialogDiagramBlockController(newModel, p, Style.getCurrentStyle());
-                    controller.repaint(new Dimension2D(el.widthPixels, el.heightPixels));
-                    p.saveAsSVG(new File(el.file));
+                    saveDialogController.gc = new SVGPainter(el.widthPixels, el.heightPixels);
+                    saveDialogController.repaint(new Dimension2D(el.widthPixels, el.heightPixels));
+                    ((SVGPainter) saveDialogController.gc).saveAsSVG(new File(el.file));
                 } else if (el.fileExtension == SaveDialogModel.FILE_EXTENSION_TEX) {
-                    TikzPainter texPainter = new TikzPainter();
-                    DiagramBlockModel newModel = main.model;
-                    SaveDialogDiagramBlockController controller =
-                            new SaveDialogDiagramBlockController(newModel, texPainter, Style.getCurrentStyle());
-                    controller.repaint(new Dimension2D(el.widthPixels, el.heightPixels));
-                    texPainter.save(new File(el.file), el.widthCantimeters, getCurrentStyle().isDebugModeEnabled() && getCurrentStyle().isDebugTikzIncludeComments());
+                    saveDialogController.gc = new TikzPainter();
+                    saveDialogController.repaint(new Dimension2D(el.widthPixels, el.heightPixels));
+                    ((TikzPainter) saveDialogController.gc).save(new File(el.file), el.widthCantimeters,
+                            style.isDebugModeEnabled() && style.isDebugTikzIncludeComments());
                 } else {
-                    ImagePainter p = new ImagePainter(el.originalWidth, el.originalHeight, el.scale);
-                    DiagramBlockModel newModel = main.model;
-                    SaveDialogDiagramBlockController controller =
-                            new SaveDialogDiagramBlockController(newModel, p, Style.getCurrentStyle());
-                    controller.repaint(new Dimension2D(el.widthPixels, el.heightPixels));
+                    saveDialogController.gc = new ImagePainter(el.originalWidth, el.originalHeight, el.scale);
+                    saveDialogController.repaint(new Dimension2D(el.widthPixels, el.heightPixels));
                     if (el.fileExtension == SaveDialogModel.FILE_EXTENSION_JPG) {
-                        p.saveAsJPG(new File(el.file));
+                        ((ImagePainter) saveDialogController.gc).saveAsJPG(new File(el.file));
                     } else {
-                        p.saveAsPNG(new File(el.file));
+                        ((ImagePainter) saveDialogController.gc).saveAsPNG(new File(el.file));
                     }
                 }
 

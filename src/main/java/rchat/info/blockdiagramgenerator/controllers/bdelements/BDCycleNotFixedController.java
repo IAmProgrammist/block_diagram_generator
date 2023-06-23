@@ -8,15 +8,16 @@ import org.json.JSONObject;
 import rchat.info.blockdiagramgenerator.Main;
 import rchat.info.blockdiagramgenerator.Utils;
 import rchat.info.blockdiagramgenerator.controllers.DiagramBlockController;
-import rchat.info.blockdiagramgenerator.models.DiagramBlockModel;
-import rchat.info.blockdiagramgenerator.models.Style;
-import rchat.info.blockdiagramgenerator.models.bdelements.*;
+import rchat.info.blockdiagramgenerator.models.bdelements.BDCycleFixedModel;
+import rchat.info.blockdiagramgenerator.models.bdelements.BDCycleNotFixedModel;
+import rchat.info.blockdiagramgenerator.models.bdelements.BDDecisionModel;
+import rchat.info.blockdiagramgenerator.models.bdelements.BDElementModel;
 import rchat.info.blockdiagramgenerator.painter.AbstractPainter;
 import rchat.info.blockdiagramgenerator.views.bdelements.BDCycleNotFixedView;
 
-import java.util.*;
-
-import static rchat.info.blockdiagramgenerator.models.DiagramBlockModel.onDataUpdate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 public class BDCycleNotFixedController extends BDElementController implements TextEditable, Container {
     public static String EXPORT_IDENTIFIER = "bd_element_cyclenotfixed";
@@ -183,7 +184,7 @@ public class BDCycleNotFixedController extends BDElementController implements Te
 
     @Override
     public BDElementController clone(DiagramBlockController newContext) {
-        return new BDCycleNotFixedController(newContext, model.body.clone(), this.model.data, this.selected);
+        return new BDCycleNotFixedController(newContext, model.body.clone(newContext), this.model.data, this.selected);
     }
 
     @Override
@@ -195,7 +196,7 @@ public class BDCycleNotFixedController extends BDElementController implements Te
         controllings.add(area);
         area.textProperty().addListener((observable, oldValue, newValue) -> {
             setText(newValue);
-            if (DiagramBlockModel.onDataUpdate != null) onDataUpdate.run();
+            if (context.model.onDataUpdate != null) context.model.onDataUpdate.run();
         });
         controllings.add(new Separator());
     }
@@ -224,7 +225,7 @@ public class BDCycleNotFixedController extends BDElementController implements Te
     public void replaceInContainer(BDElementController replacing, BDElementController replacer) {
         if (model.body == replacing && replacer instanceof BDContainerController) {
             model.body = (BDContainerController) replacer;
-            onDataUpdate.run();
+            context.model.onDataUpdate.run();
         }
     }
 }

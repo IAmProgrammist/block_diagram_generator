@@ -10,6 +10,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.controlsfx.dialog.FontSelectorDialog;
 import org.json.JSONObject;
+import rchat.info.blockdiagramgenerator.controllers.StyleDialogController;
 import rchat.info.blockdiagramgenerator.models.DiagramBlockModel;
 import rchat.info.blockdiagramgenerator.models.Style;
 
@@ -35,7 +36,7 @@ public class Main extends Application {
 
         Style currentStyle = Style.getCurrentStyle();
 
-        FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("layouts/hello-view.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("layouts/styles-dialog.fxml"));
         rb = ResourceBundle.getBundle("rchat/info/blockdiagramgenerator/bundles/languages");
         fxmlLoader.setResources(rb);
         Scene scene = new Scene(fxmlLoader.load());
@@ -70,7 +71,6 @@ public class Main extends Application {
                 frameRateMeter.start();
             }
         }
-
     }
 
     public static void main(String[] args) {
