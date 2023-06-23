@@ -121,38 +121,9 @@ public class SaveDialogController extends Dialog<SaveDialogModel> {
             setResizable(false);
             setTitle(this.rb.getString("export_image_dialog_title"));
 
-            Pattern validEditingState = Pattern.compile("(^$)|(\\d+)");
-
-            UnaryOperator<TextFormatter.Change> filter = c -> {
-                String text = c.getControlNewText();
-                if (validEditingState.matcher(text).matches()) {
-                    return c;
-                } else {
-                    return null;
-                }
-            };
-
-            StringConverter<Integer> converter = new StringConverter<>() {
-
-                @Override
-                public Integer fromString(String s) {
-                    if (s.isEmpty()) {
-                        return 1;
-                    } else {
-                        return Integer.valueOf(s);
-                    }
-                }
-
-
-                @Override
-                public String toString(Integer d) {
-                    return String.format("%d", d);
-                }
-            };
-
-            TextFormatter<Integer> widthTextFormatter = new TextFormatter<>(converter, 0, filter);
-            TextFormatter<Integer> heightTextFormatter = new TextFormatter<>(converter, 0, filter);
-            TextFormatter<Integer> densityTextFormatter = new TextFormatter<>(converter, 0, filter);
+            TextFormatter<Integer> widthTextFormatter = TextareaUtils.uIntTextFormatter();
+            TextFormatter<Integer> heightTextFormatter = TextareaUtils.uIntTextFormatter();
+            TextFormatter<Integer> densityTextFormatter = TextareaUtils.uIntTextFormatter();
 
             widthText.setTextFormatter(widthTextFormatter);
             heightText.setTextFormatter(heightTextFormatter);

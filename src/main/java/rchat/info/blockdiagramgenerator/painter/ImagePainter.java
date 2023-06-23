@@ -122,6 +122,7 @@ public class ImagePainter extends AbstractPainter {
     public void drawBackground(Color backgroundColor) {
         graphicsContext.setFill(backgroundColor);
         graphicsContext.clearRect(0, 0, graphicsContext.getCanvas().getWidth(), graphicsContext.getCanvas().getHeight());
+        graphicsContext.fillRect(0, 0, graphicsContext.getCanvas().getWidth(), graphicsContext.getCanvas().getHeight());
     }
 
     public boolean saveAsPNG(File writeDirectory) {

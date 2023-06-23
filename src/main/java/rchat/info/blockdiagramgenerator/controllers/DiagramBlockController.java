@@ -34,6 +34,6 @@ public abstract class DiagramBlockController {
     }
 
     public void repaint(Dimension2D size) {
-        view.repaint(gc, size, isViewportMode(), Style.getCurrentStyle());
+        view.repaint(gc, size, isViewportMode(), getCurrentStyle());
     }
 }

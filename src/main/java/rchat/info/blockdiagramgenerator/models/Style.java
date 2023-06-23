@@ -31,7 +31,7 @@ public final class Style {
     }
 
     private static Style currentStyle;
-    private static String DEFAULT_STYLE_NAME;
+    public static String DEFAULT_STYLE_NAME;
     private static Style DEFAULT_STYLE;
     private final String styleName;
     private String positiveBranchText;
@@ -168,6 +168,36 @@ public final class Style {
         node.putDouble(key + "G", Math.min(1, Math.max(0, color.getGreen())));
         node.putDouble(key + "B", Math.min(1, Math.max(0, color.getBlue())));
         node.putDouble(key + "A", Math.min(1, Math.max(0, color.getOpacity())));
+    }
+
+    public static Style createStyle(String newStyleName, Style cStyle) {
+        if (!hasStyle(newStyleName)) {
+            saveStyle(newStyleName, cStyle);
+            return getStyle(newStyleName);
+        }
+
+        for (int i = 1; i < Integer.MAX_VALUE; i++) {
+            if (!hasStyle(newStyleName + " (" + i + ")")) {
+                saveStyle(newStyleName + " (" + i + ")", cStyle);
+                return getStyle(newStyleName + " (" + i + ")");
+            }
+        }
+
+        return null;
+    }
+
+    public static void removeStyle(String styleName) {
+        if (hasStyle(styleName)) {
+            try {
+                Preferences.userNodeForPackage(Style.class).node("styles").node(styleName).removeNode();
+            } catch (BackingStoreException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    public String getStyleName() {
+        return styleName;
     }
 
     public static Style getCurrentStyle() {

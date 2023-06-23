@@ -21,9 +21,13 @@ public class DiagramBlockView {
         gc.clearRect(0, 0, size.getWidth(), size.getHeight());
         gc.drawBackground(style.getBackgroundColor());
         if (isViewport) {
+            int maxTilesInTile = 100;
+            int minTileSize = 5;
+
             gc.setStroke(style.getGridColor());
             gc.setLineWidth(style.getTileStrokeWidthDefault());
-            double calculatedTileSize = Math.pow(style.getTilesInTile(), -Math.floor(Math.log(model.canvasScale) / Math.log(style.getTilesInTile()))) * style.getTileSize();
+            double calculatedTileSize = Math.pow(Math.min(style.getTilesInTile(), maxTilesInTile),
+                    -Math.floor(Math.log(model.canvasScale) / Math.log(Math.min(style.getTilesInTile(), maxTilesInTile)))) * Math.max(minTileSize, style.getTileSize());
             for (double x = model.posX - Math.ceil(model.posX / calculatedTileSize) * calculatedTileSize;
                  x < size.getWidth() / model.canvasScale;
                  x += calculatedTileSize) {
