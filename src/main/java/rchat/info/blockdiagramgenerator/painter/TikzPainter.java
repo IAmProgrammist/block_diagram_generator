@@ -75,7 +75,10 @@ public class TikzPainter extends AbstractPainter {
         }
     }
 
+    public static final double NORMAL_FONT_SIZE_TEX = 10;
+
     private class TikzFillText extends TikzEntity {
+
         double x, y;
         String text;
 
@@ -89,7 +92,7 @@ public class TikzPainter extends AbstractPainter {
 
         @Override
         public String get(double scale) {
-            Font resizedFont = new Font(this.font.getName(), ((this.font.getSize() / CM_IN_1_PT) * scale) / 10);
+            Font resizedFont = new Font(this.font.getName(), ((this.font.getSize() / CM_IN_1_PT) * scale) / NORMAL_FONT_SIZE_TEX);
 
             return String.format(Locale.ENGLISH, "\\verbatimfont{\\normalsize\\%s}\n\\node[opacity=%f, above right, %s] at(%f, %f) {\\verb|%s|};\n",
                     this.context.getFont(resizedFont), this.fill.getOpacity(), this.context.getColor(this.fill),
@@ -405,7 +408,7 @@ public class TikzPainter extends AbstractPainter {
         // TODO: добавить все зависимости
         StringBuilder result = new StringBuilder();
         if (includeComments)
-            result.append("% Созданная блок схема работает для article.\n");
+            result.append("% Созданная блок схема работает только с компиляторами XeTeX и LuaTeX.\n");
         result.append("\\documentclass{article}\n\n");
         if (includeComments)
             result.append("% Необходимые зависимости\n");
@@ -421,10 +424,7 @@ public class TikzPainter extends AbstractPainter {
                 "\\usetikzlibrary{matrix}\n" +
                 "\\usetikzlibrary{decorations.text}\n" +
                 "\\usepackage{fontspec}\n" +
-                "\\usetikzlibrary{backgrounds}\n\n" +
-                "\\makeatletter\n" +
-                "\\newcommand{\\verbatimfont}[1]{\\def\\verbatim@font{#1}}%\n" +
-                "\\makeatother\n\n");
+                "\\usetikzlibrary{backgrounds}\n\n");
 
         if (backgroundColor == null) {
             backgroundColor = Color.WHITE;
@@ -432,12 +432,26 @@ public class TikzPainter extends AbstractPainter {
 
         getColor(backgroundColor);
 
+        result.append("\\begin{document}\n");
+        //if (includeComments)
+        //    result.append("\n% При формировании документа могли возникнуть некоторые неточности при расчёте, поэтому я пихнул ещё и resizebox, чтоб уж наверняка\n");
+
+        if (includeComments) {
+            result.append("% Блок-схема\n");
+            result.append("% Если Вы хотите добавить блок схему в свой документ, скопируйте код между комментариями\n");
+            result.append("% С линияи и вставьте в документ.\n\n");
+            result.append("% --------------------------\n");
+        }
+
+        result.append(String.format(Locale.ENGLISH, "\\begin{tikzpicture}[every node/.style={inner sep=0,outer sep=0}, background rectangle/.style={opacity=%f, fill=%s}, show background rectangle]\n", backgroundColor.getOpacity(), getColor(this.backgroundColor)));
+
+        result.append("\\makeatletter\n\\newcommand{\\verbatimfont}[1]{\\def\\verbatim@font{#1}}\n\\makeatother\n");
 
         if (includeComments)
             result.append("% Шрифты\n");
         // Adding fonts
         for (Map.Entry<Font, String> fontEntity : fonts.entrySet()) {
-            result.append(String.format(Locale.ENGLISH, "\\newfontfamily\\%s[Scale=%f]{%s}\n", fontEntity.getValue(), fontEntity.getKey().getSize(), fontEntity.getKey().getName()));
+            result.append(String.format(Locale.ENGLISH, "\\newfontfamily\\%s[Scale=%f, SizeFeatures={Size=%f}]{%s}\n", fontEntity.getValue(), fontEntity.getKey().getSize(), NORMAL_FONT_SIZE_TEX, fontEntity.getKey().getName()));
         }
 
         if (includeComments)
@@ -447,20 +461,16 @@ public class TikzPainter extends AbstractPainter {
             result.append(String.format(Locale.ENGLISH, "\\definecolor{%s}{rgb}{%f,%f,%f}\n", colorEntity.getValue(),
                     colorEntity.getKey().getRed(), colorEntity.getKey().getGreen(), colorEntity.getKey().getBlue()));
         }
-        if (includeComments)
-            result.append("\n% Документ\n");
-        result.append("\\begin{document}\n");
-        if (includeComments)
-            result.append("\n% При формировании документа могли возникнуть некоторые неточности при расчёте, поэтому я пихнул ещё и resizebox, чтоб уж наверняка\n");
-
-        if (includeComments)
-            result.append("\n% Собственно, сама блок схема\n");
-
-        result.append(String.format(Locale.ENGLISH, "\\begin{tikzpicture}[every node/.style={inner sep=0,outer sep=0}, background rectangle/.style={opacity=%f, fill=%s}, show background rectangle]\n", backgroundColor.getOpacity(), getColor(this.backgroundColor)));
 
         result.append(doc);
 
         result.append("\\end{tikzpicture}\n");
+
+        if (includeComments) {
+            result.append("% --------------------------\n\n");
+            result.append("% Конец блок схемы\n");
+        }
+
         result.append("\\end{document}");
 
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file),

@@ -25,12 +25,13 @@ public class DiagramBlockModel implements History.Cloneable<DiagramBlockModel> {
 
     }
 
-    public DiagramBlockModel(double posX, double posY, BDContainerController root, double canvasScale) {
+    public DiagramBlockModel(double posX, double posY, BDContainerController root, double canvasScale, Runnable onDataUpdate) {
         this.posX = posX;
         this.posY = posY;
         this.root = root;
         this.selected = root.getSelected();
         this.canvasScale = canvasScale;
+        this.onDataUpdate = onDataUpdate;
     }
 
     public DiagramBlockModel(BDContainerController root) {
@@ -45,12 +46,12 @@ public class DiagramBlockModel implements History.Cloneable<DiagramBlockModel> {
     @Override
     public DiagramBlockModel clone() {
         return new DiagramBlockModel(posX,
-                posY, root.clone(), canvasScale);
+                posY, root.clone(), canvasScale, onDataUpdate);
     }
 
     @Override
     public DiagramBlockModel clone(DiagramBlockController newContext) {
         return new DiagramBlockModel(posX,
-                posY, root.clone(newContext), canvasScale);
+                posY, root.clone(newContext), canvasScale, onDataUpdate);
     }
 }

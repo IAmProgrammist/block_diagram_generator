@@ -158,7 +158,11 @@ public class SaveDialogModel {
             fileExtension = FILE_EXTENSION_PNG;
         }else if (absolutePath.endsWith(".tex")) {
             fileExtension = FILE_EXTENSION_TEX;
-        } else throw new IllegalArgumentException();
+        } else {
+            fileExtension = FILE_EXTENSION_PNG;
+            this.file = absolutePath + ".png";
+            return;
+        };
 
         this.file = absolutePath;
     }

@@ -2,6 +2,8 @@ package rchat.info.blockdiagramgenerator.controllers;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -142,6 +144,38 @@ public class StyleDialogController extends Dialog<Style> {
             newStyle = Style.getCurrentStyle();
 
         setCStyle(newStyle);
+    }
+
+    public void importStyle(ActionEvent actionEvent) {
+        String newStyleName = styleName.getText().trim();
+
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("JSON", "*.json"),
+                new FileChooser.ExtensionFilter("Any", "*")
+        );
+        File file = fileChooser.showOpenDialog(Main.stage);
+        Style newStyle = Style.fromFile(newStyleName.isBlank() ? cStyle.getStyleName() : newStyleName, file);
+
+        if (newStyle == null)
+            return;
+
+        styleName.setText("");
+        stylesList.getItems().add(newStyle.getStyleName());
+
+        setCStyle(newStyle);
+    }
+
+    public void exportStyle(ActionEvent actionEvent) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("JSON", "*.json"),
+                new FileChooser.ExtensionFilter("Any", "*")
+        );
+
+        File file = fileChooser.showSaveDialog(Main.stage);
+
+        Style.toFile(cStyle, file);
     }
 
     public void pickFont(MouseEvent mouseEvent) {
@@ -556,7 +590,10 @@ public class StyleDialogController extends Dialog<Style> {
                 cStyle.setTileStrokeWidthDefault(newValue);
                 dbController.setCurrentStyle(cStyle);
             });
-            TextFormatter<Integer> selectionBorderWidthFormatter = TextareaUtils.uIntTextFormatter();
+            selectionBorderWidthFormatter.valueProperty().addListener((observable, oldValue, newValue) -> {
+                cStyle.setSelectionBorderWidth(newValue);
+                dbController.setCurrentStyle(cStyle);
+            });
             fontBasicSizeFormatter.valueProperty().addListener((observable, oldValue, newValue) -> {
                 cStyle.setFontBasicSize(newValue);
                 dbController.setCurrentStyle(cStyle);

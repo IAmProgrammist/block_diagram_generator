@@ -3,63 +3,64 @@
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.*?>
+<?import javafx.scene.input.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 <?import rchat.info.blockdiagramgenerator.elements.*?>
 
-<?import javafx.scene.input.KeyCodeCombination?>
 <VBox prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="rchat.info.blockdiagramgenerator.controllers.EditorController">
     <MenuBar fx:id="menuBar" useSystemMenuBar="true">
         <menus>
             <Menu text="Файл">
                 <items>
-                    <MenuItem fx:id="menuNew" text="Новый" >
+                    <MenuItem fx:id="menuNew" text="Новый">
                         <accelerator>
-                            <KeyCodeCombination control="DOWN" code="N" meta="UP" shift="UP" shortcut="UP" alt="UP"/>
+                            <KeyCodeCombination alt="UP" code="N" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
                         </accelerator>
                     </MenuItem>
-                    <MenuItem fx:id="menuOpen" text="Открыть" >
+                    <MenuItem fx:id="menuOpen" text="Открыть">
                         <accelerator>
-                            <KeyCodeCombination control="DOWN" code="O" meta="UP" shift="UP" shortcut="UP" alt="UP"/>
+                            <KeyCodeCombination alt="UP" code="O" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
                         </accelerator>
                     </MenuItem>
-                    <MenuItem fx:id="menuSave" text="Сохранить" >
+                    <MenuItem fx:id="menuSave" text="Сохранить">
                         <accelerator>
-                            <KeyCodeCombination control="DOWN" code="S" meta="UP" shift="UP" shortcut="UP" alt="UP"/>
+                            <KeyCodeCombination alt="UP" code="S" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
                         </accelerator>
                     </MenuItem>
-                    <MenuItem fx:id="menuSaveAs" text="Сохранить как" >
+                    <MenuItem fx:id="menuSaveAs" text="Сохранить как">
                         <accelerator>
-                            <KeyCodeCombination control="DOWN" shift="DOWN" code="S" meta="UP" shortcut="UP" alt="UP"/>
+                            <KeyCodeCombination alt="UP" code="S" control="DOWN" meta="UP" shift="DOWN" shortcut="UP" />
                         </accelerator>
                     </MenuItem>
-                    <MenuItem fx:id="menuExport" text="Экспорт" >
+                    <MenuItem fx:id="menuExport" text="Экспорт">
                         <accelerator>
-                            <KeyCodeCombination control="DOWN" code="E" meta="UP" shift="UP" shortcut="UP" alt="UP"/>
+                            <KeyCodeCombination alt="UP" code="E" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
                         </accelerator>
                     </MenuItem>
                     <SeparatorMenuItem />
+               <MenuItem mnemonicParsing="false" text="Выбрать стиль" fx:id="pickStyle"/>
                     <MenuItem fx:id="menuQuit" text="Выход" />
                 </items>
             </Menu>
 
             <Menu text="Изменить">
                 <items>
-                    <MenuItem fx:id="menuUndo" text="Отменить" >
+                    <MenuItem fx:id="menuUndo" text="Отменить">
                         <accelerator>
-                            <KeyCodeCombination control="DOWN" code="Z" meta="UP" shift="UP" shortcut="UP" alt="UP"/>
+                            <KeyCodeCombination alt="UP" code="Z" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
                         </accelerator>
                     </MenuItem>
-                    <MenuItem fx:id="menuRedo" text="Повторить" >
+                    <MenuItem fx:id="menuRedo" text="Повторить">
                         <accelerator>
-                            <KeyCodeCombination control="DOWN" code="Y" meta="UP" shift="UP" shortcut="UP" alt="UP"/>
+                            <KeyCodeCombination alt="UP" code="Y" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
                         </accelerator>
                     </MenuItem>
 
                     <SeparatorMenuItem />
-                    <MenuItem fx:id="menuDelete" text="Удалить" >
+                    <MenuItem fx:id="menuDelete" text="Удалить">
                         <accelerator>
-                            <KeyCodeCombination control="UP" code="DELETE" meta="UP" shift="UP" shortcut="UP" alt="UP"/>
+                            <KeyCodeCombination alt="UP" code="DELETE" control="UP" meta="UP" shift="UP" shortcut="UP" />
                         </accelerator>
                     </MenuItem>
                 </items>

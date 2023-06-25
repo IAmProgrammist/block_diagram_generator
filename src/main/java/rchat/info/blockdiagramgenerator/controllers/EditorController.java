@@ -1,6 +1,8 @@
 package rchat.info.blockdiagramgenerator.controllers;
 
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Dimension2D;
 import javafx.geometry.Insets;
@@ -9,27 +11,30 @@ import javafx.scene.control.*;
 import javafx.scene.input.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
 import javafx.util.Pair;
 import org.json.JSONObject;
 import rchat.info.blockdiagramgenerator.History;
 import rchat.info.blockdiagramgenerator.Main;
-import rchat.info.blockdiagramgenerator.controllers.bdelements.*;
+import rchat.info.blockdiagramgenerator.controllers.bdelements.BDContainerController;
+import rchat.info.blockdiagramgenerator.controllers.bdelements.BDElementController;
 import rchat.info.blockdiagramgenerator.elements.ResizableCanvas;
 import rchat.info.blockdiagramgenerator.models.DiagramBlockModel;
 import rchat.info.blockdiagramgenerator.models.EditorModel;
-import rchat.info.blockdiagramgenerator.models.SaveDialogModel;
 import rchat.info.blockdiagramgenerator.models.Style;
-import rchat.info.blockdiagramgenerator.painter.*;
+import rchat.info.blockdiagramgenerator.painter.CanvasPainter;
 import rchat.info.blockdiagramgenerator.views.DiagramBlockView;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 public class EditorController extends DiagramBlockController {
+    @FXML
+    public MenuItem pickStyle;
     EditorModel eModel;
     public File currentPath;
     @FXML
@@ -57,7 +62,6 @@ public class EditorController extends DiagramBlockController {
     public MenuItem menuRedo;
     @FXML
     public MenuItem menuDelete;
-
 
 
     public boolean checkIfSaved() {
@@ -123,8 +127,6 @@ public class EditorController extends DiagramBlockController {
             model.selected = newSelected;
 
             updateBDContentsEditor();
-            DiagramBlockModel clonedAppState = model.clone();
-            applicationHistory.pushElement(clonedAppState);
 
             updateTitle();
 
@@ -225,7 +227,7 @@ public class EditorController extends DiagramBlockController {
         menuExport.setOnAction(event -> export());
 
         menuUndo.setOnAction(event -> {
-            this.model = applicationHistory.prev();
+            this.model.root = applicationHistory.prev().root.clone(this);
 
             updateTitle();
 
@@ -239,7 +241,7 @@ public class EditorController extends DiagramBlockController {
         });
 
         menuRedo.setOnAction(event -> {
-            this.model = applicationHistory.next();
+            this.model.root = applicationHistory.next().root.clone(this);
 
             updateTitle();
 
@@ -252,16 +254,19 @@ public class EditorController extends DiagramBlockController {
         });
 
         menuDelete.setOnAction(event -> {
-            if (model.selected != null) model.selected.remove();
-            model.selected = null;
-            model.root.recalculateSizes();
-            DiagramBlockModel clonedAppState = model.clone();
-            applicationHistory.pushElement(clonedAppState);
+            if (canvas.isFocused()) {
 
-            updateTitle();
+                if (model.selected != null) model.selected.remove();
+                model.selected = null;
+                model.root.recalculateSizes();
+                DiagramBlockModel clonedAppState = model.clone();
+                applicationHistory.pushElement(clonedAppState);
 
-            updateBDContentsEditor();
-            repaint(new Dimension2D(eModel.canvasWidth, eModel.canvasHeight));
+                updateTitle();
+
+                updateBDContentsEditor();
+                repaint(new Dimension2D(eModel.canvasWidth, eModel.canvasHeight));
+            }
         });
 
         menuOpen.setOnAction(event -> {
@@ -275,6 +280,24 @@ public class EditorController extends DiagramBlockController {
                 repaint(new Dimension2D(eModel.canvasWidth, eModel.canvasHeight));
                 updateBDContentsEditor();
             }
+        });
+
+        pickStyle.setOnAction(event -> {
+            StyleDialogController stylePicker = new StyleDialogController(model.clone(), Main.stage);
+            Style style;
+            try {
+                style = stylePicker.showAndWait().get();
+            } catch (NoSuchElementException e) {
+                style = null;
+            }
+
+            if (style != null)
+                Style.setCurrentStyle(style);
+
+            this.model.root = this.model.root.clone(this);
+            setCanvasScale(this.model.canvasScale);
+
+            repaint(new Dimension2D(eModel.canvasWidth, eModel.canvasHeight));
         });
 
         currentPath = null;
@@ -340,8 +363,7 @@ public class EditorController extends DiagramBlockController {
 
             this.model.root = cnt instanceof BDContainerController ? (BDContainerController) cnt : new BDContainerController(this, cnt);
 
-            applicationHistory.clear();
-            applicationHistory.pushElement(this.model.clone());
+            applicationHistory.clear(this.model.clone());
             applicationHistory.save();
 
             updateTitle();
@@ -429,5 +451,9 @@ public class EditorController extends DiagramBlockController {
     @Override
     public boolean isDragMode() {
         return eModel.dragMode;
+    }
+
+    public File getCurrentPath() {
+        return currentPath;
     }
 }

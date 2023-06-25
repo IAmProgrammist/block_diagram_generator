@@ -25,6 +25,7 @@ import rchat.info.blockdiagramgenerator.views.DiagramBlockView;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
@@ -127,6 +128,7 @@ public class SaveDialogController extends Dialog<SaveDialogModel> {
             setResizable(false);
             setTitle(this.rb.getString("export_image_dialog_title"));
 
+
             TextFormatter<Integer> widthTextFormatter = TextareaUtils.uIntTextFormatter();
             TextFormatter<Integer> heightTextFormatter = TextareaUtils.uIntTextFormatter();
             TextFormatter<Integer> densityTextFormatter = TextareaUtils.uIntTextFormatter();
@@ -142,6 +144,13 @@ public class SaveDialogController extends Dialog<SaveDialogModel> {
             connection.setValue(new SaveDialogModel(saveDialogController.model.root.getModel().getSize().getWidth(),
                     saveDialogController.model.root.getModel().getSize().getHeight(),
                     DiagramBlockModel.DEFAULT_PPI));
+
+            if (main.getCurrentPath() != null) {
+                String filePath = new File(main.getCurrentPath().getParent() + "/" + main.getCurrentPath().getName().replaceFirst("[.][^.]+$", "") + ".png").getAbsolutePath();
+                filePathText.setText(filePath);
+                connection.getValue().setPath(filePath);
+            }
+
             widthTextFormatter.setValue((int) saveDialogController.model.root.getModel().getSize().getWidth());
 
             widthText.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -306,27 +315,34 @@ public class SaveDialogController extends Dialog<SaveDialogModel> {
 
             styleButton.setOnAction(event -> {
                 StyleDialogController stylePicker = new StyleDialogController(saveDialogController.model, Main.stage);
-                stylePicker.showAndWait().ifPresent(style1 -> {
+                Style style1;
+                try {
+                    style1 = stylePicker.showAndWait().get();
+                } catch (NoSuchElementException e) {
+                    style1 = null;
+                }
+
+                if (style1 != null)
                     saveDialogController.setStyle(style1);
-                    saveDialogController.setCanvasScale(1.0);
-                    shouldEditDensity = false;
-                    String kyle = connection.getValue().file;
-                    Short mike = connection.getValue().fileExtension;
-                    connection.setValue(new SaveDialogModel((int) saveDialogController.model.root.getModel().getSize().getWidth(),
-                            (int) saveDialogController.model.root.getModel().getSize().getHeight(),
-                            DiagramBlockModel.DEFAULT_PPI));
 
-                    connection.getValue().file = kyle;
-                    connection.getValue().fileExtension = mike;
+                saveDialogController.setCanvasScale(1.0);
+                shouldEditDensity = false;
+                String kyle = connection.getValue().file;
+                Short mike = connection.getValue().fileExtension;
+                connection.setValue(new SaveDialogModel((int) saveDialogController.model.root.getModel().getSize().getWidth(),
+                        (int) saveDialogController.model.root.getModel().getSize().getHeight(),
+                        DiagramBlockModel.DEFAULT_PPI));
 
-                    densityTextFormatter.setValue((int) connection.getValue().density);
-                    densityTextMeasurments.setValue(rb.getString("measurments_pix_perinch"));
+                connection.getValue().file = kyle;
+                connection.getValue().fileExtension = mike;
 
-                    shouldEditDensity = true;
-                    styleButton.setText(style1.getStyleName());
-                    widthTextMeasurments.setValue(rb.getString("measurments_pix"));
-                    widthTextFormatter.setValue((int) saveDialogController.model.root.getModel().getSize().getWidth());
-                });
+                densityTextFormatter.setValue((int) connection.getValue().density);
+                densityTextMeasurments.setValue(rb.getString("measurments_pix_perinch"));
+
+                shouldEditDensity = true;
+                styleButton.setText(style1.getStyleName());
+                widthTextMeasurments.setValue(rb.getString("measurments_pix"));
+                widthTextFormatter.setValue((int) saveDialogController.model.root.getModel().getSize().getWidth());
             });
 
             setOnShowing(dialogEvent -> Platform.runLater(() -> filePathText.requestFocus()));
