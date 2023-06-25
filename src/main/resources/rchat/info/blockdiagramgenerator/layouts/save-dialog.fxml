@@ -65,7 +65,7 @@
                         </ChoiceBox>
                      </children>
                   </HBox>
-                  <Button alignment="TOP_LEFT" mnemonicParsing="false" text="По умолчанию" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                  <Button fx:id="styleButton" alignment="TOP_LEFT" mnemonicParsing="false" text="По умолчанию" GridPane.columnIndex="1" GridPane.rowIndex="4" />
                   <Text strokeType="OUTSIDE" strokeWidth="0.0" text="%export_image_dialog_title">
                      <GridPane.margin>
                         <Insets bottom="10.0" right="10.0" top="10.0" />

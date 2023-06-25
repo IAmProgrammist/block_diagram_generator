@@ -8,8 +8,11 @@ import javafx.scene.Scene;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.controlsfx.dialog.FontSelectorDialog;
 import org.json.JSONObject;
+import rchat.info.blockdiagramgenerator.controllers.StyleDialogController;
 import rchat.info.blockdiagramgenerator.models.DiagramBlockModel;
+import rchat.info.blockdiagramgenerator.models.Style;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -28,11 +31,15 @@ public class Main extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
+        Style.init();
         this.stage = stage;
+
+        Style currentStyle = Style.getCurrentStyle();
+
         FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("layouts/hello-view.fxml"));
         rb = ResourceBundle.getBundle("rchat/info/blockdiagramgenerator/bundles/languages");
         fxmlLoader.setResources(rb);
-        Scene scene = new Scene(fxmlLoader.load(), DiagramBlockModel.canvasWidth, DiagramBlockModel.canvasHeight);
+        Scene scene = new Scene(fxmlLoader.load());
         scene.setOnKeyPressed(event -> {
             if (rewriteKeyPressedEvent != null) {
                 rewriteKeyPressedEvent.handle(event);
@@ -40,8 +47,8 @@ public class Main extends Application {
         });
         stage.setScene(scene);
         stage.show();
-        if (DiagramBlockModel.IS_DEBUG_MODE_ENABLED) {
-            if (DiagramBlockModel.IS_DEBUG_SHOW_FPS) {
+        if (currentStyle.isDebugModeEnabled()) {
+            if (currentStyle.isDebugShowFps()) {
                 AnimationTimer frameRateMeter = new AnimationTimer() {
 
                     @Override

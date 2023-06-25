@@ -1,14 +1,13 @@
 package rchat.info.blockdiagramgenerator.views.bdelements;
 
 import javafx.geometry.Dimension2D;
-import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.text.Font;
 import javafx.util.Pair;
 import rchat.info.blockdiagramgenerator.Utils;
 import rchat.info.blockdiagramgenerator.models.DiagramBlockModel;
+import rchat.info.blockdiagramgenerator.models.Style;
 import rchat.info.blockdiagramgenerator.models.bdelements.BDTerminatorModel;
 import rchat.info.blockdiagramgenerator.painter.AbstractPainter;
-
-import static rchat.info.blockdiagramgenerator.models.DiagramBlockModel.basicFont;
 
 public class BDTerminatorView extends BDElementView {
     protected BDTerminatorModel model;
@@ -17,33 +16,33 @@ public class BDTerminatorView extends BDElementView {
     }
 
     @Override
-    public void repaint(AbstractPainter gc, Pair<Double, Double> drawPoint,
-                        boolean selectionOverflow, boolean selected, double scale) {
+    public void repaint(AbstractPainter gc, Pair<Double, Double> drawPoint, Font basicFont,
+                        boolean selectionOverflow, boolean selected, boolean isViewport, boolean isDragmode, double scale, Style style) {
         Dimension2D size = model.getSize();
         double textHeight = size.getHeight() * scale;
         double totalWidth = size.getWidth() * scale;
-        gc.setFill(DiagramBlockModel.BD_BACKGROUND_COLOR);
+        gc.setFill(style.getBdBackgroundColor());
         gc.fillRoundRect(drawPoint.getKey() * scale, drawPoint.getValue() * scale, totalWidth, textHeight, textHeight, textHeight);
-        gc.setStroke(DiagramBlockModel.STROKE_COLOR);
-        gc.setLineWidth(DiagramBlockModel.STROKE_WIDTH_DEFAULT * scale);
+        gc.setStroke(style.getStrokeColor());
+        gc.setLineWidth(style.getStrokeWidthDefault() * scale);
         gc.strokeRoundRect(drawPoint.getKey() * scale, drawPoint.getValue() * scale, totalWidth, textHeight, textHeight, textHeight);
         gc.setFont(basicFont);
-        double currentLevel = DiagramBlockModel.TEXT_PADDING * scale -
-                DiagramBlockModel.LINE_SPACING * scale;
+        double currentLevel = style.getTextPadding() * scale -
+                style.getLineSpacing() * scale;
         for (String line : this.model.getDataLines()) {
             Dimension2D d = Utils.computeTextWidth(basicFont, line);
             currentLevel += d.getHeight();
-            gc.setFill(DiagramBlockModel.FONT_COLOR);
+            gc.setFill(style.getFontColor());
             gc.fillText(line, (totalWidth - d.getWidth()) / 2 + (drawPoint.getKey() * scale), drawPoint.getValue() * scale + currentLevel);
-            currentLevel += DiagramBlockModel.LINE_SPACING * scale;
+            currentLevel += style.getLineSpacing() * scale;
         }
-        if (DiagramBlockModel.VIEWPORT_MODE) {
+        if (isViewport) {
             if (selected) {
-                drawSelectBorder(gc, drawPoint, model.getSize(), scale);
+                drawSelectBorder(gc, drawPoint, model.getSize(), scale, style);
             } else if (selectionOverflow) {
-                if (DiagramBlockModel.dragMode) {
-                    drawDragNDropForeground(gc, drawPoint, model.getSize(), scale);
-                } else drawOverflowBorder(gc, drawPoint, model.getSize(), scale);
+                if (isDragmode) {
+                    drawDragNDropForeground(gc, drawPoint, model.getSize(), scale, style);
+                } else drawOverflowBorder(gc, drawPoint, model.getSize(), scale, style);
             }
         }
     }

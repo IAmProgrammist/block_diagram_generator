@@ -11,6 +11,8 @@ public class BDContainerModel extends BDElementModel {
     public List<BDElementController> elements = new LinkedList<>();
     public List<Pair<Double, Double>> elementYBorders = new ArrayList<>();
     public Integer lastVisitedDragModePos = null;
+    public double height;
+    public double maxLeftBound;
 
     public BDContainerModel() {
         super("");
@@ -47,21 +49,6 @@ public class BDContainerModel extends BDElementModel {
 
     @Override
     public Pair<Double, Double> getBottomConnector(Pair<Double, Double> pos) {
-        if (elements.size() > 0) {
-            double maxLeftBound = 0;
-            double height = 0;
-            for (BDElementController element : elements) {
-                Dimension2D elementSize = element.getModel().getSize();
-                double currLeftBound;
-                if ((currLeftBound = element.getModel().getDistanceToLeftBound()) > maxLeftBound) {
-                    maxLeftBound = currLeftBound;
-                }
-                height += elementSize.getHeight() + DiagramBlockModel.ELEMENTS_SPACING;
-            }
-
-            height -= DiagramBlockModel.ELEMENTS_SPACING;
-            return new Pair<>(pos.getKey() + maxLeftBound, pos.getValue() + height);
-        }
-        return pos;
+        return new Pair<>(pos.getKey() + maxLeftBound, pos.getValue() + height);
     }
 }

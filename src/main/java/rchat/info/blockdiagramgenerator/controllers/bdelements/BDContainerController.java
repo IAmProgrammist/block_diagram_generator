@@ -1,19 +1,16 @@
 package rchat.info.blockdiagramgenerator.controllers.bdelements;
 
 import javafx.geometry.Dimension2D;
-import javafx.scene.Node;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.util.Pair;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import rchat.info.blockdiagramgenerator.Utils;
+import rchat.info.blockdiagramgenerator.controllers.DiagramBlockController;
 import rchat.info.blockdiagramgenerator.models.DiagramBlockModel;
 import rchat.info.blockdiagramgenerator.models.bdelements.BDContainerModel;
-import rchat.info.blockdiagramgenerator.models.bdelements.BDCycleFixedModel;
 import rchat.info.blockdiagramgenerator.models.bdelements.BDElementModel;
 import rchat.info.blockdiagramgenerator.painter.AbstractPainter;
 import rchat.info.blockdiagramgenerator.views.bdelements.BDContainerView;
-import rchat.info.blockdiagramgenerator.views.bdelements.BDCycleFixedView;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -23,11 +20,11 @@ public class BDContainerController extends BDElementController implements Collec
     public BDContainerModel model;
     public BDContainerView view;
 
-    public BDContainerController() {
-        super(EXPORT_IDENTIFIER);
+    public BDContainerController(DiagramBlockController context) {
+        super(context, EXPORT_IDENTIFIER);
 
-        if (DiagramBlockModel.VIEWPORT_MODE) {
-            this.model = new BDContainerModel(new BDAddElementController());
+        if (context.isViewportMode()) {
+            this.model = new BDContainerModel(new BDAddElementController(context));
         } else {
             this.model = new BDContainerModel();
         }
@@ -38,14 +35,14 @@ public class BDContainerController extends BDElementController implements Collec
         recalculateSizes();
     }
 
-    public BDContainerController(BDElementController... elements) {
-        super(EXPORT_IDENTIFIER);
+    public BDContainerController(DiagramBlockController context, BDElementController... elements) {
+        super(context, EXPORT_IDENTIFIER);
 
         elements = Arrays.stream(elements)
                 .filter(el -> !(el instanceof BDAddElementController))
                 .collect(Collectors.toList()).toArray(new BDElementController[0]);
-        if (elements.length == 0 && DiagramBlockModel.VIEWPORT_MODE) {
-            this.model = new BDContainerModel(new BDAddElementController());
+        if (elements.length == 0 && context.isViewportMode()) {
+            this.model = new BDContainerModel(new BDAddElementController(context));
         } else {
             this.model = new BDContainerModel(elements);
         }
@@ -56,14 +53,14 @@ public class BDContainerController extends BDElementController implements Collec
         recalculateSizes();
     }
 
-    public BDContainerController(boolean selected, BDElementController... elements) {
-        super(EXPORT_IDENTIFIER);
+    public BDContainerController(DiagramBlockController context, boolean selected, BDElementController... elements) {
+        super(context, EXPORT_IDENTIFIER);
 
         elements = Arrays.stream(elements)
                 .filter(el -> !(el instanceof BDAddElementController))
                 .collect(Collectors.toList()).toArray(new BDElementController[0]);
-        if (elements.length == 0 && DiagramBlockModel.VIEWPORT_MODE) {
-            this.model = new BDContainerModel(new BDAddElementController());
+        if (elements.length == 0 && context.isViewportMode()) {
+            this.model = new BDContainerModel(new BDAddElementController(context));
         } else {
             this.model = new BDContainerModel(elements);
         }
@@ -75,19 +72,19 @@ public class BDContainerController extends BDElementController implements Collec
         recalculateSizes();
     }
 
-    public BDContainerController(JSONObject object) {
-        super(object);
+    public BDContainerController(DiagramBlockController context, JSONObject object) {
+        super(context, object);
         List<BDElementController> elements = new ArrayList<>();
         JSONArray elementsArray = object.getJSONArray("data");
 
         for (int i = 0; i < elementsArray.length(); i++)
-            elements.add(BDElementController.fromJSONObject(elementsArray.getJSONObject(i)));
+            elements.add(BDElementController.fromJSONObject(context, elementsArray.getJSONObject(i)));
 
         BDElementController[] elementsAr = elements.stream()
                 .filter(el -> !(el == null || el instanceof BDAddElementController))
                 .collect(Collectors.toList()).toArray(new BDElementController[0]);
-        if (elementsAr.length == 0 && DiagramBlockModel.VIEWPORT_MODE) {
-            this.model = new BDContainerModel(new BDAddElementController());
+        if (elementsAr.length == 0 && context.isViewportMode()) {
+            this.model = new BDContainerModel(new BDAddElementController(context));
         } else {
             this.model = new BDContainerModel(elementsAr);
         }
@@ -117,7 +114,9 @@ public class BDContainerController extends BDElementController implements Collec
 
     @Override
     public void update(AbstractPainter gc, Pair<Double, Double> position, double scale) {
-        view.repaint(gc, position, isMouseInElement(position), selected, scale);
+        view.repaint(gc, position, isMouseInElement(position), selected, context.isViewportMode(), context.isDragMode(),
+                scale, this.context.getCurrentStyle(), new Pair<>(this.context.canvasMousePosX(),
+                this.context.canvasMousePosY()));
     }
 
     // We're doing this because there is may be only one element in container, so hitbox for this only element and
@@ -125,12 +124,12 @@ public class BDContainerController extends BDElementController implements Collec
     @Override
     public boolean isMouseInElement(Pair<Double, Double> position) {
         Dimension2D fixedSize = model.getSize();
-        fixedSize = new Dimension2D(fixedSize.getWidth() + 2 * DiagramBlockModel.CONTAINER_OVERFLOW_PADDING,
-                fixedSize.getHeight() + 2 * DiagramBlockModel.CONTAINER_OVERFLOW_PADDING);
-        Pair<Double, Double> fixedPosition = new Pair<>(position.getKey() - DiagramBlockModel.CONTAINER_OVERFLOW_PADDING,
-                position.getValue() - DiagramBlockModel.CONTAINER_OVERFLOW_PADDING);
+        fixedSize = new Dimension2D(fixedSize.getWidth() + 2 * context.getCurrentStyle().getContainerOverflowPadding(),
+                fixedSize.getHeight() + 2 * context.getCurrentStyle().getContainerOverflowPadding());
+        Pair<Double, Double> fixedPosition = new Pair<>(position.getKey() - context.getCurrentStyle().getContainerOverflowPadding(),
+                position.getValue() - context.getCurrentStyle().getContainerOverflowPadding());
         return Utils.isPointInBounds(
-                new Pair<>(DiagramBlockModel.canvasMousePosX, DiagramBlockModel.canvasMousePosY), fixedPosition,
+                new Pair<>(context.canvasMousePosX(), context.canvasMousePosY()), fixedPosition,
                 fixedSize);
     }
 
@@ -146,7 +145,7 @@ public class BDContainerController extends BDElementController implements Collec
                     currentLevel);
             selected = element.select(drawElementPoint);
             if (selected != null) break;
-            currentLevel += element.getModel().getSize().getHeight() + DiagramBlockModel.ELEMENTS_SPACING;
+            currentLevel += element.getModel().getSize().getHeight() + context.getCurrentStyle().getElementsSpacing();
         }
 
         if (selected != null) {
@@ -177,7 +176,7 @@ public class BDContainerController extends BDElementController implements Collec
                     .filter(bdElementController -> !(bdElementController instanceof BDAddElementController))
                     .collect(Collectors.toList());
             this.model.lastVisitedDragModePos = null;
-            DiagramBlockModel.onDataUpdate.run();
+            context.model.onDataUpdate.run();
         }
     }
 
@@ -192,7 +191,7 @@ public class BDContainerController extends BDElementController implements Collec
         double maxRightBound = 0;
         double height = 0;
         List<Pair<Double, Double>> dragNDropYBounds = new ArrayList<>();
-        dragNDropYBounds.add(new Pair<>(height - DiagramBlockModel.CONTAINER_OVERFLOW_PADDING, -DiagramBlockModel.ELEMENTS_SPACING));
+        dragNDropYBounds.add(new Pair<>(height - context.getCurrentStyle().getContainerOverflowPadding(), -context.getCurrentStyle().getElementsSpacing()));
         for (BDElementController element : model.elements) {
             element.recalculateSizes();
             Dimension2D elementSize = element.getModel().getSize();
@@ -204,17 +203,19 @@ public class BDContainerController extends BDElementController implements Collec
             if ((currRightBound = element.getModel().getDistanceToRightBound()) > maxRightBound) {
                 maxRightBound = currRightBound;
             }
-            height += elementSize.getHeight() + DiagramBlockModel.ELEMENTS_SPACING;
-            dragNDropYBounds.add(new Pair<>(height - DiagramBlockModel.ELEMENTS_SPACING - elementSize.getHeight() / 2,
-                    height - DiagramBlockModel.ELEMENTS_SPACING));
+            height += elementSize.getHeight() + context.getCurrentStyle().getElementsSpacing();
+            dragNDropYBounds.add(new Pair<>(height - context.getCurrentStyle().getElementsSpacing() - elementSize.getHeight() / 2,
+                    height - context.getCurrentStyle().getElementsSpacing()));
         }
 
-        height -= DiagramBlockModel.ELEMENTS_SPACING;
-        dragNDropYBounds.add(new Pair<>(height + DiagramBlockModel.CONTAINER_OVERFLOW_PADDING,
-                height + DiagramBlockModel.ELEMENTS_SPACING));
+        height -= context.getCurrentStyle().getElementsSpacing();
+        dragNDropYBounds.add(new Pair<>(height + context.getCurrentStyle().getContainerOverflowPadding(),
+                height + context.getCurrentStyle().getElementsSpacing()));
 
         Dimension2D size = new Dimension2D(maxLeftBound + maxRightBound, height);
         model.elementYBorders = dragNDropYBounds;
+        model.height = height;
+        model.maxLeftBound = maxLeftBound;
         model.setMeasurements(size, maxLeftBound, maxRightBound);
     }
 
@@ -306,7 +307,17 @@ public class BDContainerController extends BDElementController implements Collec
         for (BDElementController controller : this) {
             elements[i++] = controller.clone();
         }
-        return new BDContainerController(this.selected, elements);
+        return new BDContainerController(context, this.selected, elements);
+    }
+
+    @Override
+    public BDContainerController clone(DiagramBlockController newContext) {
+        BDElementController[] elements = new BDElementController[size()];
+        int i = 0;
+        for (BDElementController controller : this) {
+            elements[i++] = controller.clone(newContext);
+        }
+        return new BDContainerController(newContext, this.selected, elements);
     }
 
     @Override
@@ -317,8 +328,8 @@ public class BDContainerController extends BDElementController implements Collec
     @Override
     public void removeFromContainer(BDElementController bdElementController) {
         model.elements.remove(bdElementController);
-        if (model.elements.size() == 0 && DiagramBlockModel.VIEWPORT_MODE) {
-            model.elements.add(new BDAddElementController());
+        if (model.elements.size() == 0 && context.isViewportMode()) {
+            model.elements.add(new BDAddElementController(context));
             model.elements.get(0).setParentContainer(this);
         }
     }
@@ -326,6 +337,6 @@ public class BDContainerController extends BDElementController implements Collec
     @Override
     public void replaceInContainer(BDElementController replacing, BDElementController replacer) {
         model.elements.set(model.elements.indexOf(replacing), replacer);
-        DiagramBlockModel.onDataUpdate.run();
+        context.model.onDataUpdate.run();
     }
 }

@@ -22,7 +22,7 @@ public class SaveDialogModel {
     public static final short CENTIMETERS = 2;
     public static final short FILE_EXTENSION_SVG = 0;
     public static final short FILE_EXTENSION_PNG = 1;
-    public static final short FILE_EXTENSION_JPG = 2;
+    //public static final short FILE_EXTENSION_JPG = 2;
     public static final short FILE_EXTENSION_TEX = 3;
     //px/inch
     public double density;
@@ -152,13 +152,17 @@ public class SaveDialogModel {
     public void setPath(String absolutePath) {
         if (absolutePath.endsWith(".svg")) {
             fileExtension = FILE_EXTENSION_SVG;
-        } else if (absolutePath.endsWith(".jpg")) {
-            fileExtension = FILE_EXTENSION_JPG;
+        //} else if (absolutePath.endsWith(".jpg")) {
+        //    fileExtension = FILE_EXTENSION_JPG;
         } else if (absolutePath.endsWith(".png")) {
             fileExtension = FILE_EXTENSION_PNG;
         }else if (absolutePath.endsWith(".tex")) {
             fileExtension = FILE_EXTENSION_TEX;
-        } else throw new IllegalArgumentException();
+        } else {
+            fileExtension = FILE_EXTENSION_PNG;
+            this.file = absolutePath + ".png";
+            return;
+        };
 
         this.file = absolutePath;
     }

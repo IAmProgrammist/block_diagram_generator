@@ -95,5 +95,6 @@ public class CanvasPainter extends AbstractPainter {
     public void drawBackground(Color backgroundColor) {
         graphicsContext.setFill(backgroundColor);
         graphicsContext.clearRect(0, 0, graphicsContext.getCanvas().getWidth(), graphicsContext.getCanvas().getHeight());
+        graphicsContext.fillRect(0, 0, graphicsContext.getCanvas().getWidth(), graphicsContext.getCanvas().getHeight());
     }
 }
