@@ -340,7 +340,8 @@ public class SaveDialogController extends Dialog<SaveDialogModel> {
                 densityTextMeasurments.setValue(rb.getString("measurments_pix_perinch"));
 
                 shouldEditDensity = true;
-                styleButton.setText(style1.getStyleName());
+                if (style1 != null)
+                    styleButton.setText(style1.getStyleName());
                 widthTextMeasurments.setValue(rb.getString("measurments_pix"));
                 widthTextFormatter.setValue((int) saveDialogController.model.root.getModel().getSize().getWidth());
             });
