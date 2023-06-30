@@ -57,8 +57,7 @@ public class BDCycleNotFixedView extends BDElementView {
                         (drawPoint.getValue()) * scale}, 4);
 
         gc.setFont(basicFont);
-        //TODO: This is so bad!
-        double currentLevel = (rhombusHeight - textHeight) / 2 - 3 * style.getLineSpacing() * scale;
+        double currentLevel = (rhombusHeight - textHeight) / 2 + style.getTextPadding() * scale;
         for (String line : this.model.getDataLines()) {
             Dimension2D d = Utils.computeTextWidth(basicFont, line);
             currentLevel += d.getHeight();

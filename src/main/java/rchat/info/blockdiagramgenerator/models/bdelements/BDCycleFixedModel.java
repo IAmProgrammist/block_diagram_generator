@@ -10,6 +10,8 @@ public class BDCycleFixedModel extends BDElementModel {
     public BDContainerController body;
     public Dimension2D rhombusSize;
     public Dimension2D rhombusTextSize;
+    public double a;
+    public double l;
 
     public BDCycleFixedModel(String data, BDContainerController body) {
         super(data);
@@ -57,10 +59,13 @@ public class BDCycleFixedModel extends BDElementModel {
     }
 
     public void setMeasurements(Dimension2D size, double leftBound, double rightBound,
-                                Dimension2D rhombusSize, Dimension2D rhombusTextSize) {
+                                Dimension2D rhombusSize, Dimension2D rhombusTextSize,
+                                double a, double l) {
         super.setMeasurements(size, leftBound, rightBound);
         this.rhombusSize = rhombusSize;
         this.rhombusTextSize = rhombusTextSize;
+        this.a = a;
+        this.l = l;
     }
 
     public Dimension2D getRhombusSize() {

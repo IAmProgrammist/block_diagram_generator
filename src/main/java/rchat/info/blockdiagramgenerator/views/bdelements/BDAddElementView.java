@@ -32,8 +32,7 @@ public class BDAddElementView extends BDElementView{
         gc.setLineDashes();
 
         gc.setFont(basicFont);
-        double currentLevel = style.getTextPadding() * scale -
-                style.getLineSpacing() * scale;
+        double currentLevel = style.getTextPadding() * scale;
         for (String line : this.model.getDataLines()) {
             Dimension2D d = Utils.computeTextWidth(basicFont, line);
             currentLevel += d.getHeight();

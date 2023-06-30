@@ -17,7 +17,7 @@ public final class Style {
         DEFAULT_STYLE_NAME = "Default";
         DEFAULT_STYLE = new Style(DEFAULT_STYLE_NAME,
                 "Courier New", Color.BLACK, Color.BLACK, Color.WHITE, new Color(0.9, 0.9, 0.9, 1), 50, 5,
-                3, 30, 3, 70, 50, 50, 15,
+                3, 30, 20, 70, 50, 50, 15,
                 30, "+", "-", new Color(0.8, 0.8, 0.8, 1),
                 Color.LIGHTGREEN, Color.DARKSEAGREEN, new Color(0.0, 1, 0.0, 0.3), 10, 1,
                 3, 30, 300, 25,

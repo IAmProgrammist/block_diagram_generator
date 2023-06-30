@@ -327,6 +327,7 @@ public class BDDecisionController extends BDElementController implements TextEdi
         }
         textHeight -= context.getCurrentStyle().getLineSpacing();
         double textWidth = maxLineLen + 2 * context.getCurrentStyle().getTextPadding();
+        textHeight += 2 * context.getCurrentStyle().getTextPadding();
         double diag = textHeight + textWidth / 2;
 
         Dimension2D rhombusSize = new Dimension2D(diag * 2, diag);

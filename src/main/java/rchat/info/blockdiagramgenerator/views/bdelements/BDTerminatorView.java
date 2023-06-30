@@ -27,8 +27,7 @@ public class BDTerminatorView extends BDElementView {
         gc.setLineWidth(style.getStrokeWidthDefault() * scale);
         gc.strokeRoundRect(drawPoint.getKey() * scale, drawPoint.getValue() * scale, totalWidth, textHeight, textHeight, textHeight);
         gc.setFont(basicFont);
-        double currentLevel = style.getTextPadding() * scale -
-                style.getLineSpacing() * scale;
+        double currentLevel = style.getTextPadding() * scale;
         for (String line : this.model.getDataLines()) {
             Dimension2D d = Utils.computeTextWidth(basicFont, line);
             currentLevel += d.getHeight();

@@ -70,8 +70,7 @@ public class BDCycleFixedView extends BDElementView {
         gc.setFill(style.getBdBackgroundColor());
 
         gc.setFont(basicFont);
-        //TODO: This is so bad!
-        double currentLevel = (rhombusHeight - textHeight) / 2 + 5 * style.getLineSpacing() * scale;
+        double currentLevel = (model.a * scale) / 2 - textHeight / 2 + style.getTextPadding() * scale;
         for (String line : this.model.getDataLines()) {
             Dimension2D d = Utils.computeTextWidth(basicFont, line);
             currentLevel += d.getHeight();

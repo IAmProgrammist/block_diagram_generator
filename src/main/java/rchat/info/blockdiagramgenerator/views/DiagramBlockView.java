@@ -2,11 +2,15 @@ package rchat.info.blockdiagramgenerator.views;
 
 import javafx.geometry.Dimension2D;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
+import javafx.scene.text.Font;
 import javafx.util.Pair;
 import rchat.info.blockdiagramgenerator.models.DiagramBlockModel;
 import rchat.info.blockdiagramgenerator.models.Style;
 import rchat.info.blockdiagramgenerator.painter.AbstractPainter;
+
+import java.awt.*;
 
 public class DiagramBlockView {
     public DiagramBlockModel model;
@@ -39,6 +43,7 @@ public class DiagramBlockView {
                 gc.strokeLine(0, y * model.canvasScale, size.getWidth(), y * model.canvasScale);
             }
         }
+
         model.root.update(gc, new Pair<>(model.posX, model.posY), model.canvasScale);
     }
 }

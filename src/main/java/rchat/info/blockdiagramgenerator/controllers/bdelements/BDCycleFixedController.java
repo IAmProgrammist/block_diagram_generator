@@ -116,10 +116,10 @@ public class BDCycleFixedController extends BDElementController implements TextE
         textHeight -= context.getCurrentStyle().getLineSpacing();
         double textWidth = maxLineLen + 2 * context.getCurrentStyle().getTextPadding();
         textHeight += 2 * context.getCurrentStyle().getTextPadding();
-        double a = Math.max(textHeight, textWidth);
-
-        Dimension2D rhombusSize = new Dimension2D(a * 2, a);
         Dimension2D rhombusTextSize = new Dimension2D(textWidth, textHeight);
+        double l = textWidth / 4 - textHeight / 4;
+        double a = Math.max(textHeight, textWidth - 2 * l);
+        Dimension2D rhombusSize = new Dimension2D(a * 2, a);
         this.model.rhombusSize = rhombusSize;
         this.model.rhombusTextSize = rhombusTextSize;
         double rhombusWidth = rhombusSize.getWidth();
@@ -134,7 +134,7 @@ public class BDCycleFixedController extends BDElementController implements TextE
         double bottomPoint = rhombusHeight + 2 * context.getCurrentStyle().getElementsSpacing() + model.body.getModel().getSize().getHeight() + context.getCurrentStyle().getDecisionBlocksPadding();
         double rightBound = rightLineOffset;
         Dimension2D size = new Dimension2D(Math.abs(leftBound + rightBound), bottomPoint);
-        model.setMeasurements(size, leftBound, rightBound);
+        model.setMeasurements(size, leftBound, rightBound, rhombusSize, rhombusTextSize, a, l);
     }
 
     @Override

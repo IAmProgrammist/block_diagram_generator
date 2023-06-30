@@ -29,8 +29,7 @@ public class BDPreProcessView extends BDElementView {
         gc.strokeRect((drawPoint.getKey() + 0.15 * textHeight / scale) * scale, drawPoint.getValue() * scale,
                 totalWidth - 0.3 * textHeight, textHeight);
         gc.setFont(basicFont);
-        double currentLevel = style.getTextPadding() * scale -
-                style.getLineSpacing() * scale;
+        double currentLevel = style.getTextPadding() * scale;
         for (String line : this.model.getDataLines()) {
             Dimension2D d = Utils.computeTextWidth(basicFont, line);
             currentLevel += d.getHeight();

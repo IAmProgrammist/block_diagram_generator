@@ -115,6 +115,7 @@ public class BDCycleNotFixedController extends BDElementController implements Te
         }
         textHeight -= context.getCurrentStyle().getLineSpacing();
         double textWidth = maxLineLen + 2 * context.getCurrentStyle().getTextPadding();
+        textHeight += 2 * context.getCurrentStyle().getTextPadding();
         double diag = textHeight + textWidth / 2;
 
         Dimension2D rhombusSize = new Dimension2D(diag * 2, diag);
@@ -127,13 +128,11 @@ public class BDCycleNotFixedController extends BDElementController implements Te
         double leftLineOffset = Math.max(Math.max(rhombusWidth / 2, model.body.getModel().getDistanceToLeftBound())
                 + context.getCurrentStyle().getDecisionBlocksPadding(), context.getCurrentStyle().getMinDecisionShoulderLen());
 
-        double leftBound = leftLineOffset;
         double rightLineOffset = Math.max(Math.max(rhombusWidth / 2, model.body.getModel().getDistanceToRightBound())
                 + context.getCurrentStyle().getDecisionBlocksPadding(), context.getCurrentStyle().getMinDecisionShoulderLen());
         double bottomPoint = rhombusHeight + 2 * context.getCurrentStyle().getElementsSpacing() + model.body.getModel().getSize().getHeight() + context.getCurrentStyle().getDecisionBlocksPadding();
-        double rightBound = rightLineOffset;
-        Dimension2D size = new Dimension2D(leftBound + rightBound, bottomPoint);
-        model.setMeasurements(size, leftBound, rightBound);
+        Dimension2D size = new Dimension2D(leftLineOffset + rightLineOffset, bottomPoint);
+        model.setMeasurements(size, leftLineOffset, rightLineOffset);
     }
 
     @Override
