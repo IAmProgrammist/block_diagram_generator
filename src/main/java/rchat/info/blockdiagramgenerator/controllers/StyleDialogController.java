@@ -138,10 +138,7 @@ public class StyleDialogController extends Dialog<Style> {
     public void deleteStyle(ActionEvent actionEvent) {
         Style.removeStyle(cStyle.getStyleName());
         stylesList.getItems().setAll(Style.getStyles());
-        Style newStyle = Style.getStyle((String) stylesList.getItems().get(0));
-
-        if (newStyle == null)
-            newStyle = Style.getCurrentStyle();
+        Style newStyle = Style.getCurrentStyle();
 
         setCStyle(newStyle);
     }

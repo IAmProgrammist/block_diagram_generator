@@ -288,11 +288,10 @@ public class EditorController extends DiagramBlockController {
             try {
                 style = stylePicker.showAndWait().get();
             } catch (NoSuchElementException e) {
-                style = null;
+                style = Style.getCurrentStyle();
             }
 
-            if (style != null)
-                Style.setCurrentStyle(style);
+            Style.setCurrentStyle(style);
 
             this.model.root = this.model.root.clone(this);
             setCanvasScale(this.model.canvasScale);

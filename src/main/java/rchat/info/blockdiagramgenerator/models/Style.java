@@ -410,7 +410,11 @@ public final class Style {
     public static void removeStyle(String styleName) {
         if (hasStyle(styleName)) {
             try {
-                Preferences.userNodeForPackage(Style.class).node("styles").node(styleName).removeNode();
+                if (getCurrentStyle().getStyleName().equals(styleName))
+                    setCurrentStyle(DEFAULT_STYLE);
+
+                if (!DEFAULT_STYLE_NAME.equals(styleName))
+                    Preferences.userNodeForPackage(Style.class).node("styles").node(styleName).removeNode();
             } catch (BackingStoreException e) {
                 throw new RuntimeException(e);
             }
@@ -525,27 +529,27 @@ public final class Style {
     }
 
     private static void update(String style, String key, String value) {
-        if (hasStyle(style))
+        if (hasStyle(style) && !DEFAULT_STYLE_NAME.equals(style))
             Preferences.userNodeForPackage(Style.class).node("styles").node(style).put(key, value);
     }
 
     private static void update(String style, String key, double value) {
-        if (hasStyle(style))
+        if (hasStyle(style) && !DEFAULT_STYLE_NAME.equals(style))
             Preferences.userNodeForPackage(Style.class).node("styles").node(style).putDouble(key, value);
     }
 
     private static void update(String style, String key, int value) {
-        if (hasStyle(style))
+        if (hasStyle(style) && !DEFAULT_STYLE_NAME.equals(style))
             Preferences.userNodeForPackage(Style.class).node("styles").node(style).putInt(key, value);
     }
 
     private static void update(String style, String key, boolean value) {
-        if (hasStyle(style))
+        if (hasStyle(style) && !DEFAULT_STYLE_NAME.equals(style))
             Preferences.userNodeForPackage(Style.class).node("styles").node(style).putBoolean(key, value);
     }
 
     private static void update(String style, String key, Color value) {
-        if (hasStyle(style))
+        if (hasStyle(style) && !DEFAULT_STYLE_NAME.equals(style))
             putColor(Preferences.userNodeForPackage(Style.class).node("styles").node(style), key, value);
     }
 
