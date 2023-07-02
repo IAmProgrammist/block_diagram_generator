@@ -319,11 +319,8 @@ public class SaveDialogController extends Dialog<SaveDialogModel> {
                 try {
                     style1 = stylePicker.showAndWait().get();
                 } catch (NoSuchElementException e) {
-                    style1 = null;
+                    style1 = Style.getCurrentStyle();
                 }
-
-                if (style1 != null)
-                    saveDialogController.setStyle(style1);
 
                 saveDialogController.setCanvasScale(1.0);
                 shouldEditDensity = false;
@@ -340,8 +337,7 @@ public class SaveDialogController extends Dialog<SaveDialogModel> {
                 densityTextMeasurments.setValue(rb.getString("measurments_pix_perinch"));
 
                 shouldEditDensity = true;
-                if (style1 != null)
-                    styleButton.setText(style1.getStyleName());
+                styleButton.setText(style1.getStyleName());
                 widthTextMeasurments.setValue(rb.getString("measurments_pix"));
                 widthTextFormatter.setValue((int) saveDialogController.model.root.getModel().getSize().getWidth());
             });
