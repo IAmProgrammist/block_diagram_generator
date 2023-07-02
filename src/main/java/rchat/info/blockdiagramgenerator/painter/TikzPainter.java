@@ -2,7 +2,6 @@ package rchat.info.blockdiagramgenerator.painter;
 
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
-import rchat.info.blockdiagramgenerator.models.DiagramBlockModel;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -11,7 +10,7 @@ import java.util.*;
 public class TikzPainter extends AbstractPainter {
     private Map<Color, String> colors = new HashMap<>();
     private Map<Font, String> fonts = new HashMap<>();
-    String rand = randomName();
+    String id = randomName();
     private Color backgroundColor = null;
     double actualWidth = 0;
     List<TikzEntity> entities = new ArrayList<>();
@@ -343,7 +342,7 @@ public class TikzPainter extends AbstractPainter {
     }
 
     private void saveColor(Color p) {
-        colors.put(p, "color" + rand + randomName());
+        colors.put(p, "color" + id + randomName());
     }
 
     private String getColor(Color p) {
@@ -354,7 +353,7 @@ public class TikzPainter extends AbstractPainter {
     }
 
     private void saveFont(Font p) {
-        fonts.put(p, "font" + rand + randomName());
+        fonts.put(p, "font" + id + randomName());
     }
 
     private String getFont(Font p) {
@@ -443,6 +442,9 @@ public class TikzPainter extends AbstractPainter {
             result.append("% --------------------------\n");
         }
 
+        result.append("\\newsavebox{\\dbg" + id + "}\n" +
+                "\\begin{lrbox}{\\dbg" + id + "}");
+
         result.append(String.format(Locale.ENGLISH, "\\begin{tikzpicture}[every node/.style={inner sep=0,outer sep=0}, background rectangle/.style={opacity=%f, fill=%s}, show background rectangle]\n", backgroundColor.getOpacity(), getColor(this.backgroundColor)));
 
         result.append("\\makeatletter\n\\newcommand{\\verbatimfont}[1]{\\def\\verbatim@font{#1}}\n\\makeatother\n");
@@ -465,6 +467,14 @@ public class TikzPainter extends AbstractPainter {
         result.append(doc);
 
         result.append("\\end{tikzpicture}\n");
+        result.append("\\end{lrbox}\n");
+
+        if (includeComments) {
+            result.append("% Здесь Вы можете поменять размер блок схемы. Оношение ширина/высота будет сохранено.\n" +
+                    "% Для изменения размеров блок схемы Вы можете изменять первый параметр resizebox, он задаёт желаемую ширину.\n");
+        }
+
+        result.append(String.format(Locale.ENGLISH, "\\resizebox{%fcm}{!}{\\usebox{%s}}\n", maxWidth, "\\dbg" + id));
 
         if (includeComments) {
             result.append("% --------------------------\n\n");
