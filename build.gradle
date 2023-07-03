@@ -62,13 +62,20 @@ test {
 jlink {
     jpackage {
         jpackageHome = 'C:\\Program Files\\Eclipse Adoptium\\jdk-17.0.7.7-hotspot'
+
+        if(org.gradle.internal.os.OperatingSystem.current().windows) {
+            imageOptions = ['--icon', 'src\\main\\resources\\rchat\\info\\blockdiagramgenerator\\images\\icon\\icon_background.ico']
+            //installerOptions = ['--win-per-user-install', '--win-dir-chooser', '--win-menu', '--win-shortcut']
+        }
     }
 
     imageZip = project.file("${buildDir}/distributions/app-${javafx.platform.classifier}.zip")
     options = ['--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
     launcher {
-        name = 'app'
+        name = 'bdg'
     }
+
+
 }
 
 jlinkZip {

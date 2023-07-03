@@ -5,6 +5,7 @@ import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -35,6 +36,7 @@ public class Main extends Application {
     public void start(Stage stage) throws IOException {
         Style.init();
         this.stage = stage;
+        stage.getIcons().add(new Image(Main.class.getResource("images/icon/icon_no_background.png").openStream()));
 
         Style currentStyle = Style.getCurrentStyle();
 
