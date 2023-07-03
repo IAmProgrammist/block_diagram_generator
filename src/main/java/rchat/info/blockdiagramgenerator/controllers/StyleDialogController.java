@@ -323,6 +323,8 @@ public class StyleDialogController extends Dialog<Style> {
     TextFormatter<Integer> maxBdContainerDragndropWidthMarginFormatter = TextareaUtils.uIntTextFormatter();
     public TextField tilesInTile;
     TextFormatter<Integer> tilesInTileFormatter = TextareaUtils.uIntTextFormatter();
+    public TextField branchNamePadding;
+    TextFormatter<Integer> branchNamePaddingFormatter = TextareaUtils.uIntTextFormatter();
     public CheckBox isDebugModeEnabled;
     public CheckBox isDebugShowFps;
     public CheckBox isDebugTikzIncludeComments;
@@ -356,9 +358,10 @@ public class StyleDialogController extends Dialog<Style> {
                     connectorsWidth, textPadding, lineSpacing, elementsSpacing, decisionBlocksPadding, minDecisionShoulderLen, dashLineWidthLine,
                     dashLineWidthSpace, positiveBranchText, negativeBranchText, gridColor, selectedColor, overflowSelectionColor, dragndropForegroundColor,
                     tileSize, tileStrokeWidthDefault, selectionBorderWidth, containerOverflowPadding, maxBdContainerDragndropWidth, maxBdContainerDragndropWidthMargin,
-                    tilesInTile, isDebugModeEnabled, isDebugShowFps, isDebugTikzIncludeComments, debugDrawBorders, debugBorderColor};
+                    tilesInTile, isDebugModeEnabled, isDebugShowFps, isDebugTikzIncludeComments, debugDrawBorders, debugBorderColor, branchNamePadding};
 
             fontBasicSize.setTextFormatter(fontBasicSizeFormatter);
+            branchNamePadding.setTextFormatter(branchNamePaddingFormatter);
             strokeWidthDefault.setTextFormatter(strokeWidthDefaultFormatter);
             connectorsWidth.setTextFormatter(connectorsWidthFormatter);
             textPadding.setTextFormatter(textPaddingFormatter);
@@ -543,6 +546,10 @@ public class StyleDialogController extends Dialog<Style> {
                 cStyle.setFontBasicSize(newValue);
                 dbController.setCurrentStyle(cStyle);
             });
+            branchNamePaddingFormatter.valueProperty().addListener((observable, oldValue, newValue) -> {
+                cStyle.setBranchNamePadding(newValue);
+                dbController.setCurrentStyle(cStyle);
+            });
             strokeWidthDefaultFormatter.valueProperty().addListener((observable, oldValue, newValue) -> {
                 cStyle.setStrokeWidthDefault(newValue);
                 dbController.setCurrentStyle(cStyle);
@@ -640,6 +647,7 @@ public class StyleDialogController extends Dialog<Style> {
         decisionBlocksPaddingFormatter.setValue((int) cStyle.getDecisionBlocksPadding());
         minDecisionShoulderLenFormatter.setValue((int) cStyle.getMinDecisionShoulderLen());
         dashLineWidthLineFormatter.setValue((int) cStyle.getDashLineWidthLine());
+        branchNamePaddingFormatter.setValue((int) cStyle.getBranchNamePadding());
 
         dashLineWidthSpaceFormatter.setValue((int) cStyle.getDashLineWidthSpace());
         positiveBranchText.setText(cStyle.getPositiveBranchText());

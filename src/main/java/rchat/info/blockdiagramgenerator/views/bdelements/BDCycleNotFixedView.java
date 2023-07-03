@@ -84,8 +84,8 @@ public class BDCycleNotFixedView extends BDElementView {
         Dimension2D centerBranchTextSize = Utils.computeTextWidth(basicFont, style.getPositiveBranchText());
         gc.setFill(style.getFontColor());
         gc.fillText(style.getPositiveBranchText(),
-                (bottomRhombusConnector.getKey() - centerBranchTextSize.getWidth() / scale - style.getLineSpacing()) * scale,
-                (bottomRhombusConnector.getValue() + centerBranchTextSize.getHeight() / scale) * scale);
+                (bottomRhombusConnector.getKey() - centerBranchTextSize.getWidth() / scale - style.getBranchNamePadding()) * scale,
+                (bottomRhombusConnector.getValue() + centerBranchTextSize.getHeight() / scale + style.getBranchNamePadding()) * scale);
 
         double leftLineOffset = Math.max(Math.max(rhombusWidth / scale / 2, model.body.getModel().getDistanceToLeftBound())
                 + style.getDecisionBlocksPadding(), style.getMinDecisionShoulderLen());

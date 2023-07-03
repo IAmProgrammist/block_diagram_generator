@@ -102,14 +102,14 @@ public class BDDecisionView extends BDElementView {
                 Dimension2D centerBranchTextSize = Utils.computeTextWidth(basicFont, style.getPositiveBranchText());
                 gc.setFill(style.getFontColor());
                 gc.fillText(style.getPositiveBranchText(),
-                        (bottomRhombusConnector.getKey() - centerBranchTextSize.getWidth() / scale - style.getLineSpacing()) * scale,
-                        (bottomRhombusConnector.getValue() + centerBranchTextSize.getHeight() / scale) * scale);
+                        (bottomRhombusConnector.getKey() - centerBranchTextSize.getWidth() / scale - style.getBranchNamePadding()) * scale,
+                        (bottomRhombusConnector.getValue() + centerBranchTextSize.getHeight() / scale + style.getBranchNamePadding()) * scale);
             } else {
                 Dimension2D centerBranchTextSize = Utils.computeTextWidth(basicFont, style.getNegativeBranchText());
                 gc.setFill(style.getFontColor());
                 gc.fillText(style.getNegativeBranchText(),
-                        (bottomRhombusConnector.getKey() - centerBranchTextSize.getWidth() / scale - style.getLineSpacing()) * scale,
-                        (bottomRhombusConnector.getValue() + centerBranchTextSize.getHeight() / scale) * scale);
+                        (bottomRhombusConnector.getKey() - centerBranchTextSize.getWidth() / scale - style.getBranchNamePadding()) * scale,
+                        (bottomRhombusConnector.getValue() + centerBranchTextSize.getHeight() / scale + style.getBranchNamePadding()) * scale);
             }
 
             Pair<Double, Double> bottomRestConnector;
@@ -144,12 +144,12 @@ public class BDDecisionView extends BDElementView {
                     gc.setFill(style.getFontColor());
                     gc.fillText(style.getNegativeBranchText(),
                             restConnector.getKey() * scale,
-                            (rhombusLeftConnector.getValue() - style.getTextPadding()) * scale);
+                            (rhombusLeftConnector.getValue() - style.getBranchNamePadding()) * scale);
                 } else {
                     gc.setFill(style.getFontColor());
                     gc.fillText(style.getPositiveBranchText(),
                             restConnector.getKey() * scale,
-                            (rhombusLeftConnector.getValue() - style.getTextPadding()) * scale);
+                            (rhombusLeftConnector.getValue() - style.getBranchNamePadding()) * scale);
 
                 }
                 restContainer.update(gc, drawRestPoint, scale);
@@ -188,13 +188,13 @@ public class BDDecisionView extends BDElementView {
                     gc.setFill(style.getFontColor());
                     gc.fillText(style.getNegativeBranchText(),
                             (restConnector.getKey() - restTextSize.getWidth() / scale) * scale,
-                            (rhombusRightConnector.getValue() - style.getTextPadding()) * scale);
+                            (rhombusRightConnector.getValue() - style.getBranchNamePadding()) * scale);
                 } else {
                     Dimension2D restTextSize = Utils.computeTextWidth(basicFont, style.getPositiveBranchText());
                     gc.setFill(style.getFontColor());
                     gc.fillText(style.getPositiveBranchText(),
                             (restConnector.getKey() - restTextSize.getWidth() / scale) * scale,
-                            (rhombusRightConnector.getValue() - style.getTextPadding()) * scale);
+                            (rhombusRightConnector.getValue() - style.getBranchNamePadding()) * scale);
 
                 }
                 restContainer.update(gc, drawRestPoint, scale);
@@ -265,7 +265,7 @@ public class BDDecisionView extends BDElementView {
                 gc.setFill(style.getFontColor());
                 gc.fillText(style.getNegativeBranchText(),
                         negConnector.getKey() * scale,
-                        (rhombusLeftConnector.getValue() - style.getTextPadding()) * scale);
+                        (rhombusLeftConnector.getValue() - style.getBranchNamePadding()) * scale);
                 model.negative.update(gc, drawNegativePoint, scale);
                 gc.setStroke(style.getStrokeColor());
                 gc.setLineWidth(style.getStrokeWidthDefault() * scale);
@@ -303,8 +303,10 @@ public class BDDecisionView extends BDElementView {
                         3);
                 gc.setFill(style.getFontColor());
                 gc.fillText(style.getPositiveBranchText(),
-                        (posConnector.getKey() - Utils.computeTextWidth(basicFont, style.getPositiveBranchText()).getWidth() / scale) * scale,
-                        (rhombusRightConnector.getValue() - style.getTextPadding()) * scale);
+                        (posConnector.getKey() -
+                                Utils.computeTextWidth(basicFont, style.getPositiveBranchText()).getWidth() / scale -
+                                style.getBranchNamePadding()) * scale,
+                        (rhombusRightConnector.getValue() - style.getBranchNamePadding()) * scale);
                 model.positive.update(gc, drawPositivePoint, scale);
                 gc.setStroke(style.getStrokeColor());
                 gc.setLineWidth(style.getStrokeWidthDefault() * scale);
@@ -348,7 +350,7 @@ public class BDDecisionView extends BDElementView {
                 gc.setFill(style.getFontColor());
                 gc.fillText(style.getPositiveBranchText(),
                         posConnector.getKey() * scale,
-                        (rhombusLeftConnector.getValue() - style.getTextPadding()) * scale);
+                        (rhombusLeftConnector.getValue() - style.getBranchNamePadding()) * scale);
 
                 Pair<Double, Double> drawNegativePoint = new Pair<>(rhombusRightConnector.getKey() + negativeShoulderLen,
                         model.getBottomRhombusConnector(drawPoint).getValue() + style.getElementsSpacing());
@@ -370,7 +372,7 @@ public class BDDecisionView extends BDElementView {
                 gc.setFill(style.getFontColor());
                 gc.fillText(style.getNegativeBranchText(),
                         (negConnector.getKey() - Utils.computeTextWidth(basicFont, style.getNegativeBranchText()).getWidth() / scale) * scale,
-                        (rhombusRightConnector.getValue() - style.getTextPadding()) * scale);
+                        (rhombusRightConnector.getValue() - style.getBranchNamePadding()) * scale);
                 model.negative.update(gc, drawNegativePoint, scale);
                 gc.setStroke(style.getStrokeColor());
                 gc.setLineWidth(style.getStrokeWidthDefault() * scale);

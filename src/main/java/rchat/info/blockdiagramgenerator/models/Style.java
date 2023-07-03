@@ -22,7 +22,7 @@ public final class Style {
                 Color.LIGHTGREEN, Color.DARKSEAGREEN, new Color(0.0, 1, 0.0, 0.3), 10, 1,
                 3, 30, 300, 25,
                 10, true, false, true, false,
-                Color.PURPLE
+                Color.PURPLE, 20
         );
 
         saveStyle(DEFAULT_STYLE_NAME, DEFAULT_STYLE);
@@ -107,8 +107,10 @@ public final class Style {
     private static final String overflowSelectionColorKey = "overflowSelectionColor";
     private Color dragndropForegroundColor;
     private static final String dragndropForegroundColorKey = "dragndropForegroundColor";
+    private double branchNamePadding;
+    private static final String branchNamePaddingKey = "branchNamePadding";
 
-    private Style(String styleName, String fontBasicName, Color strokeColor, Color fontColor, Color bdBackgroundColor, Color backgroundColor, double fontBasicSize, double strokeWidthDefault, double connectorsWidth, double textPadding, double lineSpacing, double elementsSpacing, double decisionBlocksPadding, double minDecisionShoulderLen, double dashLineWidthLine, double dashLineWidthSpace, String positiveBranchText, String negativeBranchText, Color gridColor, Color selectedColor, Color overflowSelectionColor, Color dragndropForegroundColor, double tileSize, double tileStrokeWidthDefault, double selectionBorderWidth, double containerOverflowPadding, double maxBdContainerDragndropWidth, double maxBdContainerDragndropWidthMargin, int tilesInTile, boolean isDebugModeEnabled, boolean isDebugShowFps, boolean isDebugTikzIncludeComments, boolean debugDrawBorders, Color debugBorderColor) {
+    private Style(String styleName, String fontBasicName, Color strokeColor, Color fontColor, Color bdBackgroundColor, Color backgroundColor, double fontBasicSize, double strokeWidthDefault, double connectorsWidth, double textPadding, double lineSpacing, double elementsSpacing, double decisionBlocksPadding, double minDecisionShoulderLen, double dashLineWidthLine, double dashLineWidthSpace, String positiveBranchText, String negativeBranchText, Color gridColor, Color selectedColor, Color overflowSelectionColor, Color dragndropForegroundColor, double tileSize, double tileStrokeWidthDefault, double selectionBorderWidth, double containerOverflowPadding, double maxBdContainerDragndropWidth, double maxBdContainerDragndropWidthMargin, int tilesInTile, boolean isDebugModeEnabled, boolean isDebugShowFps, boolean isDebugTikzIncludeComments, boolean debugDrawBorders, Color debugBorderColor, double branchNamePadding) {
         this.styleName = styleName;
         this.fontBasicName = fontBasicName;
         this.strokeColor = strokeColor;
@@ -143,6 +145,7 @@ public final class Style {
         this.isDebugTikzIncludeComments = isDebugTikzIncludeComments;
         this.debugDrawBorders = debugDrawBorders;
         this.debugBorderColor = debugBorderColor;
+        this.branchNamePadding = branchNamePadding;
     }
 
     private static void saveStyle(String styleName, Style style) {
@@ -156,6 +159,7 @@ public final class Style {
         styleNode.put(fontBasicNameKey, style.fontBasicName);
 
         styleNode.putDouble(tileSizeKey, style.tileSize);
+        styleNode.putDouble(branchNamePaddingKey, style.branchNamePadding);
         styleNode.putDouble(tileStrokeWidthDefaultKey, style.tileStrokeWidthDefault);
         styleNode.putDouble(selectionBorderWidthKey, style.selectionBorderWidth);
         styleNode.putDouble(containerOverflowPaddingKey, style.containerOverflowPadding);
@@ -267,7 +271,8 @@ public final class Style {
                     getJSON(style, isDebugShowFpsKey, DEFAULT_STYLE.isDebugShowFps),
                     getJSON(style, isDebugTikzIncludeCommentsKey, DEFAULT_STYLE.isDebugTikzIncludeComments),
                     getJSON(style, debugDrawBordersKey, DEFAULT_STYLE.debugDrawBorders),
-                    getJSON(style, debugBorderColorKey, DEFAULT_STYLE.debugBorderColor));
+                    getJSON(style, debugBorderColorKey, DEFAULT_STYLE.debugBorderColor),
+                    getJSON(style, branchNamePaddingKey, DEFAULT_STYLE.branchNamePadding));
 
             return createStyle(styleName, fileStyle);
         } catch (FileNotFoundException e) {
@@ -319,6 +324,7 @@ public final class Style {
             putJSON(style, isDebugTikzIncludeCommentsKey, saveStyle.isDebugTikzIncludeComments);
             putJSON(style, debugDrawBordersKey, saveStyle.debugDrawBorders);
             putJSON(style, debugBorderColorKey, saveStyle.debugBorderColor);
+            putJSON(style, branchNamePaddingKey, saveStyle.branchNamePadding);
 
             writer.write(style.toString());
         } catch (IOException ignored) {
@@ -512,7 +518,8 @@ public final class Style {
                     style.getBoolean(isDebugShowFpsKey, DEFAULT_STYLE.isDebugShowFps),
                     style.getBoolean(isDebugTikzIncludeCommentsKey, DEFAULT_STYLE.isDebugTikzIncludeComments),
                     style.getBoolean(debugDrawBordersKey, DEFAULT_STYLE.debugDrawBorders),
-                    getColor(style, debugBorderColorKey, DEFAULT_STYLE.debugBorderColor));
+                    getColor(style, debugBorderColorKey, DEFAULT_STYLE.debugBorderColor),
+                    style.getDouble(branchNamePaddingKey, DEFAULT_STYLE.branchNamePadding));
 
 
         }
@@ -718,6 +725,11 @@ public final class Style {
         this.dragndropForegroundColor = dragndropForegroundColor;
     }
 
+    public void setBranchNamePadding(double branchNamePadding) {
+        update(this.styleName, branchNamePaddingKey, branchNamePadding);
+        this.branchNamePadding = branchNamePadding;
+    }
+
     public String getPositiveBranchText() {
         return positiveBranchText;
     }
@@ -848,5 +860,9 @@ public final class Style {
 
     public Color getDragndropForegroundColor() {
         return dragndropForegroundColor;
+    }
+
+    public double getBranchNamePadding() {
+        return branchNamePadding;
     }
 }

@@ -176,6 +176,12 @@
                                 <TextField fx:id="dashLineWidthSpace" />
                             </children>
                         </VBox>
+                        <VBox>
+                            <children>
+                                <Label text="Отступ названий веток" />
+                                <TextField fx:id="branchNamePadding" />
+                            </children>
+                        </VBox>
 
                         <Label text="Прочее в блок схемах" />
                         <Separator prefWidth="200.0" />
