@@ -155,16 +155,21 @@ public class SaveDialogController extends Dialog<SaveDialogModel> {
 
             widthText.textProperty().addListener((observable, oldValue, newValue) -> {
                 if (processTextChangingEvents) {
-                    if (oldValue == newValue) return;
+                    try {
+                        Double.parseDouble(newValue);
+                    } catch (NumberFormatException e) {
+                        newValue = "0";
+                    }
+
                     if (widthTextMeasurments.getValue().equals(rb.getString("measurments_pix"))) {
                         connection.getValue().setWidth(Double.parseDouble(newValue), SaveDialogModel.PIXELS);
-                        updateMeasurmentTexts(SaveDialogModel.PIXELS);
+                        updateHeight(SaveDialogModel.PIXELS);
                     } else if (widthTextMeasurments.getValue().equals(rb.getString("measurments_cm"))) {
                         connection.getValue().setWidth(Double.parseDouble(newValue), SaveDialogModel.CENTIMETERS);
-                        updateMeasurmentTexts(SaveDialogModel.CENTIMETERS);
+                        updateHeight(SaveDialogModel.CENTIMETERS);
                     } else {
                         connection.getValue().setWidth(Double.parseDouble(newValue), SaveDialogModel.INCHES);
-                        updateMeasurmentTexts(SaveDialogModel.INCHES);
+                        updateHeight(SaveDialogModel.INCHES);
                     }
                 }
             });
@@ -176,7 +181,7 @@ public class SaveDialogController extends Dialog<SaveDialogModel> {
             widthTextMeasurments.setValue(rb.getString("measurments_pix"));
             widthTextMeasurments.valueProperty().addListener((observable, oldValue, newValue) -> {
                 if (oldValue.equals(newValue)) return;
-                heightTextMeasurments.setValue(newValue);
+                processTextChangingEvents = false;
                 Dimension2D size;
                 if (newValue.equals(rb.getString("measurments_pix"))) {
                     size = connection.getValue().getSize(SaveDialogModel.PIXELS);
@@ -187,21 +192,27 @@ public class SaveDialogController extends Dialog<SaveDialogModel> {
                 }
                 widthTextFormatter.setValue((int) size.getWidth());
                 heightTextFormatter.setValue((int) size.getHeight());
+                processTextChangingEvents = true;
             });
             heightTextFormatter.setValue((int) saveDialogController.model.root.getModel().getSize().getHeight());
 
             heightText.textProperty().addListener((observable, oldValue, newValue) -> {
                 if (processTextChangingEvents) {
-                    if (oldValue == newValue) return;
+                    try {
+                        Double.parseDouble(newValue);
+                    } catch (NumberFormatException e) {
+                        newValue = "0";
+                    }
+
                     if (widthTextMeasurments.getValue().equals(rb.getString("measurments_pix"))) {
                         connection.getValue().setHeight(Double.parseDouble(newValue), SaveDialogModel.PIXELS);
-                        updateMeasurmentTexts(SaveDialogModel.PIXELS);
+                        updateWidth(SaveDialogModel.PIXELS);
                     } else if (widthTextMeasurments.getValue().equals(rb.getString("measurments_cm"))) {
                         connection.getValue().setHeight(Double.parseDouble(newValue), SaveDialogModel.CENTIMETERS);
-                        updateMeasurmentTexts(SaveDialogModel.CENTIMETERS);
+                        updateWidth(SaveDialogModel.CENTIMETERS);
                     } else {
                         connection.getValue().setHeight(Double.parseDouble(newValue), SaveDialogModel.INCHES);
-                        updateMeasurmentTexts(SaveDialogModel.INCHES);
+                        updateWidth(SaveDialogModel.INCHES);
                     }
                 }
             });
@@ -352,6 +363,20 @@ public class SaveDialogController extends Dialog<SaveDialogModel> {
         Dimension2D size = connection.getValue().getSize(sizeType);
         processTextChangingEvents = false;
         heightText.setText(String.format("%d", (int) size.getHeight()));
+        widthText.setText(String.format("%d", (int) size.getWidth()));
+        processTextChangingEvents = true;
+    }
+
+    public void updateHeight(short sizeType) {
+        Dimension2D size = connection.getValue().getSize(sizeType);
+        processTextChangingEvents = false;
+        heightText.setText(String.format("%d", (int) size.getHeight()));
+        processTextChangingEvents = true;
+    }
+
+    public void updateWidth(short sizeType) {
+        Dimension2D size = connection.getValue().getSize(sizeType);
+        processTextChangingEvents = false;
         widthText.setText(String.format("%d", (int) size.getWidth()));
         processTextChangingEvents = true;
     }
