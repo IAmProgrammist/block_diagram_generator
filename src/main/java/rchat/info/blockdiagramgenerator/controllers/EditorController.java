@@ -378,16 +378,10 @@ public class EditorController extends DiagramBlockController {
     public boolean pickFile(boolean save) {
         FileChooser fileChooser = new FileChooser();
 
-        if (save)
-            fileChooser.getExtensionFilters().addAll(
-                    new FileChooser.ExtensionFilter("Block Diagram Generator", "*.bdg", "*.dgb"),
-                    new FileChooser.ExtensionFilter("Any", "*")
-            );
-        else
-            fileChooser.getExtensionFilters().addAll(
-                    new FileChooser.ExtensionFilter("Block Diagram Generator", "*.bdg", "*.dgb"),
-                    new FileChooser.ExtensionFilter("Any", "*")
-            );
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Block Diagram Generator", "*.bdg", "*.dgb"),
+                new FileChooser.ExtensionFilter("Any", "*")
+        );
         File file;
         if (save)
             file = fileChooser.showSaveDialog(Main.stage);
