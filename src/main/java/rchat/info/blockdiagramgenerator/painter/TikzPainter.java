@@ -442,8 +442,8 @@ public class TikzPainter extends AbstractPainter {
             result.append("% --------------------------\n");
         }
 
-        result.append("\\newsavebox{\\dbg" + id + "}\n" +
-                "\\begin{lrbox}{\\dbg" + id + "}");
+        result.append("\\newsavebox{\\bdg" + id + "}\n" +
+                "\\begin{lrbox}{\\bdg" + id + "}");
 
         result.append(String.format(Locale.ENGLISH, "\\begin{tikzpicture}[every node/.style={inner sep=0,outer sep=0}, background rectangle/.style={opacity=%f, fill=%s}, show background rectangle]\n", backgroundColor.getOpacity(), getColor(this.backgroundColor)));
 
@@ -474,7 +474,7 @@ public class TikzPainter extends AbstractPainter {
                     "% Для изменения размеров блок схемы Вы можете изменять первый параметр resizebox, он задаёт желаемую ширину.\n");
         }
 
-        result.append(String.format(Locale.ENGLISH, "\\resizebox{%fcm}{!}{\\usebox{%s}}\n", maxWidth, "\\dbg" + id));
+        result.append(String.format(Locale.ENGLISH, "\\resizebox{%fcm}{!}{\\usebox{%s}}\n", maxWidth, "\\bdg" + id));
 
         if (includeComments) {
             result.append("% --------------------------\n\n");
