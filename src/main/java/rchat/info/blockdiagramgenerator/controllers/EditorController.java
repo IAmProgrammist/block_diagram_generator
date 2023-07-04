@@ -380,12 +380,12 @@ public class EditorController extends DiagramBlockController {
 
         if (save)
             fileChooser.getExtensionFilters().addAll(
-                    new FileChooser.ExtensionFilter("Block Diagram Generator", "*.bdg"),
+                    new FileChooser.ExtensionFilter("Block Diagram Generator", "*.bdg", "*.dgb"),
                     new FileChooser.ExtensionFilter("Any", "*")
             );
         else
             fileChooser.getExtensionFilters().addAll(
-                    new FileChooser.ExtensionFilter("Block Diagram Generator", "*.dgb", "*.bdg"),
+                    new FileChooser.ExtensionFilter("Block Diagram Generator", "*.bdg", "*.dgb"),
                     new FileChooser.ExtensionFilter("Any", "*")
             );
         File file;
